@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import html, json, os, shutil, urllib.parse
+import html, json, os, shutil, urllib.parse, sys
 from pathlib import Path
-from data.catalog import GAMES
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from data.catalog import GAMES
 SITE=ROOT/"site"
 BASE=os.environ.get("SITE_BASE_PATH","/kyo-bodo-jp/")
 if not BASE.startswith("/"): BASE="/"+BASE
