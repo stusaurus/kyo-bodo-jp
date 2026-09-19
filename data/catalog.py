@@ -1,5 +1,5 @@
 def g(game_id,title,pmin,pmax,tmin,tmax,age,ratings,appeal,how,scenes,query,tags=""):
-    d,s,l,c,e,co,b,cp,f,ch,lg,p,sp=[int(x) for x in ratings.split("")]
+    d,s,l,c,e,co,b,cp,f,ch,lg,p,sp=[int(x) for x in ratings]
     steps=how.split("|")
     scene_list=scenes.split("|")
     return {
