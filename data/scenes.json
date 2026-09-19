@@ -1,0 +1,16 @@
+[
+  {"scene_id":"two-player","title":"2人で遊ぶ","keyword":"2人 ボードゲーム","intro":"2人でしっかり遊べるものだけを集めました。夫婦・カップル・友達同士で、短時間からじっくり系まで選べます。","rule":{"type":"players","value":2}},
+  {"scene_id":"couple","title":"夫婦・カップル","keyword":"夫婦 ボードゲーム / カップル ボードゲーム","intro":"会話が増えるもの、静かに考えられるもの、2人で協力できるものを中心に。家で過ごす夜に選びやすいゲームです。","rule":{"type":"field","field":"couple"}},
+  {"scene_id":"family","title":"家族で遊ぶ","keyword":"家族 ボードゲーム","intro":"大人だけが有利になりすぎず、ルールを理解しやすいゲームを中心に。休日や食後の家族時間に。","rule":{"type":"field","field":"family"}},
+  {"scene_id":"children","title":"小学生と遊ぶ","keyword":"小学生 ボードゲーム","intro":"小学生でも入りやすく、大人も一緒に楽しめるゲームを優先。対象年齢だけでなく、直感性と待ち時間も重視します。","rule":{"type":"field","field":"children"}},
+  {"scene_id":"friends","title":"友達と遊ぶ","keyword":"友達 ボードゲーム","intro":"会話・駆け引き・盛り上がりのバランスが良いものを中心に。集まってから『何やる？』となった時に使えます。","rule":{"type":"tag","tag":"friends"}},
+  {"scene_id":"large-group","title":"大人数","keyword":"大人数 ボードゲーム","intro":"5人以上でも全員が参加しやすく、待ち時間が長くなりにくいゲームを優先します。","rule":{"type":"field","field":"large_group"}},
+  {"scene_id":"first-meeting","title":"初対面がいる","keyword":"初対面 ボードゲーム","intro":"説明が短く、会話のきっかけが自然に生まれるゲームを中心に。空気を温めたい最初の1本向けです。","rule":{"type":"formula","fields":["beginner","conversation","party"]}},
+  {"scene_id":"drinking","title":"飲み会","keyword":"飲み会 ボードゲーム","intro":"難しい説明なしで始めやすく、会話とリアクションが増えるゲームを中心に。","rule":{"type":"formula","fields":["party","conversation","short_play"]}},
+  {"scene_id":"short","title":"短時間","keyword":"短時間 ボードゲーム","intro":"10〜20分前後で終わりやすく、もう1回も選びやすいゲーム。平日の夜や待ち時間にも。","rule":{"type":"field","field":"short_play"}},
+  {"scene_id":"long","title":"じっくり遊ぶ","keyword":"じっくり ボードゲーム","intro":"30分以上かけて、戦略や協力をしっかり楽しみたい日に。休日向けの満足感があるゲームです。","rule":{"type":"long"}},
+  {"scene_id":"think","title":"頭を使う","keyword":"頭を使う ボードゲーム","intro":"運だけでなく、先読み・配置・効率を考える面白さが強いゲームを集めました。","rule":{"type":"field","field":"strategy"}},
+  {"scene_id":"laugh","title":"笑える","keyword":"盛り上がる ボードゲーム","intro":"上手い下手より、その場で笑えることを優先。友達・家族・パーティーで盛り上がりやすいゲームです。","rule":{"type":"formula","fields":["excitement","conversation","party"]}},
+  {"scene_id":"cooperative","title":"協力ゲーム","keyword":"協力 ボードゲーム","intro":"誰か1人を負かすのではなく、みんなで同じ目標を達成するゲーム。相談する時間そのものを楽しめます。","rule":{"type":"field","field":"cooperation"}},
+  {"scene_id":"beginner","title":"初心者向け","keyword":"初心者 ボードゲーム","intro":"説明が短く、最初の1回でも面白さが分かりやすいゲームを優先。ボードゲームに慣れていない人と遊ぶ日に。","rule":{"type":"field","field":"beginner"}}
+]
