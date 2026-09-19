@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import json, os, re, sys, time, urllib.parse, urllib.request
 from pathlib import Path
-from data.catalog import GAMES
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from data.catalog import GAMES
 OUT=ROOT/"data"/"rakuten_cache.json"
 APP_ID=os.environ.get("RAKUTEN_APPLICATION_ID","").strip()
 ACCESS_KEY=os.environ.get("RAKUTEN_ACCESS_KEY","").strip()
