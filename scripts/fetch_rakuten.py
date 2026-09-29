@@ -40,12 +40,20 @@ CONTEXT_RULES={
     "heat":["ボードゲーム","ヒートペダルトゥザメタル","pedaltothemetal"],
     "neu":["カードゲーム","ノイカード","neu"],
     "harmonies":["ボードゲーム","ホビージャパン","libellud"],
+    "take-it-easy":["ボードゲーム","カードゲーム","テーブルゲーム"],
+    "cat-in-the-box":["ボードゲーム","カードゲーム","ホビージャパン"],
 }
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
     "ito":["レインボー"],
-    "codenames":["デュエット","duet"],
+    "codenames":["デュエット","duet","xxl"],
+    "quarto":["ミニ","mini"],
+    "patchwork":["ドゥードゥル","doodle"],
+    "challengers":["ビーチカップ","beachcup"],
+    "nine-tiles":["ポケモン","pokemon","ムーミン","サンリオ","パニック"],
+    "machi-koro":["街コロ通","街コロ2","街コロツー"],
+    "cat-in-the-box":["じゃらし","アドメイト","add.mate"],
     "sushi-go-party":["中古","スシゴー！ - ピック","sushigo! - the pick"],
 }
 
