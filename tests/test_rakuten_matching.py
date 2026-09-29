@@ -43,7 +43,7 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
         if g["game_id"]=="ito": name+=" アークライト"
         if g["game_id"]=="ito-rainbow": name+=" アークライト"
         if g["game_id"]=="scout": name+=" オインクゲームズ"
-        if g["game_id"]=="hanabi": name="花火 HANABI ボードゲーム"
+        if g["game_id"]=="hanabi": name="花火 HANABI ボードゲーム"\n        if g["game_id"]=="neu": name="ノイ NEU カードゲーム"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 
