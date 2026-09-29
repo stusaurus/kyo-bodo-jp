@@ -25,6 +25,33 @@ CSS="""
 :root{--ink:#172033;--muted:#667085;--paper:#fffdf8;--card:#fff;--navy:#233046;--orange:#f26b4a;--blue:#4967d9;--line:#e7e2d9;--soft:#f4f1ea;--shadow:0 12px 32px rgba(26,33,52,.08)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}a{color:inherit}.site-header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:rgba(255,253,248,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.brand{display:flex;gap:8px;align-items:center;text-decoration:none;font-weight:900;font-size:19px}.brand b{color:var(--orange)}nav{display:flex;gap:12px}nav a{text-decoration:none;font-size:13px;font-weight:800}.hero,.page-hero,.section{max-width:1040px;margin:auto;padding-left:20px;padding-right:20px}.hero{padding-top:56px;padding-bottom:30px}.page-hero{padding-top:38px;padding-bottom:15px}.hero h1{font-size:clamp(46px,12vw,88px);line-height:.95;letter-spacing:-.055em;margin:8px 0 18px}.hero h1 span{display:block;color:var(--orange);font-size:.34em;letter-spacing:.02em;margin-bottom:9px}.hero p,.page-hero p{max-width:700px;color:#3e485c}.page-hero h1{font-size:clamp(34px,8vw,56px);line-height:1.05;margin:8px 0}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.09em;color:var(--blue)}.section{padding-top:28px;padding-bottom:28px}.section h2{font-size:28px;margin:0 0 5px}.section-sub,.small{color:var(--muted);font-size:13px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:13px;text-decoration:none;font-weight:900;border:1px solid transparent;cursor:pointer;font:inherit}.primary{background:var(--navy);color:white}.secondary{background:white;border-color:var(--line)}.rakuten{background:#bf0000;color:white}.large{min-height:54px;padding:13px 22px;font-size:17px}.hero-actions,.card-actions,.chips{display:flex;gap:10px;flex-wrap:wrap}.trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:28px}.trust,.panel,.game-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.trust{padding:14px}.trust strong{display:block}.today-box{background:var(--navy);color:white;border-radius:24px;padding:22px}.today-box .small,.today-box .section-sub{color:#d4d8e3}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.game-card{overflow:hidden}.game-card-body{padding:16px}.game-card h3{font-size:21px;margin:3px 0}.game-card .appeal{margin:5px 0 10px}.game-placeholder{height:135px;display:grid;place-items:center;background:linear-gradient(135deg,#f7e0d8,#e7ecff);font-size:42px}.game-thumb{width:100%;height:150px;object-fit:contain;background:#fff}.chip{display:inline-flex;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;text-decoration:none;font-size:13px;font-weight:800}.all-games{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.all-games a{background:white;border:1px solid var(--line);border-radius:14px;padding:12px;text-decoration:none}.diagnosis-wrap{max-width:720px;margin:auto;padding:15px 20px 50px}.progress{height:7px;background:#e9e6df;border-radius:999px;overflow:hidden;margin:10px 0 24px}.progress b{display:block;height:100%;background:var(--orange)}.question h2{font-size:28px}.answers{display:grid;gap:10px}.answer{width:100%;padding:15px;text-align:left;border:1px solid var(--line);border-radius:14px;background:white;font-size:16px;font-weight:800}.result-card{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0;box-shadow:var(--shadow)}.rank{font-size:12px;font-weight:900;color:var(--orange)}.howto{padding-left:22px}.detail-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:18px}.panel{padding:18px}.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.spec{background:var(--soft);border-radius:12px;padding:10px}.spec b{display:block;font-size:12px;color:var(--muted)}.axis{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0}.dots{letter-spacing:2px}.breadcrumb{font-size:12px;color:var(--muted)}footer{margin-top:35px;background:#172033;color:white;padding:28px 20px}footer>div,footer>p{max-width:1040px;margin:8px auto}@media(max-width:760px){nav a:nth-child(3){display:none}.grid{grid-template-columns:1fr}.trust-row{grid-template-columns:1fr}.all-games{grid-template-columns:1fr}.detail-layout{grid-template-columns:1fr}.hero{padding-top:38px}.card-actions .btn{flex:1}.today-box{padding:16px}}
 """
 
+CSS += """
+.hero-shell{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:28px;padding:34px;background:linear-gradient(135deg,#fff 0%,#fff8f1 52%,#eef1ff 100%);box-shadow:var(--shadow)}
+.hero-shell:after{content:"🎲";position:absolute;right:-22px;top:-34px;font-size:150px;opacity:.07;transform:rotate(14deg)}
+.hero-kicker{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}
+.hero-note{margin-top:12px;font-size:13px;color:var(--muted)}
+.quick-entry{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.quick-entry a{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;transition:.18s transform,.18s box-shadow}
+.quick-entry a:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.quick-entry b{display:block;font-size:16px}.quick-entry span{font-size:12px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+.step-no{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:900;margin-bottom:8px}
+.game-card{transition:.18s transform,.18s box-shadow}.game-card:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(26,33,52,.12)}
+.game-media{position:relative;background:#fff}.game-badge{position:absolute;left:10px;top:10px;background:rgba(23,32,51,.9);color:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}
+.fit-tags{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.fit-tag{display:inline-flex;background:#f6f7fb;border:1px solid #e6e9f2;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:800;color:#49546a}
+.card-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px;font-weight:700}
+.result-intro{background:linear-gradient(135deg,#fff5ee,#f2f4ff);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:16px}
+.result-card.winner{border:2px solid var(--orange);box-shadow:0 18px 42px rgba(242,107,74,.14)}.result-card.winner:before{content:"まず見るならこれ";position:absolute;right:0;top:0;background:var(--orange);color:#fff;padding:7px 12px;border-radius:0 0 0 12px;font-size:11px;font-weight:900}.result-card{position:relative}
+.result-layout{display:grid;grid-template-columns:118px 1fr;gap:14px}.result-image{width:118px;height:118px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:14px}
+.reason-list{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.reason-pill{background:#fff4ed;color:#9e4029;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.filter-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer}.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.games-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.game-list-card{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;text-decoration:none}.game-list-card:hover{box-shadow:var(--shadow)}
+.detail-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.decision-box{border-radius:15px;padding:14px;background:#f7f8fc}.decision-box.good{background:#eef8f1}.decision-box h3{margin:0 0 5px;font-size:15px}.decision-box p{margin:0;font-size:13px}
+.product-panel{position:sticky;top:78px}.product-availability{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;margin:8px 0 12px}.dot-live,.dot-search{width:8px;height:8px;border-radius:50%}.dot-live{background:#2b9d5b}.dot-search{background:#d89b2b}
+.section-lead{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}.mini-callout{font-size:12px;color:var(--muted);max-width:350px}
+@media(max-width:760px){.hero-shell{padding:24px 18px}.quick-entry{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.result-layout{grid-template-columns:88px 1fr}.result-image{width:88px;height:88px}.games-grid{grid-template-columns:1fr}.detail-summary{grid-template-columns:1fr}.product-panel{position:static}.section-lead{display:block}}
+"""
+
 ANALYTICS="""
 (function(){
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
@@ -86,6 +113,40 @@ def load_rakuten(g):
     if x.get("url"): return x["url"],x.get("image_url",""),"楽天で見る"
     q=urllib.parse.quote(g.get("rakuten_query") or g["title"])
     return "https://search.rakuten.co.jp/search/mall/"+q+"/","","楽天で探す"
+
+
+def fit_tags(g):
+    pairs=[
+        (g.get("beginner",0),"初心者向け"),(g.get("couple",0),"2人・夫婦向け"),
+        (g.get("family",0),"家族向け"),(g.get("children",0),"小学生と"),
+        (g.get("conversation",0),"会話が弾む"),(g.get("excitement",0),"盛り上がる"),
+        (g.get("strategy",0),"考えごたえ"),(g.get("cooperation",0),"協力"),
+        (g.get("short_play",0),"短時間"),(g.get("large_group",0),"大人数"),
+    ]
+    pairs.sort(key=lambda x:x[0],reverse=True)
+    out=[]
+    for score,label in pairs:
+        if score>=4 and label not in out: out.append(label)
+        if len(out)>=3: break
+    return out or ["遊びやすい"]
+
+def fit_copy(g):
+    if g.get("cooperation",0)>=4: return "勝ち負けより、相談しながら一緒に達成したい日に。"
+    if g.get("excitement",0)>=4 and g.get("conversation",0)>=4: return "みんなで声を出して笑いたい日や、場を温めたい時に。"
+    if g.get("strategy",0)>=4: return "運だけでなく、自分の選択でしっかり勝負したい日に。"
+    if g.get("couple",0)>=4: return "2人で落ち着いて遊びたい夜や、夫婦・カップル時間に。"
+    if g.get("children",0)>=4: return "子どもと一緒に、大人も手加減しすぎず遊びたい日に。"
+    return "ルール説明に時間をかけず、気軽に1本遊びたい日に。"
+
+def caution_copy(g):
+    if g.get("difficulty",0)>=4: return "最初の説明を短く済ませたいメンバーだけなら、より軽いゲームも候補。"
+    if g.get("play_time_max",0)>=60: return "短時間でサッと終えたい日には少し重めです。"
+    if g.get("conversation",0)<=2 and g.get("strategy",0)>=4: return "雑談中心でワイワイしたい日には、会話系ゲームの方が合います。"
+    if g.get("excitement",0)<=2: return "大声で盛り上がるパーティー感を求める日には別候補もあり。"
+    return "好みが分かれそうなら、診断結果の2〜3位も見比べるのがおすすめ。"
+
+def card_badge(g):
+    return fit_tags(g)[0]
 
 def shell(title,desc,body,path="",extra=""):
     full=("きょうボド｜今日なにやる？" if title=="きょうボド" else title+"｜きょうボド")
