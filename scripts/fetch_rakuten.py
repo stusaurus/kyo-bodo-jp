@@ -100,7 +100,8 @@ def match_item(g,item):
         jp_exact=has_term(name,"スシゴーパーティ")
         en_exact=has_term(name,"sushigoparty") and has_term(name,"gamewright")
         ja_import=has_term(name,"寿司パーティー") and has_term(name,"gamewright")
-        if not (jp_exact or en_exact or ja_import):
+        ja_verified_exact=norm(name)=="寿司パーティーカードゲーム"
+        if not (jp_exact or en_exact or ja_import or ja_verified_exact):
             return False,"missing_party_identity",-450
     if g["game_id"]=="take-it-easy":
         exact_jp=has_term(name,"テイクイットイージー") and has_term(name,"日本語版")
@@ -158,6 +159,7 @@ def query_variants(g):
     variants=[g.get("rakuten_query") or title,title,simple+" ボードゲーム"]
     if g["game_id"]=="sushi-go-party":
         variants=[
+            "寿司パーティー！ カードゲーム",
             "Gamewright Sushi Go Party",
             "Gamewright 寿司パーティー カードゲーム",
             "スシゴーパーティ",
