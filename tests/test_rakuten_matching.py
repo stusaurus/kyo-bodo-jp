@@ -21,6 +21,7 @@ def item(name,url="https://item.rakuten.co.jp/shop/item/"):
 def test_sushi_go_party_accepts_only_party_title():
     g=game("sushi-go-party")
     assert m.match_item(g,item("Gamewright Sushi Go Party! ボードゲーム"))[0]
+    assert m.match_item(g,item("Gamewright Sushi Go Party 寿司パーティー！ カードゲーム"))[0]
     assert m.match_item(g,item("スシゴーパーティ！ 日本語版 ボードゲーム"))[0]
     assert not m.match_item(g,item("スシゴー！ 日本語版 カードゲーム"))[0]
     assert not m.match_item(g,item("中古 ボードゲーム スシゴーパーティ！ 日本語版"))[0]
@@ -112,3 +113,15 @@ def test_patchwork_branded_base_edition_is_allowed():
         item("ホビージャパン パッチワーク：10周年記念バージョン 日本語版 ボードゲーム")
     )
     assert ok,reason
+
+
+def test_take_it_easy_exact_japanese_listing_without_generic_context():
+    g=game("take-it-easy")
+    assert m.match_item(g,item("テイクイットイージー 日本語版"))[0]
+    assert not m.match_item(g,item("Take It Easy ステッカー"))[0]
+    assert not m.match_item(g,item("木村拓哉 Checkpoint Take It Easy CD"))[0]
+
+def test_sushi_go_party_requires_gamewright_for_generic_japanese_alias():
+    g=game("sushi-go-party")
+    assert m.match_item(g,item("Gamewright Sushi Go Party 寿司パーティー カードゲーム"))[0]
+    assert not m.match_item(g,item("回転寿司 寿司パーティー おもちゃ"))[0]
