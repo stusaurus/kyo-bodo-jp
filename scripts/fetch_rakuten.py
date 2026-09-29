@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Refresh marker: Rakuten credentials are expected via GitHub Actions secrets.
 import json, os, re, sys, time, urllib.parse, urllib.request
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
