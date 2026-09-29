@@ -64,3 +64,33 @@ def test_rakuten_url_validation():
     assert m.valid_url("https://hb.afl.rakuten.co.jp/hgc/example")
     assert not m.valid_url("http://item.rakuten.co.jp/shop/item/")
     assert not m.valid_url("https://example.com/item")
+
+def test_observed_wrong_matches_are_rejected():
+    cases=[
+        ("codenames","コードネーム XXL 日本語版 ボードゲーム"),
+        ("quarto","ギガミック クアルト ミニ QUARTO MINI ボードゲーム"),
+        ("patchwork","パッチワーク: ドゥードゥル 日本語版 ボードゲーム"),
+        ("challengers","チャレンジャーズ！:ビーチカップ 日本語版 ボードゲーム"),
+        ("nine-tiles","ナインタイル ポケモンドコダ！ オインクゲームズ ボードゲーム"),
+        ("machi-koro","街コロ通 (ツー) ボードゲーム"),
+        ("take-it-easy","テイク・イット・イージー【Blu-ray】"),
+        ("cat-in-the-box","アドメイト キャットインザボックス じゃらしアタッチメント"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert not ok,(game_id,name,reason)
+
+def test_preferred_base_game_examples_are_accepted():
+    cases=[
+        ("codenames","コードネーム 2025年新版 日本語版 ボードゲーム"),
+        ("quarto","ギガミック QUARTO クアルト ボードゲーム"),
+        ("patchwork","パッチワーク 日本語版 ボードゲーム ホビージャパン"),
+        ("challengers","チャレンジャーズ！ 日本語版 ボードゲーム"),
+        ("nine-tiles","ナインタイル オインクゲームズ ボードゲーム"),
+        ("machi-koro","街コロ ボードゲーム"),
+        ("take-it-easy","テイク・イット・イージー ボードゲーム"),
+        ("cat-in-the-box","キャット・イン・ザ・ボックス 日本語版 ボードゲーム"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert ok,(game_id,name,reason)
