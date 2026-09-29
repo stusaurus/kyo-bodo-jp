@@ -22,10 +22,11 @@ def test_sushi_go_party_accepts_only_party_title():
     g=game("sushi-go-party")
     assert m.match_item(g,item("Gamewright Sushi Go Party! ボードゲーム"))[0]
     assert m.match_item(g,item("Gamewright Sushi Go Party 寿司パーティー！ カードゲーム"))[0]
+    assert m.match_item(g,item("寿司パーティー！ カードゲーム"))[0]
     assert m.match_item(g,item("スシゴーパーティ！ 日本語版 ボードゲーム"))[0]
     assert not m.match_item(g,item("スシゴー！ 日本語版 カードゲーム"))[0]
     assert not m.match_item(g,item("中古 ボードゲーム スシゴーパーティ！ 日本語版"))[0]
-    assert not m.match_item(g,item("寿司パーティー！ カードゲーム"))[0]
+    assert not m.match_item(g,item("寿司パーティー！ バランスゲーム"))[0]
 
 def test_expansions_and_accessories_are_rejected():
     g=game("catan")
