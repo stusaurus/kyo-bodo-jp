@@ -40,7 +40,7 @@ CONTEXT_RULES={
     "heat":["ボードゲーム","ヒートペダルトゥザメタル","pedaltothemetal"],
     "neu":["カードゲーム","ノイカード","neu"],
     "harmonies":["ボードゲーム","ホビージャパン","libellud"],
-    "take-it-easy":["ボードゲーム","カードゲーム","テーブルゲーム"],
+    "take-it-easy":["ボードゲーム","カードゲーム","テーブルゲーム","ふるりん本舗"],
     "cat-in-the-box":["ボードゲーム","カードゲーム","ホビージャパン"],
 }
 
@@ -62,7 +62,7 @@ ALIASES={
     "6nimmt":["ニムト","6nimmt"],
     "the-mind":["ザマインド","themind"],
     "hanabi":["花火hanabi","hanabi"],
-    "sushi-go-party":["スシゴーパーティ","sushigoparty"],
+    "sushi-go-party":["スシゴーパーティ","sushigoparty","寿司パーティー"],
     "cat-in-the-box":["キャットインザボックス","catinthebox"],
     "sea-salt-paper":["シーソルト＆ペーパー","シーソルトアンドペーパー","seasaltpaper"],
 }
@@ -95,18 +95,27 @@ def match_item(g,item):
     alias_hit=next((a for a in title_aliases(g) if has_term(name,a)),None)
     if not alias_hit:
         return False,"title_mismatch",-500
+    # Exact product identity rules for titles that Rakuten lists in multiple notations.
+    if g["game_id"]=="sushi-go-party":
+        jp_exact=has_term(name,"スシゴーパーティ")
+        en_exact=has_term(name,"sushigoparty") and has_term(name,"gamewright")
+        ja_import=has_term(name,"寿司パーティー") and has_term(name,"gamewright")
+        if not (jp_exact or en_exact or ja_import):
+            return False,"missing_party_identity",-450
+    if g["game_id"]=="take-it-easy":
+        exact_jp=has_term(name,"テイクイットイージー") and has_term(name,"日本語版")
+        has_context=any(has_term(name,t) for t in CONTEXT_RULES["take-it-easy"])
+        if not (exact_jp or has_context):
+            return False,"missing_take_it_easy_identity",-450
+
     required=CONTEXT_RULES.get(g["game_id"])
-    if required and not any(has_term(name,t) for t in required):
+    if required and g["game_id"] not in ("sushi-go-party","take-it-easy") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
     # Special-case sibling distinction.
     if g["game_id"]=="ito-rainbow" and not has_term(name,"レインボー"):
         return False,"missing_rainbow",-450
     if g["game_id"]=="codenames-duet" and not (has_term(name,"デュエット") or has_term(name,"duet")):
         return False,"missing_duet",-450
-    if g["game_id"]=="sushi-go-party" and not (
-        has_term(name,"スシゴーパーティ") or has_term(name,"sushigoparty")
-    ):
-        return False,"missing_party_title",-450
     s=100
     if has_term(name,g["title"]): s+=30
     for t in [z for z in re.split(r"[\s　]+",g.get("rakuten_query","")) if len(norm(z))>=2]:
@@ -149,10 +158,18 @@ def query_variants(g):
     variants=[g.get("rakuten_query") or title,title,simple+" ボードゲーム"]
     if g["game_id"]=="sushi-go-party":
         variants=[
+            "Gamewright Sushi Go Party",
+            "Gamewright 寿司パーティー カードゲーム",
             "スシゴーパーティ",
             "スシゴー パーティ",
             "Sushi Go Party Gamewright",
             "Sushi Go Party ボードゲーム",
+        ]+variants
+    if g["game_id"]=="take-it-easy":
+        variants=[
+            "テイクイットイージー 日本語版",
+            "テイク・イット・イージー 日本語版",
+            "テイクイットイージー ボードゲーム",
         ]+variants
     out=[]
     for q in variants:
@@ -262,8 +279,10 @@ def main():
                 print(f"[{i}/{len(GAMES)}] {g['title']} OK | {hit['item_code']} | {hit['item_name']}")
             else:
                 reason="no_safe_match" if not hit else "invalid_rakuten_url"
-                audit[g["game_id"]]={"title":g["title"],"status":"unresolved","reason":reason,"rejected_candidates":len(rejected)}
+                audit[g["game_id"]]={"title":g["title"],"status":"unresolved","reason":reason,"rejected_candidates":len(rejected),"rejected_examples":rejected[:8]}
                 print(f"[{i}/{len(GAMES)}] {g['title']} UNRESOLVED | {reason}")
+                for row in rejected[:5]:
+                    print(f"  REJECTED {row['reason']} | {row['item_name']}")
         except Exception as ex:
             audit[g["game_id"]]={"title":g["title"],"status":"unresolved","reason":"error:"+str(ex)}
             print(f"[{i}/{len(GAMES)}] {g['title']} ERROR: {ex}",file=sys.stderr)
