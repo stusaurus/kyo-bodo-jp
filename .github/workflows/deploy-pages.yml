@@ -34,12 +34,20 @@ jobs:
           python -m pip install --quiet pytest
           pytest -q
       - name: Refresh Rakuten product links
-        continue-on-error: true
         env:
           RAKUTEN_APPLICATION_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
         run: python scripts/fetch_rakuten.py
+      - name: Validate Rakuten audit
+        run: python scripts/validate_rakuten_audit.py
+      - name: Upload Rakuten audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: rakuten-audit
+          path: |
+            data/rakuten_audit.json
+            data/rakuten_cache.json
       - name: Build static site
         env:
           SITE_BASE_PATH: /kyo-bodo-jp/
