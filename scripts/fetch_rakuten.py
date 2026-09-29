@@ -100,7 +100,7 @@ def match_item(g,item):
         jp_exact=has_term(name,"スシゴーパーティ")
         en_exact=has_term(name,"sushigoparty") and has_term(name,"gamewright")
         ja_import=has_term(name,"寿司パーティー") and has_term(name,"gamewright")
-        ja_verified_exact=norm(name)=="寿司パーティーカードゲーム"
+        ja_verified_exact=norm(name)==norm("寿司パーティー！ カードゲーム")
         if not (jp_exact or en_exact or ja_import or ja_verified_exact):
             return False,"missing_party_identity",-450
     if g["game_id"]=="take-it-easy":
