@@ -94,3 +94,19 @@ def test_preferred_base_game_examples_are_accepted():
     for game_id,name in cases:
         ok,reason,_=m.match_item(game(game_id),item(name))
         assert ok,(game_id,name,reason)
+
+def test_second_audit_false_positives_are_rejected():
+    cases=[
+        ("patchwork","ホビー 模型車 バイク レーシングカー パッチワークボードゲーム reflection game"),
+        ("nine-tiles","ナインタイル ミッキーアンドフレンズ オインクゲームズ ボードゲーム"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert not ok,(game_id,name,reason)
+
+def test_patchwork_branded_base_edition_is_allowed():
+    ok,reason,_=m.match_item(
+        game("patchwork"),
+        item("ホビージャパン パッチワーク：10周年記念バージョン 日本語版 ボードゲーム")
+    )
+    assert ok,reason
