@@ -126,3 +126,15 @@ def test_sushi_go_party_requires_gamewright_for_generic_japanese_alias():
     g=game("sushi-go-party")
     assert m.match_item(g,item("Gamewright Sushi Go Party 寿司パーティー カードゲーム"))[0]
     assert not m.match_item(g,item("回転寿司 寿司パーティー おもちゃ"))[0]
+
+
+def test_patchwork_2025_exact_japanese_title_without_publisher_is_allowed():
+    ok,reason,_=m.match_item(
+        game("patchwork"),
+        item("パッチワーク 2025年新版 日本語版")
+    )
+    assert ok,reason
+
+def test_exact_jan_queries_are_present_for_hard_to_find_games():
+    assert "4573591300034" in m.query_variants(game("take-it-easy"))
+    assert "3558380134831" in m.query_variants(game("patchwork"))
