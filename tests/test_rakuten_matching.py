@@ -10,7 +10,13 @@ def game(game_id):
     return next(g for g in m.GAMES if g["game_id"]==game_id)
 
 def item(name,url="https://item.rakuten.co.jp/shop/item/"):
-    return {"itemName":name,"itemUrl":url,"affiliateUrl":url,"itemCode":"shop:item","mediumImageUrls":[]}
+    return {
+        "itemName":name,
+        "itemUrl":url,
+        "affiliateUrl":url,
+        "itemCode":"shop:item",
+        "mediumImageUrls":[],
+    }
 
 def test_sushi_go_party_accepts_only_party_title():
     g=game("sushi-go-party")
@@ -40,10 +46,16 @@ def test_generic_titles_need_game_context():
 def test_every_catalog_title_can_match_a_safe_synthetic_listing():
     for g in m.GAMES:
         name=g["title"]+" ボードゲーム"
-        if g["game_id"]=="ito": name+=" アークライト"
-        if g["game_id"]=="ito-rainbow": name+=" アークライト"
-        if g["game_id"]=="scout": name+=" オインクゲームズ"
-        if g["game_id"]=="hanabi": name="花火 HANABI ボードゲーム"\n        if g["game_id"]=="neu": name="ノイ NEU カードゲーム"
+        if g["game_id"]=="ito":
+            name+=" アークライト"
+        if g["game_id"]=="ito-rainbow":
+            name+=" アークライト"
+        if g["game_id"]=="scout":
+            name+=" オインクゲームズ"
+        if g["game_id"]=="hanabi":
+            name="花火 HANABI ボードゲーム"
+        if g["game_id"]=="neu":
+            name="ノイ NEU カードゲーム"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 
