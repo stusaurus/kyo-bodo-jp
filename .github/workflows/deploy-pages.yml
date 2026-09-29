@@ -44,7 +44,7 @@ jobs:
         env:
           SITE_BASE_PATH: /kyo-bodo-jp/
           SITE_ORIGIN: https://stusaurus.github.io
-          GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+          GA_MEASUREMENT_ID: G-Q1N14V276G
         run: python scripts/build_site.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
