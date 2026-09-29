@@ -158,7 +158,7 @@ def main():
     for s in SCENES: write("scenes/"+s["scene_id"]+"/index.html",scene_page(s))
     paths=["", "diagnosis/","games/","scenes/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
     xml='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join("<url><loc>"+e(canon(p))+"</loc></url>" for p in paths)+"</urlset>"
-    write("sitemap.xml",xml);write("robots.txt","User-agent: *\\nAllow: /\\nSitemap: "+canon("sitemap.xml")+"\\n")
+    write("sitemap.xml",xml);write("robots.txt","User-agent: *\nAllow: /\nSitemap: "+canon("sitemap.xml")+"\n")
     write("404.html",shell("ページが見つかりません","ページが見つかりません。",'<section class="page-hero"><h1>ページが見つかりません</h1><a class="btn primary" href="'+u()+'">トップへ</a></section>'))
     print("built",len(paths),"indexable URLs in",SITE)
 
