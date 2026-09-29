@@ -108,9 +108,14 @@ def match_item(g,item):
         has_context=any(has_term(name,t) for t in CONTEXT_RULES["take-it-easy"])
         if not (exact_jp or has_context):
             return False,"missing_take_it_easy_identity",-450
+    if g["game_id"]=="patchwork":
+        exact_jp=has_term(name,"パッチワーク") and has_term(name,"日本語版")
+        has_context=any(has_term(name,t) for t in CONTEXT_RULES["patchwork"])
+        if not (exact_jp or has_context):
+            return False,"missing_patchwork_identity",-450
 
     required=CONTEXT_RULES.get(g["game_id"])
-    if required and g["game_id"] not in ("sushi-go-party","take-it-easy") and not any(has_term(name,t) for t in required):
+    if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
     # Special-case sibling distinction.
     if g["game_id"]=="ito-rainbow" and not has_term(name,"レインボー"):
@@ -169,9 +174,16 @@ def query_variants(g):
         ]+variants
     if g["game_id"]=="take-it-easy":
         variants=[
+            "4573591300034",
+            "ふるりん本舗 テイクイットイージー",
             "テイクイットイージー 日本語版",
             "テイク・イット・イージー 日本語版",
             "テイクイットイージー ボードゲーム",
+        ]+variants
+    if g["game_id"]=="patchwork":
+        variants=[
+            "3558380134831",
+            "パッチワーク 2025年新版 日本語版",
         ]+variants
     out=[]
     for q in variants:
