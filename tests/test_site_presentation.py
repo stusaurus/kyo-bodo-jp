@@ -40,3 +40,12 @@ def test_fit_tags_are_derived_for_every_game():
         tags=m.fit_tags(g)
         assert 1 <= len(tags) <= 3
         assert all(isinstance(x,str) and x for x in tags)
+
+
+def test_home_uses_illustrated_hero_asset():
+    page=m.home()
+    assert "assets/hero-kyo-bodo.webp" in page
+    assert "hero-visual" in page
+    assert "登録不要" in page
+    assert "1分ルールつき" in page
+    assert m.HERO_ASSET.name=="hero-kyo-bodo.webp"
