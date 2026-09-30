@@ -1,7 +1,14 @@
 (function () {
+  window.kyoProductImage=function(url) {
+    return url.startsWith('https://thumbnail.image.rakuten.co.jp/') ? url.replace('_ex=128x128','_ex=320x320') : url;
+  };
   var icon='<svg class="placeholder-dice" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="15" y="15" width="50" height="50" rx="13" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><circle cx="28" cy="28" r="3"/><circle cx="52" cy="28" r="3"/><circle cx="40" cy="40" r="3"/><circle cx="28" cy="52" r="3"/><circle cx="52" cy="52" r="3"/></g></svg>';
   function fallback(img) {
     if (!(img instanceof HTMLImageElement) || !img.alt.endsWith('の商品画像')) return;
+    if (img.src.startsWith('https://thumbnail.image.rakuten.co.jp/') && img.src.includes('_ex=320x320')) {
+      img.src=img.src.replace('_ex=320x320','_ex=128x128');
+      return;
+    }
     var stage=document.createElement('div');
     stage.className='game-placeholder';
     stage.setAttribute('role','img');

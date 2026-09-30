@@ -61,7 +61,11 @@ TODAY=(ROOT/"assets/today.js").read_text(encoding="utf-8")
 
 def load_rakuten(g):
     x=RAKUTEN.get(g["game_id"],{})
-    if x.get("url"): return x["url"],x.get("image_url",""),"楽天で見る"
+    if x.get("url"):
+        image=x.get("image_url","")
+        if image.startswith("https://thumbnail.image.rakuten.co.jp/"):
+            image=image.replace("_ex=128x128","_ex=320x320")
+        return x["url"],image,"楽天で見る"
     q=urllib.parse.quote(g.get("rakuten_query") or g["title"])
     return "https://search.rakuten.co.jp/search/mall/"+q+"/","","楽天で探す"
 
