@@ -189,6 +189,17 @@ CSS += """
 }
 """
 
+CSS += """
+.scene-directory{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.scene-directory-card{position:relative;display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;min-height:155px;overflow:hidden;box-shadow:0 8px 22px rgba(26,33,52,.06);transition:.18s transform,.18s box-shadow}
+.scene-directory-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(26,33,52,.11)}
+.scene-directory-card:after{content:"";position:absolute;width:92px;height:92px;border-radius:50%;right:-24px;bottom:-26px;background:var(--tile)}
+.scene-directory-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:var(--tile);font-size:22px;margin-bottom:12px}
+.scene-directory-card h3{margin:0 0 5px;font-size:18px}.scene-directory-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55;max-width:88%}
+.scene-directory-card:nth-child(4n+1){--tile:#ffe4df}.scene-directory-card:nth-child(4n+2){--tile:#e6efff}.scene-directory-card:nth-child(4n+3){--tile:#e6f5e8}.scene-directory-card:nth-child(4n+4){--tile:#fff0c9}
+@media(max-width:760px){.scene-directory{grid-template-columns:repeat(2,1fr);gap:10px}.scene-directory-card{min-height:140px;padding:14px}.scene-directory-card h3{font-size:15px}.scene-directory-card p{font-size:11px}}
+"""
+
 ANALYTICS="""
 (function(){
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
@@ -353,8 +364,9 @@ def game_page(g):
     return shell(g["title"],g["appeal"],body,"games/"+g["game_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
 
 def scenes_index():
-    chips="".join(f'<a class="chip" href="{u("scenes/"+s["scene_id"]+"/")}">{e(s["title"])}</a>' for s in SCENES)
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / シーン</div><div class="eyebrow">SCENE</div><h1>シーンから探す</h1><p>人数や相手、今日の気分が決まっているならここから。</p></section><section class="section"><div class="chips">{chips}</div></section>'''
+    icons={"two-player":"👥","couple":"💑","family":"🏠","children":"🧒","friends":"🙌","large-group":"🎉","first-meeting":"👋","drinking":"🥤","short":"⏱","long":"🧠","think":"💡","laugh":"😄","cooperative":"🤝","beginner":"🌱"}
+    cards="".join(f'<a class="scene-directory-card" href="{u("scenes/"+x["scene_id"]+"/")}"><span class="scene-directory-icon">{icons.get(x["scene_id"],"🎲")}</span><h3>{e(x["title"])}</h3><p>{e(x["intro"].split("。")[0])}。</p></a>' for x in SCENES)
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / シーン</div><div class="eyebrow">SCENE</div><h1>シーンから探す</h1><p>人数や相手、今日の気分が決まっているなら、いちばん近いカードを選ぶだけ。</p></section><section class="section"><div class="scene-directory">{cards}</div></section>'''
     return shell("シーンから探す","2人、夫婦、家族、小学生、大人数、初心者、短時間、盛り上がる、協力などシーン別に探せます。",body,"scenes/")
 
 def scene_page(s):
