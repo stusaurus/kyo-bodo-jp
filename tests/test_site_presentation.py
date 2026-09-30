@@ -62,7 +62,8 @@ def test_home_has_illustrated_scene_cards():
     assert "短時間で" in page
     assert "協力して" in page
     assert "SCENE_SPRITE_DATA" not in page
-    assert "data:image/webp;base64," in page
+    assert "assets/scene-sprite.webp" in page
+    assert m.SCENE_ASSET.name=="scene-sprite.webp"
 
 
 def test_diagnosis_uses_visual_question_cards():
