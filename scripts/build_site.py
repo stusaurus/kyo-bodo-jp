@@ -82,6 +82,30 @@ CSS += """
 @media(max-width:760px){.scene-grid{grid-template-columns:repeat(2,1fr);gap:10px}.scene-art{height:105px}.scene-copy{grid-template-columns:1fr 30px;padding:10px}.scene-copy strong{font-size:14px}.scene-copy small{font-size:11px}.scene-arrow{width:30px;height:30px}}
 """
 
+CSS += """
+.diagnosis-visual-shell{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:stretch}
+.question-visual{min-height:360px;border-radius:24px;overflow:hidden;position:relative;background:#fff0de;box-shadow:0 14px 34px rgba(24,34,56,.10)}
+.question-visual:before{content:"";position:absolute;inset:0;background-image:var(--scene-sprite);background-size:300% 200%;background-repeat:no-repeat;transform:scale(1.04)}
+.question-visual.q1:before{background-position:0% 0%}.question-visual.q2:before{background-position:0% 100%}.question-visual.q3:before{background-position:50% 0%}.question-visual.q4:before{background-position:50% 100%}.question-visual.q5:before{background-position:100% 0%}.question-visual.q6:before{background-position:100% 100%}
+.question-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,30,45,0) 48%,rgba(20,30,45,.58) 100%)}
+.question-visual-label{position:absolute;left:16px;right:16px;bottom:14px;color:#fff;z-index:2}.question-visual-label b{display:block;font-size:22px;line-height:1.15}.question-visual-label span{display:block;font-size:12px;margin-top:4px;opacity:.9}
+.question-panel{background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+.question-panel h2{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:6px 0 8px}
+.answers{grid-template-columns:repeat(2,1fr);gap:12px}
+.answer{position:relative;min-height:82px;padding:14px 15px 14px 54px;border-radius:17px;box-shadow:0 6px 16px rgba(26,33,52,.05);transition:.16s transform,.16s box-shadow,.16s border-color}
+.answer:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(26,33,52,.10);border-color:#cfd5e3}
+.answer:before{content:attr(data-icon);position:absolute;left:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#fff4e8;font-size:17px}
+.answer small{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
+.diag-tip{display:flex;gap:8px;align-items:flex-start;background:#fff8ef;border:1px solid #f4dfcb;border-radius:14px;padding:10px 12px;margin-top:14px;font-size:12px;color:#6b5a4b}
+@media(max-width:760px){
+ .diagnosis-visual-shell{grid-template-columns:1fr}
+ .question-visual{min-height:190px}
+ .question-panel{padding:18px}
+ .answers{grid-template-columns:1fr}
+ .answer{min-height:68px}
+}
+"""
+
 ANALYTICS="""
 (function(){
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
@@ -108,6 +132,15 @@ var qs=[
 ["difficulty","難しいルールは？",[["1","苦手"],["3","少しならOK"],["5","問題なし"]]],
 ["balance","運と実力なら？",[["luck","運多め"],["half","半々"],["skill","実力重視"]]]
 ],a={},i=0,games=[],links={};
+var answerIcons={
+"couple":"💑","family":"🏠","friends":"🙌","children":"🧒","large":"🎉","first":"👋",
+"2":"✌️","4":"👥","6":"🎲","8":"🎊",
+"laugh":"😄","compete":"🏆","think":"💡","coop":"🤝","relax":"☕","chat":"💬",
+"15":"⚡","30":"⏱","60":"🕐","120":"🧠",
+"1":"🌱","3":"👌","5":"🔥",
+"luck":"🎲","half":"⚖️","skill":"♟️"
+};
+var questionSub=["誰と遊ぶかで、相性はかなり変わります。","人数は遊べるゲームを決める必須条件です。","今日ほしいのはどんな時間？","今ある時間に無理なく収まるものを。","説明に使えるエネルギーも大事。","最後に、好みの勝ち筋を教えてください。"];
 function label(key,val){var q=qs.filter(function(x){return x[0]===key})[0],z=q&&q[2].filter(function(x){return x[0]===val})[0];return z?z[1]:val}
 function score(g){
 var n=Number(a.players||4);if(!(g.players_min<=n&&g.players_max>=n))return -9999;var s=60,w=a.who;
@@ -126,7 +159,7 @@ root.innerHTML='<div class="result-intro"><div class="eyebrow">YOUR PICKS</div><
 r.map(function(x,k){var g=x[0],lk=links[g.game_id]||{},img=lk.image_url?'<img class="result-image" src="'+lk.image_url+'" alt="'+g.title+'の商品画像">':'<div class="result-image game-placeholder">🎲</div>';kyoTrack("game_result_view",{game_id:g.game_id,rank:k+1,players:a.players,who:a.who,mood:a.mood});return '<article class="result-card '+(k===0?'winner':'')+'"><div class="rank">第 '+(k+1)+' 候補</div><div class="result-layout">'+img+'<div><h3>'+g.title+'</h3><p><strong>'+g.appeal+'</strong></p><div class="reason-list">'+reasonParts(g).map(function(z){return '<span class="reason-pill">'+z+'</span>'}).join("")+'</div><div class="fit-tags">'+fitTags(g).map(function(z){return '<span class="fit-tag"># '+z+'</span>'}).join("")+'</div></div></div><div class="card-meta"><span>👥 '+g.players_min+'〜'+g.players_max+'人</span><span>⏱ '+g.play_time_min+'〜'+g.play_time_max+'分</span><span>🎂 '+g.age+'歳〜</span></div><h4>ざっくり遊び方</h4><ol class="howto">'+g.how_to_play.map(function(z){return '<li>'+z+'</li>'}).join("")+'</ol><div class="card-actions"><a class="btn primary" data-track="game_detail_click" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" href="'+B+'games/'+g.game_id+'/">1分ルールを見る</a><a class="btn rakuten" data-affiliate="rakuten" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+rak(g)+'">楽天で商品を見る</a></div></article>'}).join("")+
 '<div class="panel"><strong>なんか違う？</strong><p class="small">同じメンバーでも「今日は笑いたい／今日は考えたい」で結果は変わります。</p><a class="btn secondary" href="'+B+'diagnosis/">条件を変えてもう一度</a></div>'
 }
-function render(){if(i>=qs.length){results();return}var q=qs[i],pct=Math.round(i/qs.length*100);root.innerHTML='<div class="small">QUESTION '+(i+1)+' / '+qs.length+'</div><div class="progress"><b style="width:'+pct+'%"></b></div><div class="question"><div class="eyebrow">30秒診断</div><h2>'+q[1]+'</h2><p class="small">考えすぎず、今日の気分に近いものを1つ。</p><div class="answers">'+q[2].map(function(o){return '<button class="answer" data-v="'+o[0]+'">'+o[1]+'</button>'}).join("")+'</div></div>';root.querySelectorAll(".answer").forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack("diagnosis_answer",{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}})}
+function render(){if(i>=qs.length){results();return}var q=qs[i],pct=Math.round(i/qs.length*100);root.innerHTML='<div class="small">QUESTION '+(i+1)+' / '+qs.length+'</div><div class="progress"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(i+1)+'"><div class="question-visual-label"><b>'+q[1]+'</b><span>'+questionSub[i]+'</span></div></div><div class="question-panel"><div class="eyebrow">30秒診断</div><h2>'+q[1]+'</h2><p class="small">'+questionSub[i]+'</p><div class="answers">'+q[2].map(function(o){return '<button class="answer" data-icon="'+(answerIcons[o[0]]||"●")+'" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><small>タップして次へ</small></button>'}).join("")+'</div><div class="diag-tip"><span>💡</span><span>正解はありません。今日の気分に近いものを直感で選べばOKです。</span></div></div></div>';root.querySelectorAll(".answer").forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack("diagnosis_answer",{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}})}
 Promise.all([fetch(B+"data/games.json").then(function(r){return r.json()}),fetch(B+"data/rakuten.json").then(function(r){return r.json()}).catch(function(){return {}})]).then(function(x){games=x[0];links=x[1];kyoTrack("diagnosis_start",{source:new URLSearchParams(location.search).get("src")||"direct"});render()});
 })();
 """
@@ -211,7 +244,7 @@ def home():
     return shell("きょうボド","ボードゲーム選びに迷ったら。人数・気分・時間の6問から、今日のメンバーに合う5本を30秒で診断。1分ルールで遊び方まで分かります。",body)
 
 def diagnosis():
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / 診断</div><div class="eyebrow">DIAGNOSIS</div><h1>あなたたちに合うボードゲーム診断</h1><p>6問に答えると、人数・時間・気分・難易度・運と実力の好みからおすすめを選びます。</p></section><section class="diagnosis-wrap"><div id="diagnosisApp"><p>診断を読み込んでいます…</p></div></section><script defer src="{u("assets/diagnosis.js")}"></script>'''
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / 診断</div><div class="eyebrow">DIAGNOSIS</div><h1>あなたたちに合うボードゲーム診断</h1><p>6問に答えると、人数・時間・気分・難易度・運と実力の好みからおすすめを選びます。</p></section><section class="diagnosis-wrap" style="--scene-sprite:url('{SCENE_SPRITE_DATA}')"><div id="diagnosisApp"><p>診断を読み込んでいます…</p></div></section><script defer src="{u("assets/diagnosis.js")}"></script>'''
     return shell("ボードゲーム診断","6問で今日のメンバーに合うボードゲームを診断します。",body,"diagnosis/")
 
 def games_index():
