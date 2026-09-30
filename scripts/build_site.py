@@ -134,6 +134,14 @@ CSS += """
 }
 """
 
+CSS += """
+.brand{gap:10px}.brand-mark{position:relative;width:32px;height:28px;flex:0 0 32px}
+.brand-die{position:absolute;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:10px;font-style:normal;font-weight:900;box-shadow:0 3px 8px rgba(24,34,56,.12)}
+.brand-die.d1{left:0;top:1px;background:#356ad5;transform:rotate(10deg)}.brand-die.d2{left:12px;top:8px;background:#ff6f3d;transform:rotate(-8deg)}
+.brand-word{display:flex;align-items:baseline;font-size:20px;letter-spacing:-.04em}.brand-word em{font-style:normal;color:var(--orange);margin-left:1px}.brand-sub{display:block;font-size:9px;color:var(--muted);letter-spacing:.06em;line-height:1}
+@media(max-width:520px){.brand-sub{display:none}.brand-word{font-size:18px}}
+"""
+
 ANALYTICS="""
 (function(){
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
@@ -243,7 +251,7 @@ def card_badge(g):
 def shell(title,desc,body,path="",extra=""):
     full=("きょうボド｜今日なにやる？" if title=="きょうボド" else title+"｜きょうボド")
     cfg=json.dumps({"basePath":BASE,"gaMeasurementId":GA},ensure_ascii=False)
-    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta property="og:image" content="{e(canon("assets/hero-kyo-bodo.webp"))}"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#233046"><link rel="stylesheet" href="{u("assets/styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script></head><body><header class="site-header"><a class="brand" href="{u()}"><b>◆</b>きょうボド</a><nav><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></header><main>{body}</main><footer><div><strong>きょうボド — 今日なにやる？</strong></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p class="small">当サイトはアフィリエイト広告を利用する場合があります。</p></footer></body></html>'''
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta property="og:image" content="{e(canon("assets/hero-kyo-bodo.webp"))}"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#233046"><link rel="stylesheet" href="{u("assets/styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script></head><body><header class="site-header"><a class="brand" href="{u()}"><span class="brand-mark" aria-hidden="true"><i class="brand-die d1">●</i><i class="brand-die d2">●</i></span><span><span class="brand-word">きょう<em>ボド</em></span><span class="brand-sub">今日なにやる？</span></span></a><nav><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></header><main>{body}</main><footer><div><strong>きょうボド — 今日なにやる？</strong></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p class="small">当サイトはアフィリエイト広告を利用する場合があります。</p></footer></body></html>'''
 
 def card(g,source="list",rank=""):
     r,img,label=load_rakuten(g)
