@@ -15,6 +15,7 @@ SITE_URL=ORIGIN+BASE
 SCENES=json.loads((ROOT/"data/scenes.json").read_text(encoding="utf-8"))
 CACHE_PATH=ROOT/"data/rakuten_cache.json"
 RAKUTEN=json.loads(CACHE_PATH.read_text(encoding="utf-8")) if CACHE_PATH.exists() else {}
+HERO_ASSET=ROOT/"assets"/"hero-kyo-bodo.webp"
 BY_ID={g["game_id"]:g for g in GAMES}
 
 def e(x): return html.escape(str(x),quote=True)
@@ -50,6 +51,23 @@ CSS += """
 .product-panel{position:sticky;top:78px}.product-availability{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;margin:8px 0 12px}.dot-live,.dot-search{width:8px;height:8px;border-radius:50%}.dot-live{background:#2b9d5b}.dot-search{background:#d89b2b}
 .section-lead{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}.mini-callout{font-size:12px;color:var(--muted);max-width:350px}
 @media(max-width:760px){.hero-shell{padding:24px 18px}.quick-entry{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.result-layout{grid-template-columns:88px 1fr}.result-image{width:88px;height:88px}.games-grid{grid-template-columns:1fr}.detail-summary{grid-template-columns:1fr}.product-panel{position:static}.section-lead{display:block}}
+"""
+
+CSS += """
+.hero-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,1.05fr);align-items:center;gap:18px;padding:30px 30px 30px 34px}
+.hero-shell:after{display:none}
+.hero-copy{position:relative;z-index:2}
+.hero-visual{position:relative;min-height:390px;border-radius:22px;overflow:hidden;background:#fff4e6}
+.hero-visual img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center}
+.hero-visual:after{content:"";position:absolute;inset:0;box-shadow:inset 22px 0 28px rgba(255,248,239,.55);pointer-events:none}
+.hero-stickers{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 0}
+.hero-sticker{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);box-shadow:0 5px 14px rgba(26,33,52,.06);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}
+@media(max-width:760px){
+  .hero-shell{grid-template-columns:1fr;padding:20px 16px 16px;gap:16px}
+  .hero-visual{min-height:250px;order:2}
+  .hero-visual img{object-position:62% center}
+  .hero-visual:after{box-shadow:inset 0 20px 30px rgba(255,248,239,.22)}
+}
 """
 
 ANALYTICS="""
@@ -152,7 +170,7 @@ def card_badge(g):
 def shell(title,desc,body,path="",extra=""):
     full=("きょうボド｜今日なにやる？" if title=="きょうボド" else title+"｜きょうボド")
     cfg=json.dumps({"basePath":BASE,"gaMeasurementId":GA},ensure_ascii=False)
-    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta name="theme-color" content="#233046"><link rel="stylesheet" href="{u("assets/styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script></head><body><header class="site-header"><a class="brand" href="{u()}"><b>◆</b>きょうボド</a><nav><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></header><main>{body}</main><footer><div><strong>きょうボド — 今日なにやる？</strong></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p class="small">当サイトはアフィリエイト広告を利用する場合があります。</p></footer></body></html>'''
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta property="og:image" content="{e(canon("assets/hero-kyo-bodo.webp"))}"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#233046"><link rel="stylesheet" href="{u("assets/styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script></head><body><header class="site-header"><a class="brand" href="{u()}"><b>◆</b>きょうボド</a><nav><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></header><main>{body}</main><footer><div><strong>きょうボド — 今日なにやる？</strong></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p class="small">当サイトはアフィリエイト広告を利用する場合があります。</p></footer></body></html>'''
 
 def card(g,source="list",rank=""):
     r,img,label=load_rakuten(g)
@@ -173,7 +191,7 @@ def home():
     chips="".join(f'<a class="chip" href="{u("scenes/"+s["scene_id"]+"/")}">{e(s["title"])}</a>' for s in SCENES)
     ids=["ito","catan","splendor","nanjamonja","gobblet-gobblers","dobble"]
     pop="".join(card(BY_ID[x],"popular") for x in ids if x in BY_ID)
-    body=f'''<section class="hero"><div class="hero-shell"><div class="hero-kicker">🎯 6問・約30秒</div><h1><span>きょうボド</span>今日なにやる？</h1><p><strong>「何でもいい」が一番むずかしい。</strong><br>人数・時間・今の気分から、今日のメンバーに合うボードゲームを5本まで絞ります。</p><div class="hero-actions"><a class="btn primary large" href="{u("diagnosis/?src=hero")}">今のメンバーで診断する</a><a class="btn secondary large" href="#scenes">条件から直接探す</a></div><div class="hero-note">会員登録なし・無料。結果には「1分で分かる遊び方」も表示します。</div><div class="quick-entry"><a href="{u("scenes/two-player/")}"><b>👥 2人で</b><span>夫婦・カップルにも</span></a><a href="{u("scenes/children/")}"><b>🧒 小学生と</b><span>家族で遊びやすい</span></a><a href="{u("scenes/large-group/")}"><b>🎉 大人数で</b><span>集まりを盛り上げる</span></a><a href="{u("scenes/beginner/")}"><b>🌱 初心者で</b><span>説明が短いものから</span></a></div></div></section>
+    body=f'''<section class="hero"><div class="hero-shell"><div class="hero-copy"><div class="hero-kicker">🎯 6問・約30秒</div><h1><span>きょうボド</span>今日なにやる？</h1><p><strong>「何でもいい」が一番むずかしい。</strong><br>人数・時間・今の気分から、今日のメンバーに合うボードゲームを5本まで絞ります。</p><div class="hero-stickers"><span class="hero-sticker">✓ 登録不要</span><span class="hero-sticker">⏱ 約30秒</span><span class="hero-sticker">📖 1分ルールつき</span></div><div class="hero-actions" style="margin-top:16px"><a class="btn primary large" href="{u("diagnosis/?src=hero")}">今のメンバーで診断する</a><a class="btn secondary large" href="#scenes">条件から直接探す</a></div><div class="hero-note">遊ぶ相手と気分だけ決めればOK。ゲームに詳しくなくても選べます。</div></div><div class="hero-visual"><img src="{u("assets/hero-kyo-bodo.webp")}" alt="家族や友達がテーブルを囲み、ボードゲームを楽しむイラスト" fetchpriority="high"></div></div><div class="quick-entry"><a href="{u("scenes/two-player/")}"><b>👥 2人で</b><span>夫婦・カップルにも</span></a><a href="{u("scenes/children/")}"><b>🧒 小学生と</b><span>家族で遊びやすい</span></a><a href="{u("scenes/large-group/")}"><b>🎉 大人数で</b><span>集まりを盛り上げる</span></a><a href="{u("scenes/beginner/")}"><b>🌱 初心者で</b><span>説明が短いものから</span></a></div></section>
 <section class="section"><div class="section-lead"><div><div class="eyebrow">HOW IT WORKS</div><h2>「選ぶ」時間を短くする</h2></div><p class="mini-callout">詳しい知識がなくても、遊ぶ相手と気分が分かれば十分です。</p></div><div class="steps"><div class="step-card"><span class="step-no">1</span><h3>今日の条件を答える</h3><p class="small">誰と・何人で・何分くらい・どんな気分か。</p></div><div class="step-card"><span class="step-no">2</span><h3>5本まで絞る</h3><p class="small">人数を必須条件にして、気分や難しさを重ねて選びます。</p></div><div class="step-card"><span class="step-no">3</span><h3>1分ルールで決める</h3><p class="small">「遊んでいる姿が想像できた」1本を選べばOK。</p></div></div></section>
 <section class="section"><div class="today-box"><div class="section-lead"><div><div class="eyebrow">TODAY</div><h2>今日のおすすめ3本</h2></div><p class="section-sub">曜日・季節から、今夜選びやすい候補を入れ替えます。</p></div><div class="grid" id="todayGames"><p>おすすめを選んでいます…</p></div></div></section>
 <section class="section" id="scenes"><div class="section-lead"><div><div class="eyebrow">SCENE</div><h2>状況が決まっているなら、すぐ探す</h2></div><p class="mini-callout">「2人」「小学生」「短時間」など、検索しやすい入口を用意しています。</p></div><div class="chips">{chips}</div></section>
@@ -224,6 +242,7 @@ def main():
     if SITE.exists(): shutil.rmtree(SITE)
     (SITE/"assets").mkdir(parents=True);(SITE/"data").mkdir(parents=True)
     write("assets/styles.css",CSS);write("assets/analytics.js",ANALYTICS);write("assets/diagnosis.js",DIAGNOSIS);write("assets/today.js",TODAY)
+    if HERO_ASSET.exists(): shutil.copy2(HERO_ASSET,SITE/"assets"/HERO_ASSET.name)
     write("data/games.json",json.dumps(GAMES,ensure_ascii=False,separators=(",",":")))
     write("data/rakuten.json",json.dumps(RAKUTEN,ensure_ascii=False,separators=(",",":")))
     write("index.html",home());write("diagnosis/index.html",diagnosis());write("games/index.html",games_index());write("scenes/index.html",scenes_index())
