@@ -1,0 +1,6 @@
+__pycache__/
+.pytest_cache/
+site/
+data/rakuten_cache.json
+data/rakuten_audit.json
+node_modules/

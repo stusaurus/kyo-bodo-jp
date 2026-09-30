@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Hero asset refresh: validated WebP source v2.
-import html, json, os, shutil, urllib.parse, sys
+import hashlib, html, json, os, shutil, urllib.parse, sys
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -24,192 +24,21 @@ def e(x): return html.escape(str(x),quote=True)
 def u(p=""): return BASE+p.lstrip("/")
 def canon(p=""): return SITE_URL+p.lstrip("/")
 
-CSS="""
-:root{--ink:#172033;--muted:#667085;--paper:#fffdf8;--card:#fff;--navy:#233046;--orange:#f26b4a;--blue:#4967d9;--line:#e7e2d9;--soft:#f4f1ea;--shadow:0 12px 32px rgba(26,33,52,.08)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}a{color:inherit}.site-header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:rgba(255,253,248,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.brand{display:flex;gap:8px;align-items:center;text-decoration:none;font-weight:900;font-size:19px}.brand b{color:var(--orange)}nav{display:flex;gap:12px}nav a{text-decoration:none;font-size:13px;font-weight:800}.hero,.page-hero,.section{max-width:1040px;margin:auto;padding-left:20px;padding-right:20px}.hero{padding-top:56px;padding-bottom:30px}.page-hero{padding-top:38px;padding-bottom:15px}.hero h1{font-size:clamp(46px,12vw,88px);line-height:.95;letter-spacing:-.055em;margin:8px 0 18px}.hero h1 span{display:block;color:var(--orange);font-size:.34em;letter-spacing:.02em;margin-bottom:9px}.hero p,.page-hero p{max-width:700px;color:#3e485c}.page-hero h1{font-size:clamp(34px,8vw,56px);line-height:1.05;margin:8px 0}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.09em;color:var(--blue)}.section{padding-top:28px;padding-bottom:28px}.section h2{font-size:28px;margin:0 0 5px}.section-sub,.small{color:var(--muted);font-size:13px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:13px;text-decoration:none;font-weight:900;border:1px solid transparent;cursor:pointer;font:inherit}.primary{background:var(--navy);color:white}.secondary{background:white;border-color:var(--line)}.rakuten{background:#bf0000;color:white}.large{min-height:54px;padding:13px 22px;font-size:17px}.hero-actions,.card-actions,.chips{display:flex;gap:10px;flex-wrap:wrap}.trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:28px}.trust,.panel,.game-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.trust{padding:14px}.trust strong{display:block}.today-box{background:var(--navy);color:white;border-radius:24px;padding:22px}.today-box .small,.today-box .section-sub{color:#d4d8e3}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.game-card{overflow:hidden}.game-card-body{padding:16px}.game-card h3{font-size:21px;margin:3px 0}.game-card .appeal{margin:5px 0 10px}.game-placeholder{height:135px;display:grid;place-items:center;background:linear-gradient(135deg,#f7e0d8,#e7ecff);font-size:42px}.game-thumb{width:100%;height:150px;object-fit:contain;background:#fff}.chip{display:inline-flex;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;text-decoration:none;font-size:13px;font-weight:800}.all-games{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.all-games a{background:white;border:1px solid var(--line);border-radius:14px;padding:12px;text-decoration:none}.diagnosis-wrap{max-width:720px;margin:auto;padding:15px 20px 50px}.progress{height:7px;background:#e9e6df;border-radius:999px;overflow:hidden;margin:10px 0 24px}.progress b{display:block;height:100%;background:var(--orange)}.question h2{font-size:28px}.answers{display:grid;gap:10px}.answer{width:100%;padding:15px;text-align:left;border:1px solid var(--line);border-radius:14px;background:white;font-size:16px;font-weight:800}.result-card{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0;box-shadow:var(--shadow)}.rank{font-size:12px;font-weight:900;color:var(--orange)}.howto{padding-left:22px}.detail-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:18px}.panel{padding:18px}.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.spec{background:var(--soft);border-radius:12px;padding:10px}.spec b{display:block;font-size:12px;color:var(--muted)}.axis{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0}.dots{letter-spacing:2px}.breadcrumb{font-size:12px;color:var(--muted)}footer{margin-top:35px;background:#172033;color:white;padding:28px 20px}footer>div,footer>p{max-width:1040px;margin:8px auto}@media(max-width:760px){nav a:nth-child(3){display:none}.grid{grid-template-columns:1fr}.trust-row{grid-template-columns:1fr}.all-games{grid-template-columns:1fr}.detail-layout{grid-template-columns:1fr}.hero{padding-top:38px}.card-actions .btn{flex:1}.today-box{padding:16px}}
-"""
+def asset(name):
+    path=ROOT/"assets"/name
+    version=hashlib.sha256(path.read_bytes()).hexdigest()[:12] if path.exists() else "1"
+    return u("assets/"+name)+"?v="+version
 
-CSS += """
-.hero-shell{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:28px;padding:34px;background:linear-gradient(135deg,#fff 0%,#fff8f1 52%,#eef1ff 100%);box-shadow:var(--shadow)}
-.hero-shell:after{content:"🎲";position:absolute;right:-22px;top:-34px;font-size:150px;opacity:.07;transform:rotate(14deg)}
-.hero-kicker{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}
-.hero-note{margin-top:12px;font-size:13px;color:var(--muted)}
-.quick-entry{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
-.quick-entry a{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;transition:.18s transform,.18s box-shadow}
-.quick-entry a:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.quick-entry b{display:block;font-size:16px}.quick-entry span{font-size:12px;color:var(--muted)}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
-.step-no{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:900;margin-bottom:8px}
-.game-card{transition:.18s transform,.18s box-shadow}.game-card:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(26,33,52,.12)}
-.game-media{position:relative;background:#fff}.game-badge{position:absolute;left:10px;top:10px;background:rgba(23,32,51,.9);color:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}
-.fit-tags{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.fit-tag{display:inline-flex;background:#f6f7fb;border:1px solid #e6e9f2;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:800;color:#49546a}
-.card-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px;font-weight:700}
-.result-intro{background:linear-gradient(135deg,#fff5ee,#f2f4ff);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:16px}
-.result-card.winner{border:2px solid var(--orange);box-shadow:0 18px 42px rgba(242,107,74,.14)}.result-card.winner:before{content:"まず見るならこれ";position:absolute;right:0;top:0;background:var(--orange);color:#fff;padding:7px 12px;border-radius:0 0 0 12px;font-size:11px;font-weight:900}.result-card{position:relative}
-.result-layout{display:grid;grid-template-columns:118px 1fr;gap:14px}.result-image{width:118px;height:118px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:14px}
-.reason-list{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.reason-pill{background:#fff4ed;color:#9e4029;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.filter-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer}.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.games-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.game-list-card{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;text-decoration:none}.game-list-card:hover{box-shadow:var(--shadow)}
-.detail-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.decision-box{border-radius:15px;padding:14px;background:#f7f8fc}.decision-box.good{background:#eef8f1}.decision-box h3{margin:0 0 5px;font-size:15px}.decision-box p{margin:0;font-size:13px}
-.product-panel{position:sticky;top:78px}.product-availability{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;margin:8px 0 12px}.dot-live,.dot-search{width:8px;height:8px;border-radius:50%}.dot-live{background:#2b9d5b}.dot-search{background:#d89b2b}
-.section-lead{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}.mini-callout{font-size:12px;color:var(--muted);max-width:350px}
-@media(max-width:760px){.hero-shell{padding:24px 18px}.quick-entry{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.result-layout{grid-template-columns:88px 1fr}.result-image{width:88px;height:88px}.games-grid{grid-template-columns:1fr}.detail-summary{grid-template-columns:1fr}.product-panel{position:static}.section-lead{display:block}}
-"""
+SCENE_ART={"two-player":1,"couple":1,"family":2,"children":3,"friends":4,"large-group":4,"first-meeting":4,"drinking":4,"short":5,"long":1,"think":1,"laugh":4,"cooperative":6,"beginner":2}
+MAIN_SCENES=[("two-player","2人で","ふたりの時間に",1),("family","家族で","みんなで、もう1回",2),("children","小学生と","大人も一緒に夢中",3),("large-group","大人数で","笑い声の真ん中に",4),("short","短時間で","ちょっとの時間も楽しく",5),("cooperative","協力して","一緒にできた、がうれしい",6)]
 
-CSS += """
-.hero-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,1.05fr);align-items:center;gap:18px;padding:30px 30px 30px 34px}
-.hero-shell:after{display:none}
-.hero-copy{position:relative;z-index:2}
-.hero-visual{position:relative;min-height:390px;border-radius:22px;overflow:hidden;background:#fff4e6}
-.hero-visual img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center}
-.hero-visual:after{content:"";position:absolute;inset:0;box-shadow:inset 22px 0 28px rgba(255,248,239,.55);pointer-events:none}
-.hero-stickers{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 0}
-.hero-sticker{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);box-shadow:0 5px 14px rgba(26,33,52,.06);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}
-@media(max-width:760px){
-  .hero-shell{grid-template-columns:1fr;padding:20px 16px 16px;gap:16px}
-  .hero-visual{min-height:250px;order:2}
-  .hero-visual img{object-position:62% center}
-  .hero-visual:after{box-shadow:inset 0 20px 30px rgba(255,248,239,.22)}
-}
-"""
+BRAND_MARK='<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="#386fc1"><rect x="14" y="2" width="23" height="23" rx="6" transform="rotate(12 25 13)"/><rect x="2" y="20" width="22" height="22" rx="6" transform="rotate(-12 13 31)"/></g><rect x="25" y="24" width="21" height="21" rx="6" fill="#eb612e" transform="rotate(12 35 34)"/><g fill="#fff"><circle cx="21" cy="9" r="1.7"/><circle cx="29" cy="10.5" r="1.7"/><circle cx="24.5" cy="14" r="1.7"/><circle cx="20" cy="17" r="1.7"/><circle cx="28" cy="18.5" r="1.7"/><circle cx="8" cy="27" r="1.7"/><circle cx="16" cy="25.5" r="1.7"/><circle cx="12" cy="31" r="1.7"/><circle cx="9" cy="36.5" r="1.7"/><circle cx="17" cy="35" r="1.7"/><circle cx="31" cy="29" r="1.7"/><circle cx="39" cy="31" r="1.7"/><circle cx="34.5" cy="35" r="1.7"/><circle cx="30" cy="39" r="1.7"/><circle cx="38" cy="41" r="1.7"/></g></svg>'
+PLACEHOLDER='<div class="game-placeholder" aria-label="商品画像は未取得"><svg class="placeholder-dice" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="15" y="15" width="50" height="50" rx="13" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><circle cx="28" cy="28" r="3"/><circle cx="52" cy="28" r="3"/><circle cx="40" cy="40" r="3"/><circle cx="28" cy="52" r="3"/><circle cx="52" cy="52" r="3"/></g></svg></div>'
 
-CSS += """
-.scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
-.scene-card{display:block;overflow:hidden;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 28px rgba(23,32,51,.08);transition:.18s transform,.18s box-shadow}
-.scene-card:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgba(23,32,51,.14)}
-.scene-art{height:124px;background-image:var(--scene-sprite);background-size:300% 200%;background-repeat:no-repeat}
-.scene-art.s1{background-position:0% 0%}.scene-art.s2{background-position:50% 0%}.scene-art.s3{background-position:100% 0%}.scene-art.s4{background-position:0% 100%}.scene-art.s5{background-position:50% 100%}.scene-art.s6{background-position:100% 100%}
-.scene-copy{display:grid;grid-template-columns:1fr 34px;gap:8px;align-items:center;padding:13px 14px 14px}.scene-copy strong{display:block;font-size:16px}.scene-copy small{display:block;color:var(--muted);margin-top:2px}.scene-arrow{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff3e7;color:var(--orange);font-weight:900}
-@media(max-width:760px){.scene-grid{grid-template-columns:repeat(2,1fr);gap:10px}.scene-art{height:105px}.scene-copy{grid-template-columns:1fr 30px;padding:10px}.scene-copy strong{font-size:14px}.scene-copy small{font-size:11px}.scene-arrow{width:30px;height:30px}}
-"""
+def scene_navigation():
+    return '<div class="scene-grid" style="--scene-sprite:url(\''+asset("scene-sprite.webp")+'\')">'+''.join(f'<a class="scene-card" href="{u("scenes/"+sid+"/")}"><div class="scene-art s{art}" aria-hidden="true"></div><div class="scene-copy"><span><strong>{title}</strong><small>{sub}</small></span><i class="scene-arrow" aria-hidden="true">→</i></div></a>' for sid,title,sub,art in MAIN_SCENES)+'</div>'
 
-CSS += """
-.diagnosis-visual-shell{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:stretch}
-.question-visual{min-height:360px;border-radius:24px;overflow:hidden;position:relative;background:#fff0de;box-shadow:0 14px 34px rgba(24,34,56,.10)}
-.question-visual:before{content:"";position:absolute;inset:0;background-image:var(--scene-sprite);background-size:300% 200%;background-repeat:no-repeat;transform:scale(1.04)}
-.question-visual.q1:before{background-position:0% 0%}.question-visual.q2:before{background-position:0% 100%}.question-visual.q3:before{background-position:50% 0%}.question-visual.q4:before{background-position:50% 100%}.question-visual.q5:before{background-position:100% 0%}.question-visual.q6:before{background-position:100% 100%}
-.question-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,30,45,0) 48%,rgba(20,30,45,.58) 100%)}
-.question-visual-label{position:absolute;left:16px;right:16px;bottom:14px;color:#fff;z-index:2}.question-visual-label b{display:block;font-size:22px;line-height:1.15}.question-visual-label span{display:block;font-size:12px;margin-top:4px;opacity:.9}
-.question-panel{background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
-.question-panel h2{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:6px 0 8px}
-.answers{grid-template-columns:repeat(2,1fr);gap:12px}
-.answer{position:relative;min-height:82px;padding:14px 15px 14px 54px;border-radius:17px;box-shadow:0 6px 16px rgba(26,33,52,.05);transition:.16s transform,.16s box-shadow,.16s border-color}
-.answer:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(26,33,52,.10);border-color:#cfd5e3}
-.answer:before{content:attr(data-icon);position:absolute;left:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#fff4e8;font-size:17px}
-.answer small{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
-.diag-tip{display:flex;gap:8px;align-items:flex-start;background:#fff8ef;border:1px solid #f4dfcb;border-radius:14px;padding:10px 12px;margin-top:14px;font-size:12px;color:#6b5a4b}
-@media(max-width:760px){
- .diagnosis-visual-shell{grid-template-columns:1fr}
- .question-visual{min-height:190px}
- .question-panel{padding:18px}
- .answers{grid-template-columns:1fr}
- .answer{min-height:68px}
-}
-"""
-
-CSS += """
-.today-grid{display:grid;grid-template-columns:1.35fr .85fr;grid-template-rows:1fr 1fr;gap:13px;margin-top:14px}
-.today-pick{position:relative;overflow:hidden;border-radius:20px;background:#fff;color:var(--ink);border:1px solid rgba(255,255,255,.15)}
-.today-pick.featured{grid-row:1 / span 2}
-.today-pick .game-media{height:170px}.today-pick.featured .game-media{height:290px}
-.today-pick .game-thumb{height:100%;object-fit:contain;padding:10px;background:#fff}
-.today-pick-body{padding:15px}.today-pick.featured .today-pick-body{padding:18px}
-.today-pick h3{font-size:20px;margin:2px 0 5px}.today-pick.featured h3{font-size:27px}
-.today-reason{display:inline-flex;border-radius:999px;background:#fff1e7;color:#a74c2e;padding:5px 9px;font-size:11px;font-weight:900;margin-bottom:6px}
-.today-ribbon{position:absolute;z-index:3;top:12px;left:12px;background:#f6b82f;color:#2d2614;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:900;box-shadow:0 5px 15px rgba(0,0,0,.12)}
-.today-pick:not(.featured){display:grid;grid-template-columns:135px 1fr}.today-pick:not(.featured) .game-media{height:100%;min-height:190px}.today-pick:not(.featured) .today-pick-body{display:flex;flex-direction:column;justify-content:center}
-.result-card.winner{padding:24px;background:linear-gradient(145deg,#fff7e9 0%,#fff 58%,#eef3ff 100%);border:2px solid #f1b53a}
-.result-card.winner .rank{display:inline-flex;background:#f6b82f;color:#352b13;border-radius:999px;padding:7px 11px;font-size:12px;box-shadow:0 5px 14px rgba(177,122,8,.18)}
-.result-card.winner h3{font-size:30px;margin:8px 0 3px}
-.result-card.winner .result-layout{grid-template-columns:170px 1fr;align-items:center}
-.result-card.winner .result-image{width:170px;height:170px;border-radius:20px;box-shadow:0 10px 25px rgba(23,32,51,.09)}
-.result-card:not(.winner) .howto{display:none}
-.result-card:not(.winner) h4{display:none}
-.result-card:not(.winner){padding:14px}
-.result-card:not(.winner) .result-layout{grid-template-columns:90px 1fr}.result-card:not(.winner) .result-image{width:90px;height:90px}
-@media(max-width:760px){
- .today-grid{grid-template-columns:1fr;grid-template-rows:auto}
- .today-pick.featured{grid-row:auto}.today-pick.featured .game-media{height:220px}
- .today-pick:not(.featured){grid-template-columns:110px 1fr}.today-pick:not(.featured) .game-media{min-height:160px}
- .result-card.winner{padding:18px}.result-card.winner .result-layout{grid-template-columns:105px 1fr}.result-card.winner .result-image{width:105px;height:105px}.result-card.winner h3{font-size:23px}
-}
-"""
-
-CSS += """
-.brand{gap:10px}.brand-mark{position:relative;width:32px;height:28px;flex:0 0 32px}
-.brand-die{position:absolute;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:10px;font-style:normal;font-weight:900;box-shadow:0 3px 8px rgba(24,34,56,.12)}
-.brand-die.d1{left:0;top:1px;background:#356ad5;transform:rotate(10deg)}.brand-die.d2{left:12px;top:8px;background:#ff6f3d;transform:rotate(-8deg)}
-.brand-word{display:flex;align-items:baseline;font-size:20px;letter-spacing:-.04em}.brand-word em{font-style:normal;color:var(--orange);margin-left:1px}.brand-sub{display:block;font-size:9px;color:var(--muted);letter-spacing:.06em;line-height:1}
-@media(max-width:520px){.brand-sub{display:none}.brand-word{font-size:18px}}
-"""
-
-CSS += """
-body{background:
-radial-gradient(circle at 12% 18%,rgba(242,107,74,.055) 0 110px,transparent 111px),
-radial-gradient(circle at 88% 42%,rgba(73,103,217,.05) 0 140px,transparent 141px),
-#fffdf8}
-.section{position:relative;padding-top:48px;padding-bottom:48px}
-.section:before{content:"";position:absolute;left:20px;right:20px;top:0;height:1px;background:linear-gradient(90deg,transparent,#e4ded4 12%,#e4ded4 88%,transparent)}
-.section:first-of-type:before{display:none}
-.section-lead h2{font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:-.035em;margin:4px 0 0}
-.eyebrow{font-size:11px;letter-spacing:.15em;font-weight:900;color:#d85e3c}
-.section:nth-of-type(odd) .eyebrow{color:#365cc0}
-.steps{counter-reset:steps}
-.step-card{position:relative;overflow:hidden;min-height:170px;padding:22px}
-.step-card:after{content:"";position:absolute;width:86px;height:86px;border-radius:50%;right:-24px;bottom:-28px;background:rgba(73,103,217,.06)}
-.step-card:nth-child(2):after{background:rgba(242,107,74,.08)}.step-card:nth-child(3):after{background:rgba(246,184,47,.10)}
-.today-box{border-radius:28px;background:linear-gradient(145deg,#172033 0%,#243552 100%);padding:26px;color:#fff;box-shadow:0 18px 46px rgba(23,32,51,.16)}
-.today-box .section-sub,.today-box .eyebrow{color:#d8dfef}.today-box h2{color:#fff}
-#scenes{background:#fff;border:1px solid var(--line);border-radius:28px;margin-top:20px;margin-bottom:20px;padding-top:30px;padding-bottom:30px;box-shadow:0 12px 32px rgba(26,33,52,.06)}
-#scenes:before{display:none}
-#scenes .chips{margin-top:18px}
-#scenes .chip{background:#f8f6f1;border-color:#e8e3d9;padding:9px 12px}
-footer{position:relative;overflow:hidden}footer:after{content:"🎲  ◇  ●  □";position:absolute;right:24px;bottom:8px;font-size:46px;letter-spacing:9px;opacity:.06;transform:rotate(-6deg)}
-@media(max-width:760px){.section{padding-top:34px;padding-bottom:34px}.today-box{padding:18px;border-radius:22px}#scenes{border-radius:22px;margin-left:12px;margin-right:12px;padding-left:14px;padding-right:14px}}
-"""
-
-CSS += """
-.game-detail-hero{max-width:1040px;margin:0 auto;padding:34px 20px 10px}
-.game-hero-card{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:center;background:linear-gradient(145deg,#fff8ef 0%,#fff 52%,#eef3ff 100%);border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow);overflow:hidden;position:relative}
-.game-hero-card:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-55px;top:-65px;background:rgba(73,103,217,.07)}
-.game-hero-copy{position:relative;z-index:2}.game-hero-copy h1{font-size:clamp(38px,6vw,62px);line-height:1.02;letter-spacing:-.045em;margin:8px 0 12px}.game-hero-copy>p{font-size:17px;max-width:640px}
-.game-hero-art{position:relative;z-index:2;background:#fff;border:1px solid var(--line);border-radius:22px;min-height:280px;display:grid;place-items:center;padding:18px;box-shadow:0 16px 34px rgba(23,32,51,.10)}
-.game-hero-art img{width:100%;height:250px;object-fit:contain}.game-hero-art .game-placeholder{height:250px;width:100%}
-.game-fast-facts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.game-fast-facts span{background:#fff;border:1px solid #e7e2d9;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
-.scene-page-hero{max-width:1040px;margin:34px auto 0;padding:0 20px}
-.scene-hero-card{position:relative;min-height:310px;border-radius:28px;overflow:hidden;background:#172033;display:flex;align-items:flex-end;box-shadow:0 18px 44px rgba(23,32,51,.16)}
-.scene-hero-card:before{content:"";position:absolute;inset:0;background-image:var(--scene-sprite);background-size:300% 200%;background-repeat:no-repeat;filter:saturate(.95)}
-.scene-hero-card.s1:before{background-position:0% 0%}.scene-hero-card.s2:before{background-position:50% 0%}.scene-hero-card.s3:before{background-position:100% 0%}.scene-hero-card.s4:before{background-position:0% 100%}.scene-hero-card.s5:before{background-position:50% 100%}.scene-hero-card.s6:before{background-position:100% 100%}
-.scene-hero-card:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,27,45,.87) 0%,rgba(18,27,45,.64) 50%,rgba(18,27,45,.18) 100%)}
-.scene-hero-copy{position:relative;z-index:2;color:#fff;padding:28px;max-width:650px}.scene-hero-copy .breadcrumb{color:#dbe2ef}.scene-hero-copy h1{font-size:clamp(36px,6vw,60px);line-height:1.04;letter-spacing:-.04em;margin:8px 0}.scene-hero-copy p{font-size:16px;max-width:560px}
-.scene-result-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:16px}.scene-result-head b{font-size:28px}.scene-result-head span{font-size:12px;color:var(--muted)}
-@media(max-width:760px){
- .game-hero-card{grid-template-columns:1fr;padding:20px;border-radius:22px}.game-hero-art{min-height:210px}.game-hero-art img{height:190px}
- .scene-hero-card{min-height:255px;border-radius:22px}.scene-hero-card:after{background:linear-gradient(180deg,rgba(18,27,45,.15) 10%,rgba(18,27,45,.86) 100%)}.scene-hero-copy{padding:20px}
- .scene-result-head{display:block}.scene-result-head b{font-size:24px}
-}
-"""
-
-CSS += """
-.scene-directory{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.scene-directory-card{position:relative;display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;min-height:155px;overflow:hidden;box-shadow:0 8px 22px rgba(26,33,52,.06);transition:.18s transform,.18s box-shadow}
-.scene-directory-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(26,33,52,.11)}
-.scene-directory-card:after{content:"";position:absolute;width:92px;height:92px;border-radius:50%;right:-24px;bottom:-26px;background:var(--tile)}
-.scene-directory-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:var(--tile);font-size:22px;margin-bottom:12px}
-.scene-directory-card h3{margin:0 0 5px;font-size:18px}.scene-directory-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55;max-width:88%}
-.scene-directory-card:nth-child(4n+1){--tile:#ffe4df}.scene-directory-card:nth-child(4n+2){--tile:#e6efff}.scene-directory-card:nth-child(4n+3){--tile:#e6f5e8}.scene-directory-card:nth-child(4n+4){--tile:#fff0c9}
-@media(max-width:760px){.scene-directory{grid-template-columns:repeat(2,1fr);gap:10px}.scene-directory-card{min-height:140px;padding:14px}.scene-directory-card h3{font-size:15px}.scene-directory-card p{font-size:11px}}
-"""
-
-CSS += """
-.games-catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.catalog-card{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 22px rgba(26,33,52,.06);transition:.18s transform,.18s box-shadow}
-.catalog-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(26,33,52,.11)}
-.catalog-media{height:175px;background:#fff;display:grid;place-items:center;padding:12px;position:relative}
-.catalog-media img{width:100%;height:100%;object-fit:contain}.catalog-media .game-placeholder{height:100%;width:100%}
-.catalog-body{padding:14px}.catalog-body strong{display:block;font-size:17px;line-height:1.25;margin-bottom:6px}.catalog-body .fit-tags{margin:6px 0}.catalog-meta{font-size:11px;color:var(--muted);font-weight:800}
-.catalog-arrow{margin-top:10px;font-size:12px;font-weight:900;color:var(--orange)}
-@media(max-width:760px){.games-catalog{grid-template-columns:repeat(2,1fr);gap:10px}.catalog-media{height:130px;padding:8px}.catalog-body{padding:10px}.catalog-body strong{font-size:14px}.catalog-meta{font-size:10px}}
-"""
+CSS=(ROOT/"assets/styles.css").read_text(encoding="utf-8")
 
 ANALYTICS="""
 (function(){
@@ -226,56 +55,9 @@ if(a.dataset.affiliate)kyoTrack("affiliate_click",{affiliate:a.dataset.affiliate
 })();
 """
 
-DIAGNOSIS="""
-(function(){
-var root=document.getElementById("diagnosisApp");if(!root)return;var B=(window.KYO_BODO_CONFIG||{}).basePath||"/kyo-bodo-jp/";
-var qs=[
-["who","誰と遊ぶ？",[["couple","夫婦・カップル"],["family","家族"],["friends","友達"],["children","子ども"],["large","大人数"],["first","初対面がいる"]]],
-["players","何人で遊ぶ？",[["2","2人"],["4","3〜4人"],["6","5〜6人"],["8","7人以上"]]],
-["mood","どんな時間にしたい？",[["laugh","とにかく笑いたい"],["compete","真剣に勝負したい"],["think","頭を使いたい"],["coop","みんなで協力したい"],["relax","ゆるく遊びたい"],["chat","会話を楽しみたい"]]],
-["time","どのくらい遊べる？",[["15","10〜15分"],["30","30分くらい"],["60","1時間くらい"],["120","じっくり"]]],
-["difficulty","難しいルールは？",[["1","苦手"],["3","少しならOK"],["5","問題なし"]]],
-["balance","運と実力なら？",[["luck","運多め"],["half","半々"],["skill","実力重視"]]]
-],a={},i=0,games=[],links={};
-var answerIcons={
-"couple":"💑","family":"🏠","friends":"🙌","children":"🧒","large":"🎉","first":"👋",
-"2":"✌️","4":"👥","6":"🎲","8":"🎊",
-"laugh":"😄","compete":"🏆","think":"💡","coop":"🤝","relax":"☕","chat":"💬",
-"15":"⚡","30":"⏱","60":"🕐","120":"🧠",
-"1":"🌱","3":"👌","5":"🔥",
-"luck":"🎲","half":"⚖️","skill":"♟️"
-};
-var questionSub=["誰と遊ぶかで、相性はかなり変わります。","人数は遊べるゲームを決める必須条件です。","今日ほしいのはどんな時間？","今ある時間に無理なく収まるものを。","説明に使えるエネルギーも大事。","最後に、好みの勝ち筋を教えてください。"];
-function label(key,val){var q=qs.filter(function(x){return x[0]===key})[0],z=q&&q[2].filter(function(x){return x[0]===val})[0];return z?z[1]:val}
-function score(g){
-var n=Number(a.players||4);if(!(g.players_min<=n&&g.players_max>=n))return -9999;var s=60,w=a.who;
-if(w==="couple")s+=g.couple*7;else if(w==="family")s+=g.family*7;else if(w==="friends")s+=(g.conversation+g.party+g.excitement)*3;else if(w==="children")s+=g.children*7;else if(w==="large")s+=(g.large_group+g.party)*5;else if(w==="first")s+=(g.beginner+g.conversation+g.party)*4;
-var m=a.mood;if(m==="laugh")s+=(g.excitement+g.party+g.conversation)*4;else if(m==="compete")s+=(g.strategy+g.excitement)*5;else if(m==="think")s+=g.strategy*8;else if(m==="coop")s+=g.cooperation*9;else if(m==="relax")s+=g.beginner*5+(6-g.difficulty)*4;else if(m==="chat")s+=g.conversation*8;
-var t=Number(a.time||30);if(t<=15)s+=Math.max(0,20-Math.max(0,g.play_time_min-15)*2);else if(t<=30)s+=Math.max(0,18-Math.abs(g.play_time_max-30)/3);else if(t<=60)s+=Math.max(0,16-Math.abs(g.play_time_max-60)/5);else s+=g.play_time_max>=45?18:5;
-var d=Number(a.difficulty||3);s+=Math.max(0,18-Math.abs(g.difficulty-d)*6);
-if(a.balance==="luck")s+=g.luck*5+(6-g.strategy)*2;else if(a.balance==="skill")s+=g.strategy*6+(6-g.luck)*2;else s+=12-Math.abs(g.strategy-g.luck)*3;return s}
-function reasonParts(g){var p=[];if(a.who)p.push(label("who",a.who)+"向き");if(a.mood)p.push(label("mood",a.mood));if(g.play_time_max<=30)p.push("30分以内");if(g.beginner>=4)p.push("初めてでも入りやすい");if(g.cooperation>=4)p.push("協力して遊べる");if(g.conversation>=4)p.push("会話が弾む");return p.slice(0,4)}
-function fitTags(g){var x=[];if(g.beginner>=4)x.push("初心者");if(g.couple>=4)x.push("2人");if(g.family>=4)x.push("家族");if(g.children>=4)x.push("小学生");if(g.excitement>=4)x.push("盛り上がる");if(g.strategy>=4)x.push("考える");if(g.cooperation>=4)x.push("協力");return x.slice(0,3)}
-function rak(g){var x=links[g.game_id]||{};return x.url||"https://search.rakuten.co.jp/search/mall/"+encodeURIComponent(g.rakuten_query||g.title)+"/"}
-function results(){
-var r=games.map(function(g){return [g,score(g)]}).filter(function(x){return x[1]>-100}).sort(function(x,y){return y[1]-x[1]}).slice(0,5);
-kyoTrack("diagnosis_complete",{players:a.players,who:a.who,mood:a.mood,desired_time:a.time,difficulty:a.difficulty,balance:a.balance,result_ids:r.map(function(x){return x[0].game_id}).join(",")});
-root.innerHTML='<div class="result-intro"><div class="eyebrow">YOUR PICKS</div><h2>今日なら、この5本。</h2><p>1位は条件とのバランスが最も良い候補。迷ったらまず1位の「1分ルール」を見て、遊ぶ姿が想像できるかで決めてください。</p></div>'+
-r.map(function(x,k){var g=x[0],lk=links[g.game_id]||{},img=lk.image_url?'<img class="result-image" src="'+lk.image_url+'" alt="'+g.title+'の商品画像">':'<div class="result-image game-placeholder">🎲</div>';kyoTrack("game_result_view",{game_id:g.game_id,rank:k+1,players:a.players,who:a.who,mood:a.mood});return '<article class="result-card '+(k===0?'winner':'')+'"><div class="rank">'+(k===0?'👑 今日の第一候補':'候補 '+(k+1))+'</div><div class="result-layout">'+img+'<div><h3>'+g.title+'</h3><p><strong>'+g.appeal+'</strong></p><div class="reason-list">'+reasonParts(g).map(function(z){return '<span class="reason-pill">'+z+'</span>'}).join("")+'</div><div class="fit-tags">'+fitTags(g).map(function(z){return '<span class="fit-tag"># '+z+'</span>'}).join("")+'</div></div></div><div class="card-meta"><span>👥 '+g.players_min+'〜'+g.players_max+'人</span><span>⏱ '+g.play_time_min+'〜'+g.play_time_max+'分</span><span>🎂 '+g.age+'歳〜</span></div><h4>ざっくり遊び方</h4><ol class="howto">'+g.how_to_play.map(function(z){return '<li>'+z+'</li>'}).join("")+'</ol><div class="card-actions"><a class="btn primary" data-track="game_detail_click" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" href="'+B+'games/'+g.game_id+'/">1分ルールを見る</a><a class="btn rakuten" data-affiliate="rakuten" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+rak(g)+'">楽天で商品を見る</a></div></article>'}).join("")+
-'<div class="panel"><strong>なんか違う？</strong><p class="small">同じメンバーでも「今日は笑いたい／今日は考えたい」で結果は変わります。</p><a class="btn secondary" href="'+B+'diagnosis/">条件を変えてもう一度</a></div>'
-}
-function render(){if(i>=qs.length){results();return}var q=qs[i],pct=Math.round(i/qs.length*100);root.innerHTML='<div class="small">QUESTION '+(i+1)+' / '+qs.length+'</div><div class="progress"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(i+1)+'"><div class="question-visual-label"><b>'+q[1]+'</b><span>'+questionSub[i]+'</span></div></div><div class="question-panel"><div class="eyebrow">30秒診断</div><h2>'+q[1]+'</h2><p class="small">'+questionSub[i]+'</p><div class="answers">'+q[2].map(function(o){return '<button class="answer" data-icon="'+(answerIcons[o[0]]||"●")+'" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><small>タップして次へ</small></button>'}).join("")+'</div><div class="diag-tip"><span>💡</span><span>正解はありません。今日の気分に近いものを直感で選べばOKです。</span></div></div></div>';root.querySelectorAll(".answer").forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack("diagnosis_answer",{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}})}
-Promise.all([fetch(B+"data/games.json").then(function(r){return r.json()}),fetch(B+"data/rakuten.json").then(function(r){return r.json()}).catch(function(){return {}})]).then(function(x){games=x[0];links=x[1];kyoTrack("diagnosis_start",{source:new URLSearchParams(location.search).get("src")||"direct"});render()});
-})();
-"""
+DIAGNOSIS=(ROOT/"assets/diagnosis.js").read_text(encoding="utf-8")
 
-TODAY="""
-(function(){var root=document.getElementById("todayGames");if(!root)return;var B=(window.KYO_BODO_CONFIG||{}).basePath||"/kyo-bodo-jp/",d=new Date();
-function sc(g){var day=d.getDay(),m=d.getMonth()+1,s=0;if(day===5)s+=g.party*4+g.excitement*3+g.conversation*2;else if(day===6)s+=g.strategy*3+(g.play_time_max>=30?10:0)+g.family*2;else if(day===0)s+=g.family*4+g.children*2+g.cooperation*2;else s+=g.short_play*4+g.beginner*2+g.couple*2;if(m===12||m===1)s+=g.family*2+g.large_group*2+g.party*2;if(m===7||m===8)s+=g.children*3+g.family*2;return s}
-function why(g){var day=d.getDay();if(day===5)return "金曜の夜に、盛り上がり重視";if(day===6)return "土曜に少しじっくり";if(day===0)return "日曜の家族時間に";if(g.short_play>=4)return "平日の夜でも遊びやすい";return "今日のバランス候補"}
-Promise.all([fetch(B+"data/games.json").then(function(r){return r.json()}),fetch(B+"data/rakuten.json").then(function(r){return r.json()}).catch(function(){return {}})]).then(function(x){var games=x[0],links=x[1],seed=Number(String(d.getFullYear())+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")),pool=games.map(function(g){g._s=sc(g);return g}).sort(function(a,b){return b._s-a._s}).slice(0,12),p=[];while(p.length<3&&pool.length)p.push(pool.splice((seed+p.length*7)%pool.length,1)[0]);root.innerHTML='<div class="today-grid">'+p.map(function(g,k){var l=links[g.game_id]||{},r=l.url||"https://search.rakuten.co.jp/search/mall/"+encodeURIComponent(g.rakuten_query||g.title)+"/",art=l.image_url?'<img class="game-thumb" src="'+l.image_url+'" alt="'+g.title+'の商品画像" loading="lazy">':'<div class="game-placeholder">🎲</div>';return '<article class="today-pick '+(k===0?'featured':'')+'">'+(k===0?'<span class="today-ribbon">👑 今日のイチオシ</span>':'')+'<div class="game-media">'+art+'</div><div class="today-pick-body"><div class="today-reason">'+why(g)+'</div><h3>'+g.title+'</h3><p>'+g.appeal+'</p><div class="card-meta"><span>👥 '+g.players_min+'〜'+g.players_max+'人</span><span>⏱ '+g.play_time_min+'〜'+g.play_time_max+'分</span></div><div class="card-actions"><a class="btn primary" data-track="game_detail_click" data-game-id="'+g.game_id+'" data-source="today_pick" href="'+B+'games/'+g.game_id+'/">どんなゲーム？</a><a class="btn rakuten" data-affiliate="rakuten" data-game-id="'+g.game_id+'" data-source="today_pick" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+r+'">楽天で見る</a></div></div></article>'}).join("")+'</div>';kyoTrack("daily_recommendation_view",{game_ids:p.map(function(g){return g.game_id}).join(","),weekday:d.getDay(),month:d.getMonth()+1})});
-})();
-"""
+TODAY=(ROOT/"assets/today.js").read_text(encoding="utf-8")
 
 def load_rakuten(g):
     x=RAKUTEN.get(g["game_id"],{})
@@ -320,13 +102,14 @@ def card_badge(g):
 def shell(title,desc,body,path="",extra=""):
     full=("きょうボド｜今日なにやる？" if title=="きょうボド" else title+"｜きょうボド")
     cfg=json.dumps({"basePath":BASE,"gaMeasurementId":GA},ensure_ascii=False)
-    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta property="og:image" content="{e(canon("assets/hero-kyo-bodo.webp"))}"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#233046"><link rel="stylesheet" href="{u("assets/styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script></head><body><header class="site-header"><a class="brand" href="{u()}"><span class="brand-mark" aria-hidden="true"><i class="brand-die d1">●</i><i class="brand-die d2">●</i></span><span><span class="brand-word">きょう<em>ボド</em></span><span class="brand-sub">今日なにやる？</span></span></a><nav><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></header><main>{body}</main><footer><div><strong>きょうボド — 今日なにやる？</strong></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p class="small">当サイトはアフィリエイト広告を利用する場合があります。</p></footer></body></html>'''
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(full)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{e(canon(path))}"><meta property="og:title" content="{e(full)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(canon(path))}"><meta property="og:type" content="website"><meta property="og:image" content="{e(canon("assets/hero-kyo-bodo.webp"))}"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#fffaf2"><link rel="stylesheet" href="{asset("styles.css")}">{extra}<script>window.KYO_BODO_CONFIG={cfg};</script><script defer src="{u("assets/analytics.js")}"></script><script defer src="{asset("media.js")}"></script></head><body><header class="site-header"><div class="header-inner"><a class="brand" href="{u()}" aria-label="きょうボド ホーム">{BRAND_MARK}<span><span class="brand-word">きょう<em>ボド</em></span><span class="brand-sub">今日なにやる？</span></span></a><nav aria-label="メインナビゲーション"><a href="{u("diagnosis/")}">診断</a><a href="{u("scenes/")}">シーン</a><a href="{u("games/")}">ゲーム一覧</a></nav></div></header><main>{body}</main><footer><div class="footer-inner"><div class="footer-brand">きょうボド <span class="small">今日なにやる？</span></div><div class="footer-nav"><a href="{u("diagnosis/")}">診断する</a><a href="{u("scenes/")}">シーンから探す</a><a href="{u("games/")}">50本のゲームを見る</a></div><p>掲載情報はゲーム選びの参考情報です。対象年齢・人数・ルール・在庫は商品版や販売店で最終確認してください。</p><p>当サイトはアフィリエイト広告を利用する場合があります。</p></div></footer></body></html>'''
+
 
 def card(g,source="list",rank=""):
     r,img,label=load_rakuten(g)
-    art=f'<img class="game-thumb" src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy">' if img else '<div class="game-placeholder">🎲</div>'
-    tags="".join(f'<span class="fit-tag"># {e(t)}</span>' for t in fit_tags(g))
-    return f'''<article class="game-card"><div class="game-media">{art}<span class="game-badge">{e(card_badge(g))}</span></div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p><div class="fit-tags">{tags}</div><div class="card-meta"><span>👥 {g["players_min"]}〜{g["players_max"]}人</span><span>⏱ {g["play_time_min"]}〜{g["play_time_max"]}分</span><span>🎂 {g["age"]}歳〜</span></div><div class="card-actions"><a class="btn primary" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？</a><a class="btn rakuten" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
+    art=f'<img class="game-thumb" src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
+    return f'''<article class="game-card"><div class="game-media">{art}</div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p><div class="card-meta"><span>{g["players_min"]}〜{g["players_max"]}人</span><span>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span>{g["age"]}歳〜</span></div><div class="card-actions"><a class="text-link" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？ <span class="arrow" aria-hidden="true">→</span></a><a class="btn secondary" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
+
 
 def scene_score(g,s):
     r=s["rule"];t=r["type"]
@@ -338,57 +121,59 @@ def scene_score(g,s):
     return 0
 
 def home():
-    chips="".join(f'<a class="chip" href="{u("scenes/"+s["scene_id"]+"/")}">{e(s["title"])}</a>' for s in SCENES)
-    ids=["ito","catan","splendor","nanjamonja","gobblet-gobblers","dobble"]
-    pop="".join(card(BY_ID[x],"popular") for x in ids if x in BY_ID)
-    body=f'''<section class="hero"><div class="hero-shell"><div class="hero-copy"><div class="hero-kicker">🎯 6問・約30秒</div><h1><span>きょうボド</span>今日なにやる？</h1><p><strong>「何でもいい」が一番むずかしい。</strong><br>人数・時間・今の気分から、今日のメンバーに合うボードゲームを5本まで絞ります。</p><div class="hero-stickers"><span class="hero-sticker">✓ 登録不要</span><span class="hero-sticker">⏱ 約30秒</span><span class="hero-sticker">📖 1分ルールつき</span></div><div class="hero-actions" style="margin-top:16px"><a class="btn primary large" href="{u("diagnosis/?src=hero")}">今のメンバーで診断する</a><a class="btn secondary large" href="#scenes">条件から直接探す</a></div><div class="hero-note">遊ぶ相手と気分だけ決めればOK。ゲームに詳しくなくても選べます。</div></div><div class="hero-visual"><img src="{u("assets/hero-kyo-bodo.webp")}" alt="家族や友達がテーブルを囲み、ボードゲームを楽しむイラスト" fetchpriority="high"></div></div><div class="scene-grid" style="--scene-sprite:url('{u('assets/scene-sprite.webp')}')"><a class="scene-card" href="{u("scenes/two-player/")}"><div class="scene-art s1"></div><div class="scene-copy"><span><strong>2人で</strong><small>じっくり楽しむ</small></span><i class="scene-arrow">›</i></div></a><a class="scene-card" href="{u("scenes/family/")}"><div class="scene-art s2"></div><div class="scene-copy"><span><strong>家族で</strong><small>みんなで楽しむ</small></span><i class="scene-arrow">›</i></div></a><a class="scene-card" href="{u("scenes/children/")}"><div class="scene-art s3"></div><div class="scene-copy"><span><strong>小学生と</strong><small>はじめてでも楽しい</small></span><i class="scene-arrow">›</i></div></a><a class="scene-card" href="{u("scenes/large-group/")}"><div class="scene-art s4"></div><div class="scene-copy"><span><strong>大人数で</strong><small>みんなで盛り上がる</small></span><i class="scene-arrow">›</i></div></a><a class="scene-card" href="{u("scenes/short/")}"><div class="scene-art s5"></div><div class="scene-copy"><span><strong>短時間で</strong><small>すぐに遊べる</small></span><i class="scene-arrow">›</i></div></a><a class="scene-card" href="{u("scenes/cooperative/")}"><div class="scene-art s6"></div><div class="scene-copy"><span><strong>協力して</strong><small>みんなで力を合わせる</small></span><i class="scene-arrow">›</i></div></a></div></section>
-<section class="section"><div class="section-lead"><div><div class="eyebrow">HOW IT WORKS</div><h2>「選ぶ」時間を短くする</h2></div><p class="mini-callout">詳しい知識がなくても、遊ぶ相手と気分が分かれば十分です。</p></div><div class="steps"><div class="step-card"><span class="step-no">1</span><h3>今日の条件を答える</h3><p class="small">誰と・何人で・何分くらい・どんな気分か。</p></div><div class="step-card"><span class="step-no">2</span><h3>5本まで絞る</h3><p class="small">人数を必須条件にして、気分や難しさを重ねて選びます。</p></div><div class="step-card"><span class="step-no">3</span><h3>1分ルールで決める</h3><p class="small">「遊んでいる姿が想像できた」1本を選べばOK。</p></div></div></section>
-<section class="section"><div class="today-box"><div class="section-lead"><div><div class="eyebrow">TODAY</div><h2>今日のおすすめ3本</h2></div><p class="section-sub">曜日・季節から、今夜選びやすい候補を入れ替えます。</p></div><div class="grid" id="todayGames"><p>おすすめを選んでいます…</p></div></div></section>
-<section class="section" id="scenes"><div class="section-lead"><div><div class="eyebrow">SCENE</div><h2>状況が決まっているなら、すぐ探す</h2></div><p class="mini-callout">「2人」「小学生」「短時間」など、検索しやすい入口を用意しています。</p></div><div class="chips">{chips}</div></section>
-<section class="section"><div class="section-lead"><div><div class="eyebrow">START HERE</div><h2>迷ったら、この定番から</h2></div><p class="mini-callout">ジャンルが偏らないよう、入り口として使いやすい6本を選んでいます。</p></div><div class="grid">{pop}</div></section><script defer src="{u("assets/today.js")}"></script>'''
+    pop="".join(card(BY_ID[x],"popular") for x in ["ito","catan","splendor"])
+    body=f'''<section class="hero"><div class="hero-shell"><div class="hero-copy"><div class="hero-message"><p class="hero-eyebrow">みんなで遊ぶと、今日がちょっと特別に。</p><h1><span>今日</span>なにやる？</h1><p class="hero-summary">人数・気分・時間から、<span>今日の1本をすぐ見つける。</span></p></div><div class="hero-action-block"><div class="hero-actions"><a class="btn primary large" href="{u("diagnosis/?src=hero")}">今のメンバーで診断する <span aria-hidden="true">→</span></a><a class="btn secondary" href="#scenes">シーンから探す <span aria-hidden="true">↓</span></a></div><p class="hero-note">6問・約30秒　／　登録不要　／　1分ルールつき</p></div></div><figure class="hero-visual"><img src="{asset("hero-kyo-bodo.webp")}" alt="暖かな光の中で、家族がテーブルを囲んでボードゲームを楽しむイラスト" width="1536" height="1024" fetchpriority="high" decoding="async"></figure></div></section>
+<section class="section scene-section" id="scenes"><div class="section-lead"><div><div class="eyebrow">PLAY TOGETHER</div><h2>今日は、誰と遊ぶ？</h2></div><a class="text-link" href="{u("scenes/")}">すべてのシーン <span class="arrow" aria-hidden="true">→</span></a></div>{scene_navigation()}</section>
+<section class="today-section"><div class="today-inner"><div class="section-lead"><div><div class="eyebrow">TODAY'S PICKS</div><h2>今日のおすすめ3本</h2></div><p class="section-sub">いつもの時間に、ひとつ遊びを。</p></div><div id="todayGames"><p class="small">今日のおすすめを読み込んでいます…</p></div></div></section>
+<section class="section"><div class="section-lead"><div><div class="eyebrow">FIND YOUR GAME</div><h2>「選ぶ」時間を短くする</h2></div></div><div class="steps"><div class="step-card"><span class="step-no">01</span><h3>今のメンバーを教えて</h3><p>人数・時間・気分を、6問で。</p></div><div class="step-card"><span class="step-no">02</span><h3>今日に合う候補が見つかる</h3><p>あなたたちに合う5本をご提案。</p></div><div class="step-card"><span class="step-no">03</span><h3>1分ルールで、遊ぶ姿を想像</h3><p>楽しそうと思ったら、その1本を。</p></div></div><div class="steps-action"><a class="text-link" href="{u("diagnosis/?src=how_it_works")}">今日の1本を診断する <span class="arrow" aria-hidden="true">→</span></a></div></section>
+<section class="section"><div class="section-lead"><div><div class="eyebrow">TIMELESS FAVORITES</div><h2>迷ったら、この定番から</h2></div><a class="text-link" href="{u("games/")}">50本のゲーム <span class="arrow" aria-hidden="true">→</span></a></div><div class="grid popular-grid">{pop}</div></section><script defer src="{asset("today.js")}"></script>'''
     return shell("きょうボド","ボードゲーム選びに迷ったら。人数・気分・時間の6問から、今日のメンバーに合う5本を30秒で診断。1分ルールで遊び方まで分かります。",body)
 
+
 def diagnosis():
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / 診断</div><div class="eyebrow">DIAGNOSIS</div><h1>あなたたちに合うボードゲーム診断</h1><p>6問に答えると、人数・時間・気分・難易度・運と実力の好みからおすすめを選びます。</p></section><section class="diagnosis-wrap" style="--scene-sprite:url('{u('assets/scene-sprite.webp')}')"><div id="diagnosisApp"><p>診断を読み込んでいます…</p></div></section><script defer src="{u("assets/diagnosis.js")}"></script>'''
+    body=f'''<section class="page-hero diagnosis-header"><div class="eyebrow">FIND YOUR GAME</div><h1 class="diagnosis-heading">今日の遊びを、見つけよう。</h1><p class="diagnosis-subtitle">6問だけ。今のメンバーと、今の気分で。</p></section><section class="diagnosis-wrap" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div id="diagnosisApp" aria-busy="true"><p class="small">診断を読み込んでいます…</p></div><noscript><p>診断にはJavaScriptが必要です。<a href="{u("scenes/")}">シーンからゲームを探す</a>こともできます。</p></noscript></section><script defer src="{asset("diagnosis.js")}"></script>'''
     return shell("ボードゲーム診断","6問で今日のメンバーに合うボードゲームを診断します。",body,"diagnosis/")
+
 
 def games_index():
     rows=[]
     for g in GAMES:
         _,img,_=load_rakuten(g)
-        tags="".join(f'<span class="fit-tag"># {e(t)}</span>' for t in fit_tags(g)[:2])
         attrs=f'data-pmin="{g["players_min"]}" data-pmax="{g["players_max"]}" data-short="{1 if g["play_time_max"]<=30 else 0}" data-family="{1 if g["family"]>=4 else 0}" data-beginner="{1 if g["beginner"]>=4 else 0}"'
-        art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy">' if img else '<div class="game-placeholder">🎲</div>'
-        rows.append(f'<a class="catalog-card game-list-card" {attrs} href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}<span class="game-badge">{e(card_badge(g))}</span></div><div class="catalog-body"><strong>{e(g["title"])}</strong><div class="fit-tags">{tags}</div><div class="catalog-meta">👥 {g["players_min"]}〜{g["players_max"]}人　⏱ {g["play_time_min"]}〜{g["play_time_max"]}分</div><div class="catalog-arrow">どんなゲーム？ →</div></div></a>')
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">GAMES</div><h1>掲載ゲーム50本</h1><p>全部読む必要はありません。条件で絞って、見た目で気になったゲームから詳細へ。</p></section><section class="section"><div class="filter-bar"><button class="filter-btn active" data-filter="all">すべて</button><button class="filter-btn" data-filter="two">2人で遊べる</button><button class="filter-btn" data-filter="family">家族向け</button><button class="filter-btn" data-filter="short">30分以内</button><button class="filter-btn" data-filter="beginner">初心者向け</button></div><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active")}});b.classList.add("active");var f=b.dataset.filter;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&Number(c.dataset.pmin)<=2&&Number(c.dataset.pmax)>=2)||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.style.display=show?"block":"none"}});kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
+        art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
+        rows.append(f'<a class="catalog-card game-list-card" {attrs} data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="games_index" href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}</div><div class="catalog-body"><strong>{e(g["title"])}</strong><p>{e(g["appeal"])}</p><div class="catalog-meta">{g["players_min"]}〜{g["players_max"]}人　／　{g["play_time_min"]}〜{g["play_time_max"]}分</div><div class="catalog-arrow">どんなゲーム？ <span aria-hidden="true">→</span></div></div></a>')
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">THE GAME SHELF</div><h1>次に遊びたい、50本。</h1><p>気になった1本から、遊びの世界をのぞいてみよう。</p></section><section class="section"><div class="filter-bar" role="group" aria-label="ゲームの絞り込み"><button class="filter-btn active" aria-pressed="true" data-filter="all">すべて</button><button class="filter-btn" aria-pressed="false" data-filter="two">2人で遊べる</button><button class="filter-btn" aria-pressed="false" data-filter="family">家族向け</button><button class="filter-btn" aria-pressed="false" data-filter="short">30分以内</button><button class="filter-btn" aria-pressed="false" data-filter="beginner">初心者向け</button></div><p class="small filter-count" id="filterCount" aria-live="polite">50本のゲーム</p><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active");x.setAttribute("aria-pressed","false")}});b.classList.add("active");b.setAttribute("aria-pressed","true");var f=b.dataset.filter,count=0;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&Number(c.dataset.pmin)<=2&&Number(c.dataset.pmax)>=2)||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.hidden=!show;if(show)count++}});document.getElementById("filterCount").textContent=count+"本のゲーム";kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
     return shell("ゲーム一覧","きょうボド掲載50ゲーム。2人、家族、30分以内、初心者向けなどから絞って探せます。",body,"games/")
+
 
 def game_page(g):
     r,img,label=load_rakuten(g)
     similar=sorted([x for x in GAMES if x["game_id"]!=g["game_id"]],key=lambda x:abs(x["strategy"]-g["strategy"])+abs(x["excitement"]-g["excitement"])+abs(x["players_min"]-g["players_min"]))[:3]
     axes=[("難しさ","difficulty"),("戦略性","strategy"),("運要素","luck"),("会話量","conversation"),("盛り上がり","excitement"),("協力度","cooperation"),("初心者向け","beginner")]
-    axis="".join(f'<div class="axis"><span>{n}</span><span class="dots">{"●"*g[k]}{"○"*(5-g[k])}</span></div>' for n,k in axes)
-    art=f'<img class="game-thumb" style="height:250px" src="{e(img)}" alt="{e(g["title"])}の商品画像">' if img else '<div class="game-placeholder" style="height:250px">🎲</div>'
-    tags="".join(f'<span class="fit-tag"># {e(t)}</span>' for t in fit_tags(g))
-    availability='<span class="dot-live"></span>楽天の商品ページを取得済み' if img else '<span class="dot-search"></span>楽天検索から候補を確認'
-    hero_art=(f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像">' if img else '<div class="game-placeholder">🎲</div>')
-    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">GAME GUIDE</div><h1>{e(g["title"])}</h1><p><strong>{e(g["appeal"])}</strong></p><div class="fit-tags">{tags}</div><div class="game-fast-facts"><span>👥 {g["players_min"]}〜{g["players_max"]}人</span><span>⏱ {g["play_time_min"]}〜{g["play_time_max"]}分</span><span>🎂 {g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div><div class="panel"><div class="section-lead"><div><div class="eyebrow">3-SECOND CHECK</div><h2>3秒で「今日向き？」を判断</h2></div></div><div class="specs"><div class="spec"><b>人数</b>{g["players_min"]}〜{g["players_max"]}人</div><div class="spec"><b>時間</b>{g["play_time_min"]}〜{g["play_time_max"]}分</div><div class="spec"><b>対象年齢</b>{g["age"]}歳〜</div><div class="spec"><b>タイプ</b>{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</div></div><div class="detail-summary"><div class="decision-box good"><h3>◎ こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>△ 今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><h2>どんなゲーム？</h2><p>{e(g["description"])}</p><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>どんな場面で使いやすい？</h2><div class="chips">{"".join("<span class=chip>"+e(z)+"</span>" for z in g["recommended_scene"])}</div></div><div class="panel" style="margin-top:18px"><div class="section-lead"><div><div class="eyebrow">ALTERNATIVES</div><h2>これと迷うなら</h2></div><p class="mini-callout">似た遊び味の候補を3本。</p></div><div class="grid">{"".join(card(x,"similar") for x in similar)}</div></div></div><aside><div class="panel product-panel">{art}<div class="product-availability">{availability}</div>{axis}<p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn rakuten large" style="width:100%" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a><a class="btn secondary" style="width:100%;margin-top:8px" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
+    axis="".join(f'<div class="axis"><span>{n}</span><span class="dots" aria-label="5段階中{g[k]}">{"●"*g[k]}{"○"*(5-g[k])}</span></div>' for n,k in axes)
+    hero_art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" decoding="async">' if img else PLACEHOLDER
+    availability='楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'
+    scenes=' ／ '.join(e(z) for z in g["recommended_scene"])
+    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p><div class="game-fast-facts"><span><small>人数</small>{g["players_min"]}〜{g["players_max"]}人</span><span><small>時間</small>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar") for x in similar)}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"WebPage","name":g["title"]+"｜きょうボド","description":g["description"],"url":canon("games/"+g["game_id"]+"/")},ensure_ascii=False)
     return shell(g["title"],g["appeal"],body,"games/"+g["game_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
 
+
 def scenes_index():
-    icons={"two-player":"👥","couple":"💑","family":"🏠","children":"🧒","friends":"🙌","large-group":"🎉","first-meeting":"👋","drinking":"🥤","short":"⏱","long":"🧠","think":"💡","laugh":"😄","cooperative":"🤝","beginner":"🌱"}
-    cards="".join(f'<a class="scene-directory-card" href="{u("scenes/"+x["scene_id"]+"/")}"><span class="scene-directory-icon">{icons.get(x["scene_id"],"🎲")}</span><h3>{e(x["title"])}</h3><p>{e(x["intro"].split("。")[0])}。</p></a>' for x in SCENES)
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / シーン</div><div class="eyebrow">SCENE</div><h1>シーンから探す</h1><p>人数や相手、今日の気分が決まっているなら、いちばん近いカードを選ぶだけ。</p></section><section class="section"><div class="scene-directory">{cards}</div></section>'''
+    selected={sid for sid,_,_,_ in MAIN_SCENES}
+    more="".join(f'<a class="scene-directory-card" href="{u("scenes/"+x["scene_id"]+"/")}"><span><h3>{e(x["title"])}</h3><p>{e(x["intro"].split("。")[0])}。</p></span><span class="scene-arrow" aria-hidden="true">→</span></a>' for x in SCENES if x["scene_id"] not in selected)
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / シーン</div><div class="eyebrow">PLAY TOGETHER</div><h1>今日は、どんな集まり？</h1><p>一緒に遊ぶ人から。今日の気分から。ぴったりの入口を選ぼう。</p></section><section class="section">{scene_navigation()}<div class="scene-more-list">{more}</div></section><section class="section"><div class="eyebrow">CAN'T DECIDE?</div><h2>どれも気になるなら、診断で。</h2><p class="small">人数・気分・時間から、今日に合う候補を選びます。</p><a class="btn primary" href="{u("diagnosis/?src=scenes_index")}">今のメンバーで診断する <span aria-hidden="true">→</span></a></section>'''
     return shell("シーンから探す","2人、夫婦、家族、小学生、大人数、初心者、短時間、盛り上がる、協力などシーン別に探せます。",body,"scenes/")
+
 
 def scene_page(s):
     ranked=sorted(GAMES,key=lambda g:scene_score(g,s),reverse=True)
     ranked=[g for g in ranked if scene_score(g,s)>=50][:12]
-    scene_i=(next((i for i,x in enumerate(SCENES) if x["scene_id"]==s["scene_id"]),0)%6)+1
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{u("assets/scene-sprite.webp")}')"><div class="scene-hero-card s{scene_i}"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">SCENE</div><h1>{e(s["title"])}ボードゲーム</h1><p>{e(s["intro"])}</p></div></div></section><section class="section"><div class="scene-result-head"><div><div class="eyebrow">PICKS</div><b>このシーンに合う{len(ranked)}本</b></div><span>おすすめ度の高い順に掲載</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    scene_i=SCENE_ART[s["scene_id"]]
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(s["title"])}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a></div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section><section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>おすすめ度の高い順に掲載</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     return shell(s["title"]+"ボードゲーム",s["intro"],body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
+
 
 def write(rel,text):
     p=SITE/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text,encoding="utf-8")
@@ -396,6 +181,8 @@ def write(rel,text):
 def main():
     if SITE.exists(): shutil.rmtree(SITE)
     (SITE/"assets").mkdir(parents=True);(SITE/"data").mkdir(parents=True)
+    shutil.copy2(ROOT/"assets/media.js",SITE/"assets/media.js")
+    for verification in ROOT.glob("google*.html"): shutil.copy2(verification,SITE/verification.name)
     write("assets/styles.css",CSS);write("assets/analytics.js",ANALYTICS);write("assets/diagnosis.js",DIAGNOSIS);write("assets/today.js",TODAY)
     if HERO_ASSET.exists(): shutil.copy2(HERO_ASSET,SITE/"assets"/HERO_ASSET.name)
     if SCENE_ASSET.exists(): shutil.copy2(SCENE_ASSET,SITE/"assets"/SCENE_ASSET.name)

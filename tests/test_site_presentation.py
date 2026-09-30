@@ -17,13 +17,13 @@ def test_home_has_clear_primary_flow():
 
 def test_diagnosis_result_presentation_is_decision_focused():
     assert "今日なら、この5本。" in m.DIAGNOSIS
-    assert "まず見るならこれ" in m.CSS
+    assert "今日の第一候補" in m.DIAGNOSIS
     assert "1分ルールを見る" in m.DIAGNOSIS
     assert "image_url" in m.DIAGNOSIS
 
 def test_game_detail_has_fit_and_caution_guidance():
     page=m.game_page(m.GAMES[0])
-    assert "3秒で「今日向き？」を判断" in page
+    assert g_description_present(page, m.GAMES[0])
     assert "こんな日に合う" in page
     assert "今日は別候補でも" in page
     assert "診断で他の候補も見る" in page
@@ -71,7 +71,7 @@ def test_diagnosis_uses_visual_question_cards():
     assert "--scene-sprite:url(" in page
     assert "diagnosis-visual-shell" in m.CSS
     assert "question-visual q" in m.DIAGNOSIS
-    assert "answerIcons" in m.DIAGNOSIS
+    assert 'role="progressbar"' in m.DIAGNOSIS
     assert "タップして次へ" in m.DIAGNOSIS
 
 def test_home_has_six_visual_scene_cards():
@@ -89,7 +89,7 @@ def test_today_recommendations_have_featured_layout():
 def test_diagnosis_first_result_is_visually_prioritized():
     assert "今日の第一候補" in m.DIAGNOSIS
     assert ".result-card.winner" in m.CSS
-    assert "170px" in m.CSS
+    assert 'data-rank="' in m.DIAGNOSIS
 
 
 def test_game_detail_uses_visual_hero():
@@ -107,9 +107,10 @@ def test_scene_pages_use_visual_hero():
 
 def test_scene_directory_uses_visual_tiles():
     page=m.scenes_index()
-    assert page.count('class="scene-directory-card"') == len(m.SCENES)
-    assert "scene-directory-icon" in page
-    assert "いちばん近いカードを選ぶだけ" in page
+    for scene in m.SCENES:
+        assert f'href="{m.u("scenes/" + scene["scene_id"] + "/")}"' in page
+    assert page.count('class="scene-card"') == 6
+    assert page.count('class="scene-directory-card"') == 8
 
 
 def test_game_catalog_uses_visual_cards():
@@ -117,4 +118,45 @@ def test_game_catalog_uses_visual_cards():
     assert 'class="games-catalog"' in page
     assert page.count('class="catalog-card game-list-card"') == len(m.GAMES)
     assert "catalog-media" in page
-    assert "どんなゲーム？ →" in page
+    assert "どんなゲーム？" in page
+
+
+def g_description_present(page, game):
+    return m.e(game["description"]) in page and all(m.e(step) in page for step in game["how_to_play"])
+
+
+def test_all_game_details_keep_rules_and_attribution():
+    for game in m.GAMES:
+        page = m.game_page(game)
+        assert g_description_present(page, game)
+        assert f'data-game-id="{game["game_id"]}"' in page
+        assert 'data-source="game_detail"' in page
+        assert 'rel="sponsored noopener"' in page
+        assert f'href="{m.canon("games/" + game["game_id"] + "/")}"' in page
+
+
+def test_all_scene_pages_keep_ranked_links_and_structured_data():
+    import json
+    import re
+    for scene in m.SCENES:
+        page = m.scene_page(scene)
+        schema = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page).group(1))
+        assert schema["@type"] == "ItemList"
+        for item in schema["itemListElement"]:
+            gid = item["url"].rstrip("/").split("/")[-1]
+            assert gid in m.BY_ID
+            assert f'data-rank="{item["position"]}"' in page
+            assert f'href="{m.u("games/" + gid + "/")}"' in page
+        assert 'diagnosis/?src=scene_page' in page
+
+
+def test_hero_and_scene_files_are_complete_high_resolution_webp():
+    import struct
+    for asset in (m.HERO_ASSET, m.SCENE_ASSET):
+        blob = asset.read_bytes()
+        assert blob[:4] == b"RIFF" and blob[8:12] == b"WEBP"
+        assert struct.unpack_from("<I", blob, 4)[0] + 8 == len(blob), f"truncated asset: {asset.name}"
+        marker = blob.index(b"\x9d\x01\x2a")
+        width, height = struct.unpack_from("<HH", blob, marker + 3)
+        assert width & 0x3FFF >= 1536
+        assert height & 0x3FFF >= 1024

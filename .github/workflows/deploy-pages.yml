@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "data/**"
+      - "assets/**"
       - "scripts/**"
       - "tests/**"
       - ".github/workflows/deploy-pages.yml"
