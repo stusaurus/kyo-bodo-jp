@@ -49,3 +49,16 @@ def test_home_uses_illustrated_hero_asset():
     assert "登録不要" in page
     assert "1分ルールつき" in page
     assert m.HERO_ASSET.name=="hero-kyo-bodo.webp"
+
+
+def test_home_has_illustrated_scene_cards():
+    page=m.home()
+    assert "scene-grid" in page
+    assert "2人で" in page
+    assert "家族で" in page
+    assert "小学生と" in page
+    assert "大人数で" in page
+    assert "短時間で" in page
+    assert "協力して" in page
+    assert "SCENE_SPRITE_DATA" not in page
+    assert "data:image/webp;base64," in page
