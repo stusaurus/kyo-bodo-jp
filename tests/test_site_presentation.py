@@ -110,3 +110,11 @@ def test_scene_directory_uses_visual_tiles():
     assert page.count('class="scene-directory-card"') == len(m.SCENES)
     assert "scene-directory-icon" in page
     assert "いちばん近いカードを選ぶだけ" in page
+
+
+def test_game_catalog_uses_visual_cards():
+    page=m.games_index()
+    assert 'class="games-catalog"' in page
+    assert page.count('class="catalog-card game-list-card"') == len(m.GAMES)
+    assert "catalog-media" in page
+    assert "どんなゲーム？ →" in page
