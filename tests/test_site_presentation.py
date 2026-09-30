@@ -103,3 +103,10 @@ def test_scene_pages_use_visual_hero():
     assert "scene-hero-card" in page
     assert "assets/scene-sprite.webp" in page
     assert "このシーンに合う" in page
+
+
+def test_scene_directory_uses_visual_tiles():
+    page=m.scenes_index()
+    assert page.count('class="scene-directory-card"') == len(m.SCENES)
+    assert "scene-directory-icon" in page
+    assert "いちばん近いカードを選ぶだけ" in page
