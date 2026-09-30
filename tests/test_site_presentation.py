@@ -90,3 +90,16 @@ def test_diagnosis_first_result_is_visually_prioritized():
     assert "今日の第一候補" in m.DIAGNOSIS
     assert ".result-card.winner" in m.CSS
     assert "170px" in m.CSS
+
+
+def test_game_detail_uses_visual_hero():
+    page=m.game_page(m.GAMES[0])
+    assert "game-hero-card" in page
+    assert "game-fast-facts" in page
+    assert "game-hero-art" in page
+
+def test_scene_pages_use_visual_hero():
+    page=m.scene_page(m.SCENES[0])
+    assert "scene-hero-card" in page
+    assert "assets/scene-sprite.webp" in page
+    assert "このシーンに合う" in page
