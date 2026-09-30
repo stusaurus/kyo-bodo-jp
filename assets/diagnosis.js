@@ -21,7 +21,7 @@ if(a.balance==="luck")s+=g.luck*5+(6-g.strategy)*2;else if(a.balance==="skill")s
 function reasonParts(g){var p=[];if(a.who)p.push(label("who",a.who)+"向き");if(a.mood)p.push(label("mood",a.mood));if(g.play_time_max<=30)p.push("30分以内");if(g.beginner>=4)p.push("初めてでも入りやすい");if(g.cooperation>=4)p.push("協力して遊べる");if(g.conversation>=4)p.push("会話が弾む");return p.slice(0,4)}
 function rak(g){var x=links[g.game_id]||{};return x.url||"https://search.rakuten.co.jp/search/mall/"+encodeURIComponent(g.rakuten_query||g.title)+"/"}
 function resultMarkup(g,k){
-  var lk=links[g.game_id]||{},image=lk.image_url?'<img class="result-image" src="'+lk.image_url+'" alt="'+g.title+'の商品画像" decoding="async">':placeholder;
+  var lk=links[g.game_id]||{},image=lk.image_url?'<img class="result-image" src="'+window.kyoProductImage(lk.image_url)+'" alt="'+g.title+'の商品画像" decoding="async">':placeholder;
   kyoTrack("game_result_view",{game_id:g.game_id,rank:k+1,players:a.players,who:a.who,mood:a.mood});
   var detail='<a class="text-link" data-track="game_detail_click" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" href="'+B+'games/'+g.game_id+'/">1分ルールを見る <span aria-hidden="true">→</span></a>';
   var shop='<a class="'+(k===0?'btn rakuten':'text-link')+'" data-affiliate="rakuten" data-game-id="'+g.game_id+'" data-source="diagnosis_result" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+rak(g)+'">'+(lk.url?'楽天で商品を見る':'楽天で探す')+' <span aria-hidden="true">↗</span></a>';
