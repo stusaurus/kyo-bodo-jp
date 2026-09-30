@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Hero asset refresh: validated WebP source.
+# Hero asset refresh: validated WebP source v2.
 import html, json, os, shutil, urllib.parse, sys
 from pathlib import Path
 
