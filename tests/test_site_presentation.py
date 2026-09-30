@@ -78,3 +78,14 @@ def test_home_has_six_visual_scene_cards():
     assert page.count('class="scene-card"') == 6
     for scene in ("two-player","family","children","large-group","short","cooperative"):
         assert f"scenes/{scene}/" in page
+
+
+def test_today_recommendations_have_featured_layout():
+    assert "today-grid" in m.CSS
+    assert "今日のイチオシ" in m.TODAY
+    assert "featured" in m.TODAY
+
+def test_diagnosis_first_result_is_visually_prioritized():
+    assert "今日の第一候補" in m.DIAGNOSIS
+    assert ".result-card.winner" in m.CSS
+    assert "170px" in m.CSS
