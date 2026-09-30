@@ -63,3 +63,18 @@ def test_home_has_illustrated_scene_cards():
     assert "協力して" in page
     assert "SCENE_SPRITE_DATA" not in page
     assert "data:image/webp;base64," in page
+
+
+def test_diagnosis_uses_visual_question_cards():
+    page=m.diagnosis()
+    assert "--scene-sprite:url(" in page
+    assert "diagnosis-visual-shell" in m.CSS
+    assert "question-visual q" in m.DIAGNOSIS
+    assert "answerIcons" in m.DIAGNOSIS
+    assert "タップして次へ" in m.DIAGNOSIS
+
+def test_home_has_six_visual_scene_cards():
+    page=m.home()
+    assert page.count('class="scene-card"') == 6
+    for scene in ("two-player","family","children","large-group","short","cooperative"):
+        assert f"scenes/{scene}/" in page
