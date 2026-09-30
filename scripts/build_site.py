@@ -200,6 +200,17 @@ CSS += """
 @media(max-width:760px){.scene-directory{grid-template-columns:repeat(2,1fr);gap:10px}.scene-directory-card{min-height:140px;padding:14px}.scene-directory-card h3{font-size:15px}.scene-directory-card p{font-size:11px}}
 """
 
+CSS += """
+.games-catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.catalog-card{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 22px rgba(26,33,52,.06);transition:.18s transform,.18s box-shadow}
+.catalog-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(26,33,52,.11)}
+.catalog-media{height:175px;background:#fff;display:grid;place-items:center;padding:12px;position:relative}
+.catalog-media img{width:100%;height:100%;object-fit:contain}.catalog-media .game-placeholder{height:100%;width:100%}
+.catalog-body{padding:14px}.catalog-body strong{display:block;font-size:17px;line-height:1.25;margin-bottom:6px}.catalog-body .fit-tags{margin:6px 0}.catalog-meta{font-size:11px;color:var(--muted);font-weight:800}
+.catalog-arrow{margin-top:10px;font-size:12px;font-weight:900;color:var(--orange)}
+@media(max-width:760px){.games-catalog{grid-template-columns:repeat(2,1fr);gap:10px}.catalog-media{height:130px;padding:8px}.catalog-body{padding:10px}.catalog-body strong{font-size:14px}.catalog-meta{font-size:10px}}
+"""
+
 ANALYTICS="""
 (function(){
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
@@ -344,10 +355,12 @@ def diagnosis():
 def games_index():
     rows=[]
     for g in GAMES:
-        tags=" ".join(f'<span class="fit-tag"># {e(t)}</span>' for t in fit_tags(g)[:2])
+        _,img,_=load_rakuten(g)
+        tags="".join(f'<span class="fit-tag"># {e(t)}</span>' for t in fit_tags(g)[:2])
         attrs=f'data-pmin="{g["players_min"]}" data-pmax="{g["players_max"]}" data-short="{1 if g["play_time_max"]<=30 else 0}" data-family="{1 if g["family"]>=4 else 0}" data-beginner="{1 if g["beginner"]>=4 else 0}"'
-        rows.append(f'<a class="game-list-card" {attrs} href="{u("games/"+g["game_id"]+"/")}"><div><strong>{e(g["title"])}</strong><div class="fit-tags">{tags}</div><span class="small">{g["players_min"]}〜{g["players_max"]}人 ・ {g["play_time_min"]}〜{g["play_time_max"]}分 ・ {g["age"]}歳〜</span></div><span aria-hidden="true">→</span></a>')
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">GAMES</div><h1>掲載ゲーム50本</h1><p>全部読む必要はありません。まず条件で絞って、気になったゲームだけ詳細を見てください。</p></section><section class="section"><div class="filter-bar"><button class="filter-btn active" data-filter="all">すべて</button><button class="filter-btn" data-filter="two">2人で遊べる</button><button class="filter-btn" data-filter="family">家族向け</button><button class="filter-btn" data-filter="short">30分以内</button><button class="filter-btn" data-filter="beginner">初心者向け</button></div><div class="games-grid" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active")}});b.classList.add("active");var f=b.dataset.filter;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&Number(c.dataset.pmin)<=2&&Number(c.dataset.pmax)>=2)||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.style.display=show?"flex":"none"}});kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
+        art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy">' if img else '<div class="game-placeholder">🎲</div>'
+        rows.append(f'<a class="catalog-card game-list-card" {attrs} href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}<span class="game-badge">{e(card_badge(g))}</span></div><div class="catalog-body"><strong>{e(g["title"])}</strong><div class="fit-tags">{tags}</div><div class="catalog-meta">👥 {g["players_min"]}〜{g["players_max"]}人　⏱ {g["play_time_min"]}〜{g["play_time_max"]}分</div><div class="catalog-arrow">どんなゲーム？ →</div></div></a>')
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">GAMES</div><h1>掲載ゲーム50本</h1><p>全部読む必要はありません。条件で絞って、見た目で気になったゲームから詳細へ。</p></section><section class="section"><div class="filter-bar"><button class="filter-btn active" data-filter="all">すべて</button><button class="filter-btn" data-filter="two">2人で遊べる</button><button class="filter-btn" data-filter="family">家族向け</button><button class="filter-btn" data-filter="short">30分以内</button><button class="filter-btn" data-filter="beginner">初心者向け</button></div><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active")}});b.classList.add("active");var f=b.dataset.filter;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&Number(c.dataset.pmin)<=2&&Number(c.dataset.pmax)>=2)||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.style.display=show?"block":"none"}});kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
     return shell("ゲーム一覧","きょうボド掲載50ゲーム。2人、家族、30分以内、初心者向けなどから絞って探せます。",body,"games/")
 
 def game_page(g):
