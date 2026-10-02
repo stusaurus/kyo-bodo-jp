@@ -54,7 +54,11 @@ jobs:
           SITE_BASE_PATH: /kyo-bodo-jp/
           SITE_ORIGIN: https://stusaurus.github.io
           GA_MEASUREMENT_ID: G-Q1N14V276G
-        run: python scripts/build_site.py\n      - name: Generate SEO discovery files\n        env:\n          SITE_URL: https://stusaurus.github.io/kyo-bodo-jp/\n        run: python scripts/generate_seo_files.py
+        run: python scripts/build_site.py
+      - name: Generate SEO discovery files
+        env:
+          SITE_URL: https://stusaurus.github.io/kyo-bodo-jp/
+        run: python scripts/generate_seo_files.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
