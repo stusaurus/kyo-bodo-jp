@@ -168,7 +168,9 @@ def game_page(g):
             {"@type":"ListItem","position":3,"name":g["title"],"item":game_url}
         ]}
     ]},ensure_ascii=False)
-    return shell(g["title"],g["appeal"],body,"games/"+g["game_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
+    seo_title = g["title"] + "｜遊び方・人数・時間を1分で確認"
+    seo_desc = g["title"] + "の遊び方を1分で確認。プレイ人数・時間・対象年齢、どんな日に合うか、似ているゲームまで分かります。" 
+    return shell(seo_title,seo_desc,body,"games/"+g["game_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
 
 
 def scenes_index():
