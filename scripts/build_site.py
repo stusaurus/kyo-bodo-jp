@@ -159,7 +159,15 @@ def game_page(g):
     availability='楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'
     scenes=' ／ '.join(e(z) for z in g["recommended_scene"])
     body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p><div class="game-fast-facts"><span><small>人数</small>{g["players_min"]}〜{g["players_max"]}人</span><span><small>時間</small>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar") for x in similar)}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
-    schema=json.dumps({"@context":"https://schema.org","@type":"WebPage","name":g["title"]+"｜きょうボド","description":g["description"],"url":canon("games/"+g["game_id"]+"/")},ensure_ascii=False)
+    game_url=canon("games/"+g["game_id"]+"/")
+    schema=json.dumps({"@context":"https://schema.org","@graph":[
+        {"@type":"WebPage","name":g["title"]+"｜きょうボド","description":g["description"],"url":game_url,"isPartOf":{"@type":"WebSite","name":"きょうボド","url":SITE_URL}},
+        {"@type":"BreadcrumbList","itemListElement":[
+            {"@type":"ListItem","position":1,"name":"きょうボド","item":SITE_URL},
+            {"@type":"ListItem","position":2,"name":"ゲーム一覧","item":canon("games/")},
+            {"@type":"ListItem","position":3,"name":g["title"],"item":game_url}
+        ]}
+    ]},ensure_ascii=False)
     return shell(g["title"],g["appeal"],body,"games/"+g["game_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
 
 
