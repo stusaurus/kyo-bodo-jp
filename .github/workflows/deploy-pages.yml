@@ -59,6 +59,8 @@ jobs:
         env:
           SITE_URL: https://stusaurus.github.io/kyo-bodo-jp/
         run: python scripts/generate_seo_files.py
+      - name: Validate generated site before publishing
+        run: python scripts/validate_site.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

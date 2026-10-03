@@ -16,7 +16,7 @@ AFFILIATE_ID=os.environ.get("RAKUTEN_AFFILIATE_ID","").strip()
 ENDPOINT="https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701"
 
 GENERIC_BLOCK_TERMS=[
-    "中古","used","ユーズド","拡張","拡張版","拡張セット","エキスパンション","expansion",
+    "英語版","英語バージョン","english edition","english version","並行輸入","輸入版","中古","used","ユーズド","拡張","拡張版","拡張セット","エキスパンション","expansion",
     "カードスリーブ","スリーブ","プレイマット","オーガナイザー","収納ケース","収納ボックス",
     "交換用","交換パーツ","スペアパーツ","プロモカード","プロモーションカード","攻略本",
     "ルールブックのみ","説明書のみ","カードケース","専用ケース","アクセサリー","アクセサリ"
@@ -253,7 +253,7 @@ def valid_url(url):
     try:
         p=urllib.parse.urlparse(url or "")
         return p.scheme=="https" and bool(p.netloc) and (
-            p.netloc.endswith("rakuten.co.jp") or "rakuten" in p.netloc
+            p.hostname == "rakuten.co.jp" or (p.hostname or "").endswith(".rakuten.co.jp")
         )
     except Exception:
         return False

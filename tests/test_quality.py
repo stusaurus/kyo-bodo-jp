@@ -1,0 +1,28 @@
+import json
+from pathlib import Path
+from scripts import build_site as b
+from scripts.fetch_rakuten import valid_url, match_item
+
+def test_scene_hard_constraints():
+    for scene in b.SCENES:
+        for g in b.GAMES:
+            if b.scene_score(g,scene)<50: continue
+            sid=scene['scene_id']
+            if sid=='couple': assert g['players_min']<=2<=g['players_max']
+            if sid=='large-group': assert g['players_max']>=5
+            if sid=='short': assert g['play_time_max']<=20
+            if sid=='cooperative': assert g['cooperation']>=4
+            if sid=='children': assert g['age']<=12
+
+def test_rakuten_host_boundary():
+    for url in ('https://evilrakuten.co.jp/x','https://rakuten.co.jp.evil.com/x','https://rakuten.evil.com/x'):
+        assert not valid_url(url)
+
+def test_every_retained_product_is_revalidated():
+    for gid,hit in b.RAKUTEN.items():
+        assert valid_url(hit['url']) and valid_url(hit['item_url'])
+        assert match_item(b.BY_ID[gid],{'itemName':hit['item_name']})[0]
+
+def test_404_is_noindex():
+    b.main()
+    assert '<meta name="robots" content="noindex">' in (b.SITE/'404.html').read_text()

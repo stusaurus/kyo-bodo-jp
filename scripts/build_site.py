@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from data.catalog import GAMES
+from scripts.fetch_rakuten import match_item, valid_url
 SITE=ROOT/"site"
 BASE=os.environ.get("SITE_BASE_PATH","/kyo-bodo-jp/")
 if not BASE.startswith("/"): BASE="/"+BASE
@@ -16,6 +17,8 @@ SITE_URL=ORIGIN+BASE
 SCENES=json.loads((ROOT/"data/scenes.json").read_text(encoding="utf-8"))
 CACHE_PATH=ROOT/"data/rakuten_cache.json"
 RAKUTEN=json.loads(CACHE_PATH.read_text(encoding="utf-8")) if CACHE_PATH.exists() else {}
+# Revalidate fetched data at the publishing boundary as well as at acquisition.
+RAKUTEN={gid:x for gid,x in RAKUTEN.items() if gid in {g["game_id"] for g in GAMES} and valid_url(x.get("url")) and valid_url(x.get("item_url")) and match_item(next(g for g in GAMES if g["game_id"]==gid),{"itemName":x.get("item_name","")})[0]}
 HERO_ASSET=ROOT/"assets"/"hero-kyo-bodo.webp"
 SCENE_ASSET=ROOT/"assets"/"scene-sprite.webp"
 BY_ID={g["game_id"]:g for g in GAMES}
@@ -47,7 +50,8 @@ try{op=localStorage.getItem("kyo_bodo_operator_test")==="1"}catch(_){}
 if(p.get("test")==="1"||p.get("test")==="0"){op=p.get("test")==="1";try{if(op)localStorage.setItem("kyo_bodo_operator_test","1");else localStorage.removeItem("kyo_bodo_operator_test")}catch(_){}}
 window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){dataLayer.push(arguments)};
 if(id){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);document.head.appendChild(s);gtag("js",new Date());gtag("config",id)}
-window.kyoTrack=function(name,data){data=data||{};if(op)data.operator_test="1";gtag("event",name,data)};
+window.kyoTrack=function(name,data){data=data||{};data.page_path=location.pathname;data.operator_test=op?"1":"0";
+try{var ctx=JSON.parse(sessionStorage.getItem("kyo_bodo_journey")||"{}");if(data.conversion_source)ctx.conversion_source=data.conversion_source;if(name==="diagnosis_complete"){ctx.journey="diagnosis";ctx.players=data.players;ctx.mood=data.mood;ctx.desired_time=data.desired_time;}if(name==="scene_view"){ctx.journey="scene";ctx.scene_id=data.scene_id;}if(data.game_id)ctx.game_id=data.game_id;sessionStorage.setItem("kyo_bodo_journey",JSON.stringify(ctx));Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})}catch(_){}gtag("event",name,data)};
 document.addEventListener("click",function(ev){var a=ev.target.closest&&ev.target.closest("a");if(!a)return;
 if(a.dataset.track)kyoTrack(a.dataset.track,{game_id:a.dataset.gameId||"",conversion_source:a.dataset.source||"",rank:a.dataset.rank||""});
 if(a.dataset.affiliate)kyoTrack("affiliate_click",{affiliate:a.dataset.affiliate,game_id:a.dataset.gameId||"",conversion_source:a.dataset.source||"",rank:a.dataset.rank||"",link_url:a.href,page_path:location.pathname});
@@ -112,11 +116,17 @@ def shell(title,desc,body,path="",extra=""):
 def card(g,source="list",rank=""):
     r,img,label=load_rakuten(g)
     art=f'<img class="game-thumb" src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
-    return f'''<article class="game-card"><div class="game-media">{art}</div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p><div class="card-meta"><span>{g["players_min"]}〜{g["players_max"]}人</span><span>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span>{g["age"]}歳〜</span></div><div class="card-actions"><a class="text-link" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？ <span class="arrow" aria-hidden="true">→</span></a><a class="btn secondary" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
+    return f'''<article class="game-card"><div class="game-media">{art}</div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p><div class="card-meta"><span>{g["players_min"]}〜{g["players_max"]}人</span><span>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span>{g["age"]}歳〜</span></div><div class="card-actions"><a class="text-link" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？ <span class="arrow" aria-hidden="true">→</span></a><a class="btn secondary" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
 
 
 def scene_score(g,s):
     r=s["rule"];t=r["type"]
+    sid=s["scene_id"]
+    if sid=="cooperative" and g["cooperation"]<4: return 0
+    if sid=="large-group" and g["players_max"]<5: return 0
+    if sid=="couple" and not g["players_min"]<=2<=g["players_max"]: return 0
+    if sid=="children" and g["age"]>12: return 0
+    if sid=="short" and g["play_time_max"]>20: return 0
     if t=="players": return 100 if g["players_min"]<=r["value"]<=g["players_max"] else 0
     if t=="field": return g.get(r["field"],0)*20
     if t=="tag": return 100 if r["tag"] in g.get("tags",[]) else 0
@@ -157,8 +167,8 @@ def game_page(g):
     axis="".join(f'<div class="axis"><span>{n}</span><span class="dots" aria-label="5段階中{g[k]}">{"●"*g[k]}{"○"*(5-g[k])}</span></div>' for n,k in axes)
     hero_art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" decoding="async">' if img else PLACEHOLDER
     availability='楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'
-    scenes=' ／ '.join(e(z) for z in g["recommended_scene"])
-    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p><div class="game-fast-facts"><span><small>人数</small>{g["players_min"]}〜{g["players_max"]}人</span><span><small>時間</small>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar") for x in similar)}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
+    scenes=' ／ '.join(f'<a href="{u("scenes/"+z["scene_id"]+"/")}">{e(z["title"])}</a>' for z in SCENES if scene_score(g,z)>=80)
+    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p><div class="game-fast-facts"><span><small>人数</small>{g["players_min"]}〜{g["players_max"]}人</span><span><small>時間</small>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar",i+1) for i,x in enumerate(similar))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
     game_url=canon("games/"+g["game_id"]+"/")
     schema=json.dumps({"@context":"https://schema.org","@graph":[
         {"@type":"WebPage","name":g["title"]+"｜きょうボド","description":g["description"],"url":game_url,"isPartOf":{"@type":"WebSite","name":"きょうボド","url":SITE_URL}},
@@ -208,7 +218,7 @@ def main():
     paths=["", "diagnosis/","games/","scenes/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
     xml='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join("<url><loc>"+e(canon(p))+"</loc></url>" for p in paths)+"</urlset>"
     write("sitemap.xml",xml);write("robots.txt","User-agent: *\nAllow: /\nSitemap: "+canon("sitemap.xml")+"\n")
-    write("404.html",shell("ページが見つかりません","ページが見つかりません。",'<section class="page-hero"><h1>ページが見つかりません</h1><a class="btn primary" href="'+u()+'">トップへ</a></section>'))
+    write("404.html",shell("ページが見つかりません","ページが見つかりません。",'<section class="page-hero"><h1>ページが見つかりません</h1><a class="btn primary" href="'+u()+'">トップへ</a></section>',extra='<meta name="robots" content="noindex">'))
     print("built",len(paths),"indexable URLs in",SITE)
 
 if __name__=="__main__": main()
