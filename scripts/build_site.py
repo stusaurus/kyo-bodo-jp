@@ -196,7 +196,14 @@ def scene_page(s):
     scene_i=SCENE_ART[s["scene_id"]]
     body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(s["title"])}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a></div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section><section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>おすすめ度の高い順に掲載</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
-    return shell(s["title"]+"ボードゲーム",s["intro"],body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
+    seo={
+        "two-player":("2人で遊べるボードゲームおすすめ", "2人で遊べるボードゲームを、プレイ時間・遊び方とともに紹介。夫婦・カップル・友達同士で今日遊ぶ1本を探せます。"),
+        "family":("家族で遊べるボードゲームおすすめ", "家族で遊べるボードゲームを紹介。小学生を含む家族でも選びやすいよう、人数・対象年齢・プレイ時間を確認できます。"),
+        "children":("小学生と遊べるボードゲームおすすめ", "小学生と大人が一緒に遊びやすいボードゲームを紹介。対象年齢・人数・プレイ時間を見ながら今日の1本を探せます。"),
+        "short":("30分以内・短時間で遊べるボードゲームおすすめ", "30分以内を目安に短時間で遊びやすいボードゲームを紹介。平日夜やすきま時間に遊ぶ1本を、人数・対象年齢と一緒に選べます。"),
+    }
+    title,desc=seo.get(s["scene_id"],(s["title"]+"ボードゲーム",s["intro"]))
+    return shell(title,desc,body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
 
 
 def write(rel,text):
