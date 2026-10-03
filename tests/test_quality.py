@@ -36,3 +36,9 @@ def test_cooperation_is_a_shared_goal_mode_not_a_conversation_rating():
 
 def test_current_dixit_edition_supports_eight_players():
     assert b.BY_ID["dixit"]["players_max"]==8
+
+
+def test_silent_cooperative_game_does_not_claim_discussion():
+    game=b.BY_ID["the-mind"]
+    assert "相談" not in b.fit_copy(game)
+    assert "同じ目標" in b.fit_copy(game)

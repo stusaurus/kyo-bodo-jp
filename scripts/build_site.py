@@ -90,7 +90,7 @@ def fit_tags(g):
     return out or ["遊びやすい"]
 
 def fit_copy(g):
-    if g.get("cooperation",0)>=4: return "勝ち負けより、相談しながら一緒に達成したい日に。"
+    if g.get("cooperation",0)>=4: return "みんなで同じ目標に挑み、一緒に達成したい日に。"
     if g.get("excitement",0)>=4 and g.get("conversation",0)>=4: return "みんなで声を出して笑いたい日や、場を温めたい時に。"
     if g.get("strategy",0)>=4: return "運だけでなく、自分の選択でしっかり勝負したい日に。"
     if g.get("couple",0)>=4: return "2人で落ち着いて遊びたい夜や、夫婦・カップル時間に。"
@@ -162,7 +162,7 @@ def games_index():
 
 def game_page(g):
     r,img,label=load_rakuten(g)
-    similar=sorted([x for x in GAMES if x["game_id"]!=g["game_id"]],key=lambda x:abs(x["strategy"]-g["strategy"])+abs(x["excitement"]-g["excitement"])+abs(x["players_min"]-g["players_min"]))[:3]
+    similar=sorted([x for x in GAMES if x["game_id"]!=g["game_id"]],key=lambda x:(0 if x["cooperative"]==g["cooperative"] else 10)+abs(x["strategy"]-g["strategy"])+abs(x["excitement"]-g["excitement"])+abs(x["players_min"]-g["players_min"]))[:3]
     axes=[("難しさ","difficulty"),("戦略性","strategy"),("運要素","luck"),("会話量","conversation"),("盛り上がり","excitement"),("協力度","cooperation"),("初心者向け","beginner")]
     axis="".join(f'<div class="axis"><span>{n}</span><span class="dots" aria-label="5段階中{g[k]}">{"●"*g[k]}{"○"*(5-g[k])}</span></div>' for n,k in axes)
     hero_art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" decoding="async">' if img else PLACEHOLDER
