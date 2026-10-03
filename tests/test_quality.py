@@ -26,3 +26,9 @@ def test_every_retained_product_is_revalidated():
 def test_404_is_noindex():
     b.main()
     assert '<meta name="robots" content="noindex">' in (b.SITE/'404.html').read_text()
+
+
+def test_cooperation_is_a_shared_goal_mode_not_a_conversation_rating():
+    expected={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik"}
+    assert {g["game_id"] for g in b.GAMES if g["cooperation"]>=4}==expected
+    assert {g["game_id"] for g in b.GAMES if g["cooperative"]}==expected

@@ -46,7 +46,11 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
-    "ito":["レインボー"],
+    "ito":["レインボー","クラシック"],
+    "the-mind":["エクストリーム","extreme"],
+    "splendor":["デュエル","duel"],
+    "pandemic":["レガシー","legacy","迅速対応","ライジングタイド"],
+    "azul":["サマーパビリオン","シントラ","ミニ","mini","summer"],
     "codenames":["デュエット","duet","xxl"],
     "quarto":["ミニ","mini"],
     "patchwork":["ドゥードゥル","doodle"],

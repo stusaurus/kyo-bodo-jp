@@ -65,3 +65,14 @@ g("cat-in-the-box","キャット・イン・ザ・ボックス",2,5,30,45,13,"35
 g("sea-salt-paper","シーソルト＆ペーパー",2,4,20,30,8,"2331424542123","美しい折り紙カードを組み合わせる軽量カードゲーム。","山札か捨て札からカードを取る|ペアを作って特殊効果を使う|得点条件を満たしたらラウンド終了を宣言する","夫婦|旅行|軽い戦略","シーソルト ペーパー 日本語版","couple|friends|short"),
 g("harmonies","ハーモニーズ",1,4,30,45,10,"2421214543122","色とりどりのトークンで景色を作る配置ゲーム。","場から地形トークンのセットを取る|自分の盤面へ配置する|動物条件を満たして得点する","夫婦|家族|見た目重視","ハーモニーズ ボードゲーム 日本語版","couple|family|strategy"),
 ]
+
+# Shared-goal cooperation is a game mode, not a synonym for conversation.
+# Keep this explicit so subjective editorial ratings cannot turn a competitive
+# game into a cooperative recommendation.
+COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik"}
+for game in GAMES:
+    game["cooperative"]=game["game_id"] in COOPERATIVE_IDS
+    if game["cooperative"]:
+        game["cooperation"]=5
+    elif game["cooperation"]>=4:
+        game["cooperation"]=2

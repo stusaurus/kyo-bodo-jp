@@ -138,3 +138,8 @@ def test_patchwork_2025_exact_japanese_title_without_publisher_is_allowed():
 def test_exact_jan_queries_are_present_for_hard_to_find_games():
     assert "4573591300034" in m.query_variants(game("take-it-easy"))
     assert "3558380134831" in m.query_variants(game("patchwork"))
+
+
+def test_more_standalone_sibling_games_are_rejected():
+    for gid,name in [("the-mind","ザ・マインド エクストリーム 日本語版"),("splendor","宝石の煌き デュエル 日本語版"),("pandemic","パンデミック レガシー 日本語版 ホビージャパン"),("azul","アズール ミニ 日本語版 ボードゲーム")]:
+        assert not m.match_item(game(gid),item(name))[0]

@@ -122,7 +122,7 @@ def card(g,source="list",rank=""):
 def scene_score(g,s):
     r=s["rule"];t=r["type"]
     sid=s["scene_id"]
-    if sid=="cooperative" and g["cooperation"]<4: return 0
+    if sid=="cooperative" and not g["cooperative"]: return 0
     if sid=="large-group" and g["players_max"]<5: return 0
     if sid=="couple" and not g["players_min"]<=2<=g["players_max"]: return 0
     if sid=="children" and g["age"]>12: return 0

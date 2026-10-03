@@ -12,7 +12,7 @@ var placeholder="<div class=\"game-placeholder\" aria-label=\"\u5546\u54c1\u753b
 var questionSub=["遊ぶ人の顔を思い浮かべて。","みんなで一緒に遊べる1本を。","今日ほしいのはどんな時間？","今ある時間に無理なく収まるものを。","ルール説明も、気軽に？じっくり？","最後は、好きな遊び方を。"];
 function label(key,val){var q=qs.filter(function(x){return x[0]===key})[0],z=q&&q[2].filter(function(x){return x[0]===val})[0];return z?z[1]:val}
 function score(g){
-var n=Number(a.players||4);if(!(g.players_min<=n&&g.players_max>=n))return -9999;if(g.play_time_max>Number(a.time||30))return -9999;if(a.mood==="coop"&&g.cooperation<4)return -9999;var s=60,w=a.who;
+var n=Number(a.players||4);if(!(g.players_min<=n&&g.players_max>=n))return -9999;if(g.play_time_max>Number(a.time||30))return -9999;if(a.mood==="coop"&&!g.cooperative)return -9999;var s=60,w=a.who;
 if(w==="couple")s+=g.couple*7;else if(w==="family")s+=g.family*7;else if(w==="friends")s+=(g.conversation+g.party+g.excitement)*3;else if(w==="children")s+=g.children*7;else if(w==="large")s+=(g.large_group+g.party)*5;else if(w==="first")s+=(g.beginner+g.conversation+g.party)*4;
 var m=a.mood;if(m==="laugh")s+=(g.excitement+g.party+g.conversation)*4;else if(m==="compete")s+=(g.strategy+g.excitement)*5;else if(m==="think")s+=g.strategy*8;else if(m==="coop")s+=g.cooperation*9;else if(m==="relax")s+=g.beginner*5+(6-g.difficulty)*4;else if(m==="chat")s+=g.conversation*8;
 var t=Number(a.time||30);if(t<=15)s+=Math.max(0,20-Math.max(0,g.play_time_min-15)*2);else if(t<=30)s+=Math.max(0,18-Math.abs(g.play_time_max-30)/3);else if(t<=60)s+=Math.max(0,16-Math.abs(g.play_time_max-60)/5);else s+=g.play_time_max>=45?18:5;
