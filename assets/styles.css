@@ -298,3 +298,6 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 @media(prefers-reduced-motion:reduce) {
   html { scroll-behavior: auto; }*, *:before, *:after { animation: none !important; transition: none !important; }.btn:hover { transform: none; }
 }
+
+.player-answers{grid-template-columns:repeat(4,minmax(0,1fr))}.player-answers .answer{padding:14px 10px;min-height:52px}.player-answers .answer-arrow{display:none}
+@media(max-width:600px){.player-answers{grid-template-columns:repeat(3,minmax(0,1fr))}}

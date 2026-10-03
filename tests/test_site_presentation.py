@@ -16,7 +16,7 @@ def test_home_has_clear_primary_flow():
     assert "今日のおすすめ3本" in page
 
 def test_diagnosis_result_presentation_is_decision_focused():
-    assert "今日なら、この5本。" in m.DIAGNOSIS
+    assert "今日の条件に合う候補から選ぼう。" in m.DIAGNOSIS
     assert "今日の第一候補" in m.DIAGNOSIS
     assert "1分ルールを見る" in m.DIAGNOSIS
     assert "image_url" in m.DIAGNOSIS

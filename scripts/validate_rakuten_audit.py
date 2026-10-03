@@ -3,6 +3,9 @@ import json, sys
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from scripts.fetch_rakuten import GAMES, match_item, valid_url
+cache=json.loads((ROOT/"data"/"rakuten_cache.json").read_text(encoding="utf-8"))
 report=json.loads((ROOT/"data"/"rakuten_audit.json").read_text(encoding="utf-8"))
 games=report.get("games",{})
 normal=report.get("normal_count",0)
@@ -11,6 +14,15 @@ dups=report.get("duplicate_groups") or {}
 
 assert total==50, f"expected 50 games, got {total}"
 assert len(games)==50, f"audit rows missing: {len(games)}/50"
+assert normal==len(cache), "audit/cache count mismatch"
+errors=[gid for gid,row in games.items() if row.get("reason","").startswith("error:")]
+assert len(errors)<10, f"systemic Rakuten API failure: {len(errors)}/50; keep previous deployment"
+for game in GAMES:
+    hit=cache.get(game["game_id"])
+    if not hit: continue
+    assert match_item(game,{"itemName":hit.get("item_name","")})[0], game["game_id"]
+    assert valid_url(hit.get("url")) and valid_url(hit.get("item_url")), game["game_id"]
+    assert hit.get("image_url","").startswith("https://"), f"{game["game_id"]}: missing image"
 assert not dups, f"duplicate item codes found: {dups}"
 for gid,row in games.items():
     if row.get("status")=="ok":
