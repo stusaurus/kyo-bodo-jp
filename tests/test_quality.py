@@ -32,3 +32,7 @@ def test_cooperation_is_a_shared_goal_mode_not_a_conversation_rating():
     expected={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik"}
     assert {g["game_id"] for g in b.GAMES if g["cooperation"]>=4}==expected
     assert {g["game_id"] for g in b.GAMES if g["cooperative"]}==expected
+
+
+def test_current_dixit_edition_supports_eight_players():
+    assert b.BY_ID["dixit"]["players_max"]==8
