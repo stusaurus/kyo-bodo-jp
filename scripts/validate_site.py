@@ -3,8 +3,10 @@
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlparse, unquote
-import json, xml.etree.ElementTree as ET
+import json, xml.etree.ElementTree as ET, sys
 ROOT=Path(__file__).resolve().parents[1];SITE=ROOT/'site';BASE='/kyo-bodo-jp/';ORIGIN='https://stusaurus.github.io'
+sys.path.insert(0,str(ROOT))
+from data.catalog import GAMES
 class Page(HTMLParser):
     def __init__(self): super().__init__();self.links=[];self.canonical=[];self.h1=0;self.schemas=[];self.schema=False
     def handle_starttag(self,tag,attrs):
@@ -35,5 +37,6 @@ ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
 listed={x.text for x in ET.parse(SITE/'sitemap.xml').findall('s:url/s:loc',ns)}
 assert urls==listed,(urls-listed,listed-urls)
 assert 'Sitemap: '+ORIGIN+BASE+'sitemap.xml' in (SITE/'robots.txt').read_text()
-assert len(json.loads((SITE/'data/games.json').read_text()))==50
-print(f'Validated {len(urls)} pages: internal links, H1, canonical, JSON-LD, sitemap, robots and 50 games')
+games_data=json.loads((SITE/'data/games.json').read_text())
+assert len(games_data)==len(GAMES),(len(games_data),len(GAMES))
+print(f'Validated {len(urls)} pages: internal links, H1, canonical, JSON-LD, sitemap, robots and {len(GAMES)} games')
