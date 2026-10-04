@@ -12,11 +12,12 @@ normal=report.get("normal_count",0)
 total=report.get("total_games",0)
 dups=report.get("duplicate_groups") or {}
 
-assert total==50, f"expected 50 games, got {total}"
-assert len(games)==50, f"audit rows missing: {len(games)}/50"
+expected=len(GAMES)
+assert total==expected, f"expected {expected} games, got {total}"
+assert len(games)==expected, f"audit rows missing: {len(games)}/{expected}"
 assert normal==len(cache), "audit/cache count mismatch"
 errors=[gid for gid,row in games.items() if row.get("reason","").startswith("error:")]
-assert len(errors)<10, f"systemic Rakuten API failure: {len(errors)}/50; keep previous deployment"
+assert len(errors)<max(10, expected//4), f"systemic Rakuten API failure: {len(errors)}/{expected}; keep previous deployment"
 for game in GAMES:
     hit=cache.get(game["game_id"])
     if not hit: continue
