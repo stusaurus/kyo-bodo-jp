@@ -183,3 +183,15 @@ def test_new_base_game_examples_are_accepted():
     for game_id,name in cases:
         ok,reason,_=m.match_item(game(game_id),item(name))
         assert ok,(game_id,name,reason)
+
+
+def test_third_audit_variant_false_positives_are_rejected():
+    cases=[
+        ("mandala","タロットクロス カードゲーム ボードゲーム用シート 抽象的なマンダラ"),
+        ("qwirkle","マインドウェア クワークル デラックス版 Qwirkle Deluxe Edition"),
+        ("cascadia","カスカディア・ローリング：波立つ川 日本語版 ボードゲーム"),
+        ("sagrada","Floodgate Games サグラダ ボードゲーム ファミリーゲーム"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert not ok,(game_id,name,reason)
