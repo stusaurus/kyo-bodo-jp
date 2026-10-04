@@ -52,6 +52,13 @@ CONTEXT_RULES={
     "qwirkle":["ボードゲーム","クワークル"],
     "rhino-hero":["ボードゲーム","haba","すごろくや"],
     "animal-upon-animal":["ボードゲーム","haba","ワニに乗る"],
+    "mandala":["ボードゲーム","カードゲーム","lookout","ホビージャパン"],
+    "forbidden-island":["完全日本語版","ボードゲーム","アークライト"],
+    "ice-cool":["ボードゲーム","ホビージャパン","日本語版"],
+    "qwirkle":["ボードゲーム","日本語版","日本版","タイル"],
+    "quiz-iisen":["ボードゲーム","アークライト"],
+    "cascadia":["ボードゲーム","日本語版","ケンビル"],
+    "sagrada":["ボードゲーム","日本語版","engames"],
 }
 
 # Prevent sibling/base variants from being used for another registered game.
@@ -78,6 +85,16 @@ PER_GAME_BLOCK={
     "camel-up":["カードゲーム","オフシーズン"],
     "wingspan":["東洋の翼","欧州の翼","大洋の翼","中南米の翼","asia"],
     "bomb-busters":["プロキット","prokit"],
+    "heat":["ヘヴィレイン","ヘビーレイン","heavy rain","トンネルヴィジョン","tunnel vision"],
+    "the-game":["exit","脱出"],
+    "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala"],
+    "forbidden-island":["パラサイト","小説","電子書籍"],
+    "ice-cool":["リング","ネッククーラー","冷感","クールリング"],
+    "qwirkle":["ラミー","rummy"],
+    "quiz-iisen":["恋愛編"],
+    "cascadia":["ジュニア","junior"],
+    "terraforming-mars":["ダイスゲーム","dice game","カードゲーム","ares","アレス","プレリュード","prelude"],
+    "sagrada":["ライフ","life","パッション","passion","グローリー","glory"],
     "sushi-go-party":["中古","スシゴー！ - ピック","sushigo! - the pick"],
 }
 
@@ -142,6 +159,15 @@ def match_item(g,item):
         has_context=any(has_term(name,t) for t in CONTEXT_RULES["patchwork"])
         if not (exact_jp or has_context):
             return False,"missing_patchwork_identity",-450
+
+    if g["game_id"]=="the-game":
+        exact_second=(has_term(name,"ザゲーム") and (has_term(name,"第2版") or has_term(name,"第二版")) and has_term(name,"日本語"))
+        if not exact_second:
+            return False,"missing_the_game_identity",-450
+    if g["game_id"]=="terraforming-mars":
+        exact_base=has_term(name,"テラフォーミングマーズ") and has_term(name,"完全日本語版")
+        if not exact_base:
+            return False,"missing_terraforming_mars_base_identity",-450
 
     required=CONTEXT_RULES.get(g["game_id"])
     if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork") and not any(has_term(name,t) for t in required):
@@ -225,6 +251,11 @@ def query_variants(g):
         "qwirkle":"4573366172019",
         "resistance-avalon":"4981932021201",
         "sagrada":"4580071970045",
+        "heat":"0824968113011",
+        "the-game":"4542325312223",
+        "forbidden-island":"4542325311141",
+        "mandala":"4981932024578",
+        "quiz-iisen":"4542325120033",
     }
     if g["game_id"] in jan_queries:
         variants=[jan_queries[g["game_id"]]]+variants
