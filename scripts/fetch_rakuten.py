@@ -42,6 +42,16 @@ CONTEXT_RULES={
     "harmonies":["ボードゲーム","ホビージャパン","libellud"],
     "take-it-easy":["ボードゲーム","カードゲーム","テーブルゲーム","ふるりん本舗"],
     "cat-in-the-box":["ボードゲーム","カードゲーム","ホビージャパン"],
+    "the-game":["ボードゲーム","カードゲーム","アークライト","すごろくや"],
+    "bandido":["ボードゲーム","カードゲーム","すごろくや"],
+    "sky-team":["ボードゲーム","すごろくや"],
+    "wavelength":["ボードゲーム","ホビージャパン"],
+    "wingspan":["ボードゲーム","アークライト"],
+    "terraforming-mars":["ボードゲーム","アークライト"],
+    "timebomb-q":["ボードゲーム","アークライト","タイムボムq"],
+    "qwirkle":["ボードゲーム","クワークル"],
+    "rhino-hero":["ボードゲーム","haba","すごろくや"],
+    "animal-upon-animal":["ボードゲーム","haba","ワニに乗る"],
 }
 
 # Prevent sibling/base variants from being used for another registered game.
@@ -58,6 +68,16 @@ PER_GAME_BLOCK={
     "nine-tiles":["ポケモン","pokemon","ムーミン","サンリオ","パニック","ミッキー","mickey"],
     "machi-koro":["街コロ通","街コロ2","街コロツー"],
     "cat-in-the-box":["じゃらし","アドメイト","add.mate"],
+    "catan":["ジュニア","junior"],
+    "splendor-duel":["偽造者","counterfeiters"],
+    "seven-wonders-duel":["パンテオン","pantheon","アゴラ","agora"],
+    "ice-cool":["アイスクール2","icecool2"],
+    "rhino-hero":["巨大版","superbattle","スーパー"],
+    "qwirkle":["トラベル","ミニ","travel","mini"],
+    "testplay-no":["黒","レガシー","legacy"],
+    "camel-up":["カードゲーム","オフシーズン"],
+    "wingspan":["東洋の翼","欧州の翼","大洋の翼","中南米の翼","asia"],
+    "bomb-busters":["プロキット","prokit"],
     "sushi-go-party":["中古","スシゴー！ - ピック","sushigo! - the pick"],
 }
 
@@ -69,6 +89,11 @@ ALIASES={
     "sushi-go-party":["スシゴーパーティ","sushigoparty","寿司パーティー"],
     "cat-in-the-box":["キャットインザボックス","catinthebox"],
     "sea-salt-paper":["シーソルト＆ペーパー","シーソルトアンドペーパー","seasaltpaper"],
+    "splendor-duel":["宝石の煌きデュエル","宝石の煌き：デュエル","splendorduel"],
+    "seven-wonders-duel":["世界の七不思議デュエル","7wondersduel"],
+    "ticket-ride-europe":["チケットトゥライドヨーロッパ","tickettorideeurope"],
+    "timebomb-q":["タイムボムq"],
+    "werewolf-dx":["人狼dx","会話型心理ゲーム人狼dx"],
 }
 
 def norm(s):
@@ -189,6 +214,20 @@ def query_variants(g):
             "3558380134831",
             "パッチワーク 2025年新版 日本語版",
         ]+variants
+    jan_queries={
+        "splendor-duel":"3558380101895",
+        "catan-junior":"4543471004000",
+        "wavelength":"3558380081296",
+        "ice-cool":"4981932023021",
+        "terraforming-mars":"4542325315200",
+        "bomb-busters":"4580071970885",
+        "cascadia":"4573346505370",
+        "qwirkle":"4573366172019",
+        "resistance-avalon":"4981932021201",
+        "sagrada":"4580071970045",
+    }
+    if g["game_id"] in jan_queries:
+        variants=[jan_queries[g["game_id"]]]+variants
     out=[]
     for q in variants:
         q=" ".join(q.split()).strip()
