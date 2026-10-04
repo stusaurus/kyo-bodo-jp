@@ -29,7 +29,7 @@ def test_404_is_noindex():
 
 
 def test_cooperation_is_a_shared_goal_mode_not_a_conversation_rating():
-    expected={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik"}
+    expected={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
     assert {g["game_id"] for g in b.GAMES if g["cooperation"]>=4}==expected
     assert {g["game_id"] for g in b.GAMES if g["cooperative"]}==expected
 
