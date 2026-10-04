@@ -87,12 +87,12 @@ PER_GAME_BLOCK={
     "bomb-busters":["プロキット","prokit"],
     "heat":["ヘヴィレイン","ヘビーレイン","heavy rain","トンネルヴィジョン","tunnel vision"],
     "the-game":["exit","脱出"],
-    "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala"],
+    "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala","タロット","タペストリー","クロス","用シート"],
     "forbidden-island":["パラサイト","小説","電子書籍"],
     "ice-cool":["リング","ネッククーラー","冷感","クールリング"],
-    "qwirkle":["ラミー","rummy"],
+    "qwirkle":["ラミー","rummy","デラックス","deluxe"],
     "quiz-iisen":["恋愛編"],
-    "cascadia":["ジュニア","junior"],
+    "cascadia":["ジュニア","junior","ローリング","rolling","波立つ川","丘の峰"],
     "terraforming-mars":["ダイスゲーム","dice game","カードゲーム","ares","アレス","プレリュード","prelude"],
     "sagrada":["ライフ","life","パッション","passion","グローリー","glory"],
     "sushi-go-party":["中古","スシゴー！ - ピック","sushigo! - the pick"],
@@ -168,6 +168,15 @@ def match_item(g,item):
         exact_base=has_term(name,"テラフォーミングマーズ") and has_term(name,"完全日本語版")
         if not exact_base:
             return False,"missing_terraforming_mars_base_identity",-450
+
+    if g["game_id"]=="mandala":
+        exact_jp=has_term(name,"マンダラ") and has_term(name,"日本語版") and (has_term(name,"ボードゲーム") or has_term(name,"カードゲーム"))
+        if not exact_jp:
+            return False,"missing_mandala_japanese_game_identity",-450
+    if g["game_id"]=="sagrada":
+        exact_jp=has_term(name,"サグラダ") and (has_term(name,"日本語版") or has_term(name,"engames"))
+        if not exact_jp:
+            return False,"missing_sagrada_japanese_identity",-450
 
     required=CONTEXT_RULES.get(g["game_id"])
     if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork") and not any(has_term(name,t) for t in required):
