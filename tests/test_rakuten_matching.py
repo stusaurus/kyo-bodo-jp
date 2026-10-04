@@ -60,6 +60,10 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
             name="ノイ NEU カードゲーム"
         if g["game_id"]=="patchwork":
             name="ホビージャパン パッチワーク 日本語版 ボードゲーム"
+        if g["game_id"]=="the-game":
+            name="ザ・ゲーム 第2版 完全日本語版 アークライト ボードゲーム"
+        if g["game_id"]=="terraforming-mars":
+            name="テラフォーミング・マーズ 完全日本語版 アークライト ボードゲーム"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 
@@ -143,3 +147,39 @@ def test_exact_jan_queries_are_present_for_hard_to_find_games():
 def test_more_standalone_sibling_games_are_rejected():
     for gid,name in [("the-mind","ザ・マインド エクストリーム 日本語版"),("splendor","宝石の煌き デュエル 日本語版"),("pandemic","パンデミック レガシー 日本語版 ホビージャパン"),("azul","アズール ミニ 日本語版 ボードゲーム")]:
         assert not m.match_item(game(gid),item(name))[0]
+
+
+def test_observed_80_game_false_positives_are_rejected():
+    cases=[
+        ("heat","ヒート：ヘヴィレイン 日本語版 ボードゲーム"),
+        ("mandala","ぬりえブック MANDALA1 マンダラお絵かき"),
+        ("the-game","EXIT 脱出：ザ・ゲーム ファラオの玄室 日本語版"),
+        ("forbidden-island","パラサイト 禁断の島 クリスティン・フロセス"),
+        ("ice-cool","アイスクールリング ネッククーラー 冷感グッズ"),
+        ("qwirkle","MindWare クワークル ラミー Qwirkle Rummy 戦略型カードゲーム"),
+        ("quiz-iisen","クイズいいセン行きまSHOW! 恋愛編 アークライト ボードゲーム"),
+        ("cascadia","カスカディア・ジュニア 日本語版 ボードゲーム"),
+        ("terraforming-mars","テラフォーミング・マーズ ダイスゲーム 日本語版 ボードゲーム"),
+        ("sagrada","サグラダ ライフ 日本語版 ボードゲーム"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert not ok,(game_id,name,reason)
+
+
+def test_new_base_game_examples_are_accepted():
+    cases=[
+        ("heat","ヒート 日本語版 ボードゲーム ホビージャパン"),
+        ("mandala","マンダラ MANDALA 日本語版 ボードゲーム"),
+        ("the-game","ザ・ゲーム 第2版 完全日本語版 アークライト ボードゲーム"),
+        ("forbidden-island","禁断の島 完全日本語版 アークライト ボードゲーム"),
+        ("ice-cool","アイスクール 日本語版 ホビージャパン ボードゲーム"),
+        ("qwirkle","クワークル 日本語版 タイル ボードゲーム"),
+        ("quiz-iisen","クイズいいセン行きまSHOW! アークライト ボードゲーム"),
+        ("cascadia","カスカディア 日本語版 ケンビル ボードゲーム"),
+        ("terraforming-mars","テラフォーミング・マーズ 完全日本語版 アークライト ボードゲーム"),
+        ("sagrada","サグラダ 日本語版 Engames ボードゲーム"),
+    ]
+    for game_id,name in cases:
+        ok,reason,_=m.match_item(game(game_id),item(name))
+        assert ok,(game_id,name,reason)
