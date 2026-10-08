@@ -14,6 +14,9 @@ def test_home_has_clear_primary_flow():
     assert "2人で" in page
     assert "小学生と" in page
     assert "今日のおすすめ3本" in page
+    assert f"{len(m.GAMES)}本のゲーム" in page
+    assert "50本のゲーム" not in page
+    assert "ボードゲーム診断とおすすめ" in page
 
 def test_diagnosis_result_presentation_is_decision_focused():
     assert "今日の条件に合う候補から選ぼう。" in m.DIAGNOSIS
