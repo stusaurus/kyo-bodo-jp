@@ -1,0 +1,26 @@
+name: SEO phase one preflight
+on:
+  pull_request:
+    branches: [main]
+    paths: ['scripts/**', 'src/**', 'tests/**', '.github/workflows/seo-phase1-preflight.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Validate diagnosis, game pages and SEO files
+        env:
+          SITE_URL: https://stusaurus.github.io/kyo-bodo-jp/
+        run: |
+          python -m pip install --quiet pytest
+          pytest -q
+          python scripts/build_site.py
+          python scripts/generate_seo_files.py
+          python scripts/validate_site.py
+          if grep -q '<lastmod>' site/sitemap.xml; then echo "Unverified lastmod found"; exit 1; fi
