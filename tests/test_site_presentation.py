@@ -108,6 +108,19 @@ def test_scene_pages_use_visual_hero():
     assert "このシーンに合う" in page
 
 
+def test_scene_selection_guide_uses_actual_catalog_and_related_existing_scenes():
+    scene = next(x for x in m.SCENES if x["scene_id"] == "two-player")
+    page = m.scene_page(scene)
+    assert "掲載データから見比べる3本" in page
+    assert "2人対応のゲームでも所要時間や会話量は異なります" in page
+    assert m.u("scenes/couple/") in page
+    assert m.u("scenes/short/") in page
+    top = sorted(m.GAMES, key=lambda g: m.scene_score(g, scene), reverse=True)
+    top = [g for g in top if m.scene_score(g, scene) >= 50][:3]
+    for game in top:
+        assert m.u("games/" + game["game_id"] + "/") in page
+
+
 def test_scene_directory_uses_visual_tiles():
     page=m.scenes_index()
     for scene in m.SCENES:

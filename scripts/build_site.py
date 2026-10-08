@@ -190,11 +190,51 @@ def scenes_index():
     return shell("シーンから探す","2人、夫婦、家族、小学生、大人数、初心者、短時間、盛り上がる、協力などシーン別に探せます。",body,"scenes/")
 
 
+def scene_selection_guide(s, ranked):
+    """Explain why real catalog titles were shortlisted, linking only existing pages."""
+    tips = {
+        'two-player': '2人対応のゲームでも所要時間や会話量は異なります。短時間で遊ぶか、じっくり考えるかを先に決めると選びやすくなります。',
+        'family': '一番小さい参加者の対象年齢と、実際の参加人数を先に確認しましょう。慣れていない人がいる日は遊び方の説明も比較してください。',
+        'children': '対象年齢の表記は商品版の目安です。読み書きの量や待ち時間なども確認し、大人と子どもが一緒に参加しやすい1本を探しましょう。',
+        'short': 'プレイ時間には説明や準備の時間が含まれないことがあります。予定の時間に余裕を持たせて選びましょう。',
+        'large-group': '最大人数に入るだけでなく、全員が同時に参加しやすいか、順番待ちが長くならないかを確認しましょう。',
+        'cooperative': '協力ゲームでも相談の多さや難しさは違います。全員が意思決定に参加できる内容かを確認しましょう。',
+    }
+    tip = tips.get(s['scene_id'], '参加する人数、対象年齢、所要時間と遊び方を先に比較してください。好みが分かれる場合は診断でも候補を見直せます。')
+    picks = ''.join(
+        f'<li><a href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
+        f' — {g["players_min"]}〜{g["players_max"]}人／{g["play_time_min"]}〜{g["play_time_max"]}分／対象{g["age"]}歳〜。'
+        f' {e(g["appeal"])}</li>'
+        for g in ranked[:3]
+    )
+    related = {
+        'two-player': ('couple', 'short'),
+        'family': ('children', 'cooperative'),
+        'children': ('family', 'beginner'),
+        'short': ('two-player', 'beginner'),
+        'large-group': ('friends', 'first-meeting'),
+        'cooperative': ('family', 'children'),
+    }.get(s['scene_id'], ('two-player', 'family'))
+    related_links = ''.join(
+        f'<a class="text-link" href="{u("scenes/" + x["scene_id"] + "/")}">{e(x["title"])}から探す →</a> '
+        for x in SCENES if x['scene_id'] in related and x['scene_id'] != s['scene_id']
+    )
+    return f'''<section class="section scene-selection-guide">
+<div class="eyebrow">HOW TO CHOOSE</div>
+<h2>{e(s['title'])}ときの選び方</h2>
+<p>{e(tip)}</p>
+<h3>掲載データから見比べる3本</h3>
+<ol>{picks}</ol>
+<p class="small">人数・時間・対象年齢は掲載ゲームデータの参考値です。実際の版・ルールは販売店やメーカーで確認してください。</p>
+<nav aria-label="別の遊び方から探す">{related_links}</nav>
+</section>'''
+
+
 def scene_page(s):
     ranked=sorted(GAMES,key=lambda g:scene_score(g,s),reverse=True)
     ranked=[g for g in ranked if scene_score(g,s)>=50][:12]
     scene_i=SCENE_ART[s["scene_id"]]
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(s["title"])}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a></div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section><section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>おすすめ度の高い順に掲載</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(s["title"])}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a></div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>おすすめ度の高い順に掲載</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     seo={
         "two-player":("2人で遊べるボードゲームおすすめ", "2人で遊べるボードゲームを、プレイ時間・遊び方とともに紹介。夫婦・カップル・友達同士で今日遊ぶ1本を探せます。"),
