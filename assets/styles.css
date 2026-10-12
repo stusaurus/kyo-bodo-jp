@@ -301,3 +301,13 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 
 .player-answers{grid-template-columns:repeat(4,minmax(0,1fr))}.player-answers .answer{padding:14px 10px;min-height:52px}.player-answers .answer-arrow{display:none}
 @media(max-width:600px){.player-answers{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Existing scene pages: keep wide data inside a keyboard-accessible scroller. */
+.scene-table-scroll{max-width:100%;overflow-x:auto;margin:24px 0;overscroll-behavior-inline:contain}
+.scene-data-table{width:100%;min-width:620px;border-collapse:collapse;text-align:left;font-size:14px}
+.scene-data-table caption{text-align:left;padding:0 0 12px;line-height:1.7}
+.scene-data-table th,.scene-data-table td{padding:14px 12px;border-bottom:1px solid #deddd5;vertical-align:top}
+.scene-data-table thead{background:#f3f0e8}.scene-data-table a{display:inline-block;padding:8px 0}
+.scene-table-scroll:focus-visible{outline:2px solid #386fc1;outline-offset:4px}
+
+.scene-data-table tbody th{position:sticky;left:0;background:#faf8f2;z-index:1}

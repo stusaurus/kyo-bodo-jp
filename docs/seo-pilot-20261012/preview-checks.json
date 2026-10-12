@@ -1,0 +1,191 @@
+[
+  {
+    "path": "kyo-bodo-jp/scenes/two-player/",
+    "mode": "preview",
+    "width": 320,
+    "status": 200,
+    "title": "2人で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/two-player/",
+    "scroll": 320,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 215,
+        "transferSize": 25367
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": true,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/scenes/short/",
+    "mode": "preview",
+    "width": 320,
+    "status": 200,
+    "title": "20分以内・短時間で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/short/",
+    "scroll": 320,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 144,
+        "transferSize": 25546
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": true,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/diagnosis/",
+    "mode": "preview",
+    "width": 320,
+    "status": 200,
+    "title": "ボードゲーム診断｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/diagnosis/",
+    "scroll": 320,
+    "tableRows": 0,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 63,
+        "transferSize": 4192
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": null,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/scenes/two-player/",
+    "mode": "preview",
+    "width": 390,
+    "status": 200,
+    "title": "2人で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/two-player/",
+    "scroll": 390,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 173,
+        "transferSize": 25367
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": true,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/scenes/short/",
+    "mode": "preview",
+    "width": 390,
+    "status": 200,
+    "title": "20分以内・短時間で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/short/",
+    "scroll": 390,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 29,
+        "transferSize": 25546
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": true,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/diagnosis/",
+    "mode": "preview",
+    "width": 390,
+    "status": 200,
+    "title": "ボードゲーム診断｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/diagnosis/",
+    "scroll": 390,
+    "tableRows": 0,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 51,
+        "transferSize": 4192
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": null,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/scenes/two-player/",
+    "mode": "preview",
+    "width": 1440,
+    "status": 200,
+    "title": "2人で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/two-player/",
+    "scroll": 1440,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 134,
+        "transferSize": 25367
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": null,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/scenes/short/",
+    "mode": "preview",
+    "width": 1440,
+    "status": 200,
+    "title": "20分以内・短時間で遊べるボードゲームおすすめ｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/scenes/short/",
+    "scroll": 1440,
+    "tableRows": 12,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 21,
+        "transferSize": 25546
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": null,
+    "errors": []
+  },
+  {
+    "path": "kyo-bodo-jp/diagnosis/",
+    "mode": "preview",
+    "width": 1440,
+    "status": 200,
+    "title": "ボードゲーム診断｜きょうボド",
+    "h1": 1,
+    "canonical": "https://stusaurus.github.io/kyo-bodo-jp/diagnosis/",
+    "scroll": 1440,
+    "tableRows": 0,
+    "brokenImages": 0,
+    "navigation": [
+      {
+        "domContentLoadedMs": 78,
+        "transferSize": 4192
+      }
+    ],
+    "overflowElements": [],
+    "tableScrollWorks": null,
+    "errors": []
+  }
+]
