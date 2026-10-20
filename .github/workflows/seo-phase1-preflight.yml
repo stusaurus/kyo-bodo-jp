@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - uses: actions/setup-node@v4
@@ -31,3 +33,19 @@ jobs:
           python scripts/generate_seo_files.py
           python scripts/validate_site.py
           if grep -q '<lastmod>' site/sitemap.xml; then echo "Unverified lastmod found"; exit 1; fi
+      - name: Prepare unchanged-offer before and after previews
+        env:
+          SCENE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: python scripts/prepare_scene_comparison.py
+      - name: Verify scene comparison at 320, 390 and 1440 pixels
+        run: |
+          npm install --prefix /tmp/scene-qa --no-audit --no-fund playwright@1.56.1
+          /tmp/scene-qa/node_modules/.bin/playwright install --with-deps chromium
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_scene_presentation.cjs
+      - name: Save unpublished scene evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scene-presentation-evidence
+          path: audit-results/scene-presentation/
+          retention-days: 14

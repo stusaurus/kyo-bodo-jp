@@ -11,7 +11,7 @@ def test_all_diagnosis_conditions_respect_members_time_and_cooperation():
     for(let n=2;n<=14;n++)for(let t of [15,30,60,120])for(let mood of ['laugh','compete','think','coop','relax','chat']){
       a={players:String(n),time:String(t),mood,who:'family',difficulty:'1',balance:'half'};
       for(let g of games)if(score(g)>-100){
-        if(g.players_min>n||g.players_max<n||g.play_time_max>t||(mood==='coop'&&g.cooperation<4))throw Error(g.game_id);
+        if(!supportsPlayers(g,n)||g.play_time_max>t||(mood==='coop'&&g.cooperation<4))throw Error(g.game_id);
         let reasons=reasonParts(g);
         if(reasons.includes('coop')||reasons.includes('family向き')&&g.family<4)throw Error('unsupported reason');count++;
       }
@@ -33,7 +33,7 @@ def test_relaxed_results_keep_players_and_cooperation_hard_and_fill_common_short
     let result=exact.slice(0,5).concat(relaxed);
     if(result.length!==5)throw Error('expected five results');
     for(let [g] of result){
-      if(!(g.players_min<=2&&g.players_max>=2))throw Error('player constraint relaxed');
+      if(!(supportsPlayers(g,2)))throw Error('player constraint relaxed');
       if(!g.cooperative)throw Error('cooperation constraint relaxed');
     }
     console.log(result.map(x=>x[0].game_id).join(','));

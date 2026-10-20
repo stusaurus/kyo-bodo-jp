@@ -1,0 +1,54 @@
+const {chromium}=require('playwright');
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
+const assert=require('node:assert/strict');
+const out=path.resolve('audit-results/scene-presentation');fs.mkdirSync(out,{recursive:true});
+function serve(root,port){return new Promise(resolve=>{
+ const server=http.createServer((req,res)=>{
+  const rel=decodeURIComponent(new URL(req.url,'http://localhost').pathname).replace(/^\/kyo-bodo-jp\//,'');
+  let file=path.resolve(root,rel);if(!file.startsWith(path.resolve(root)+path.sep)&&file!==path.resolve(root)){res.writeHead(403).end();return;}
+  if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
+  if(!fs.existsSync(file)){res.writeHead(404).end();return;}
+  const types={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp'};
+  res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
+ });server.listen(port,'127.0.0.1',()=>resolve(server));
+});}
+(async()=>{
+ const servers=[await serve('audit-results/baseline/site',8765),await serve('site',8766)];
+ const browser=await chromium.launch();const records=[];
+ try{
+  for(const width of [320,390,1440]){
+   const context=await browser.newContext({viewport:{width,height:900},isMobile:width<500,hasTouch:width<500});
+   await context.route(/google-analytics\.com|googletagmanager\.com|analytics\.google\.com/,r=>r.abort());
+   const snapshots=[];
+   for(const [index,label] of ['before','after'].entries()){
+    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const response=await page.goto(`http://127.0.0.1:${8765+index}/kyo-bodo-jp/scenes/two-player/?test=1`,{waitUntil:'networkidle'});
+    assert.equal(response.status(),200);
+    const images=page.locator('.game-card img');
+    for(let i=0;i<await images.count();i++){await images.nth(i).scrollIntoViewIfNeeded();await images.nth(i).evaluate(img=>img.decode());}
+    await page.evaluate(()=>scrollTo(0,0));
+    const snapshot=await page.evaluate(()=>({
+     title:document.title,description:document.querySelector('meta[name="description"]').content,
+     canonical:document.querySelector('link[rel="canonical"]').href,h1:document.querySelector('h1').textContent,
+     schema:JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent),
+     cards:[...document.querySelectorAll('.game-card')].map(el=>({title:el.querySelector('h3').textContent,
+      game:el.querySelector('[data-affiliate]').dataset.gameId,href:el.querySelector('[data-affiliate]').href,
+      image:el.querySelector('img')?.getAttribute('src')||null})),
+     width:innerWidth,documentWidth:document.documentElement.scrollWidth,
+     note:document.querySelector('.scene-result-head span').textContent,
+     table:document.querySelector('.scene-table-scroll').scrollWidth>document.querySelector('.scene-table-scroll').clientWidth,
+     body:document.body.textContent
+    }));
+    assert(snapshot.documentWidth<=width+2,'document overflow');assert.equal(errors.length,0,errors.join(','));
+    await page.screenshot({path:path.join(out,`${label}-${width}.png`),fullPage:true,animations:'disabled'});
+    if(index){assert(snapshot.note.includes('カタログ掲載順'));assert(!snapshot.body.includes('None人'));assert(snapshot.body.includes('2人以上'));}
+    const {note,table,body,...stable}=snapshot;snapshots.push(stable);
+    records.push({label,width,documentWidth:snapshot.documentWidth,images:await images.count(),errors,tableScroll:snapshot.table,note:snapshot.note});
+    await page.close();
+   }
+   assert.deepEqual(snapshots[1],snapshots[0],'SEO/order/product links or images changed');
+   await context.close();
+  }
+  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
+ }finally{await browser.close();servers.forEach(s=>s.close());}
+})().catch(error=>{fs.writeFileSync(path.join(out,'failure.txt'),String(error.stack));console.error(error);process.exitCode=1;});
