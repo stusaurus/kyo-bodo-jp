@@ -116,10 +116,15 @@ g("hellapagos","ヘルパゴス",3,12,20,20,10,"2245523232553","無人島で協�
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 for game in GAMES:
     if game['game_id'] == 'codenames-duet':
-        # CGE's original edition explicitly specifies 2+, not a maximum of two.
+        # Publisher description specifies 2+, not a maximum of two.
         game['players_max'] = None
         game['players_open_ended'] = True
-        game['players_source'] = 'https://www.czechgames.com/games/codenames-duet-2017'
+        game['players_source'] = 'https://hobbyjapan.games/codename_duet/'
+        # The retained Rakuten offer is the explicitly named 2025 Japanese edition.
+        game['edition'] = '2025年新版 日本語版'
+        game['play_time_min'] = game['play_time_max'] = 15
+        game['age'] = 11
+        game['rakuten_query'] = 'コードネーム デュエット 2025 日本語版'
     game['players_label'] = player_label(game)
     game["cooperative"]=game["game_id"] in COOPERATIVE_IDS
     if game["cooperative"]:

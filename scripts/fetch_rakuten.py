@@ -186,6 +186,8 @@ def match_item(g,item):
         return False,"missing_rainbow",-450
     if g["game_id"]=="codenames-duet" and not (has_term(name,"デュエット") or has_term(name,"duet")):
         return False,"missing_duet",-450
+    if g['game_id']=='codenames-duet' and not (has_term(name,'2025') and has_term(name,'日本語版')):
+        return False,'duet_edition_unconfirmed',-450
     s=100
     if has_term(name,g["title"]): s+=30
     for t in [z for z in re.split(r"[\s　]+",g.get("rakuten_query","")) if len(norm(z))>=2]:
