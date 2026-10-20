@@ -6,7 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from data.catalog import GAMES
+from data.catalog import GAMES, supports_players
 
 WHO = ["couple","family","friends","children","large","first"]
 PLAYERS = [str(x) for x in range(2,15)]
@@ -17,7 +17,7 @@ BALANCE = ["luck","half","skill"]
 
 def score(g, a):
     n=int(a["players"])
-    if not (g["players_min"] <= n <= g["players_max"]): return -9999
+    if not (supports_players(g,n)): return -9999
     if g["play_time_max"] > int(a["time"]): return -9999
     if a["mood"]=="coop" and not g["cooperative"]: return -9999
     s=60

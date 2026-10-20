@@ -8,8 +8,8 @@ def test_scene_hard_constraints():
         for g in b.GAMES:
             if b.scene_score(g,scene)<50: continue
             sid=scene['scene_id']
-            if sid=='couple': assert g['players_min']<=2<=g['players_max']
-            if sid=='large-group': assert g['players_max']>=5
+            if sid=='couple': assert b.supports_players(g,2)
+            if sid=='large-group': assert b.supports_players(g,max(5,g['players_min']))
             if sid=='short': assert g['play_time_max']<=20
             if sid=='cooperative': assert g['cooperation']>=4
             if sid=='children': assert g['age']<=12

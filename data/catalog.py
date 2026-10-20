@@ -13,6 +13,20 @@ def g(game_id,title,pmin,pmax,tmin,tmax,age,ratings,appeal,how,scenes,query,tags
         "rakuten_query":query,"tags":[x for x in tags.split("|") if x],
     }
 
+def supports_players(game, count):
+    maximum = game['players_max']
+    return game['players_min'] <= count and (count <= maximum if maximum is not None else
+        game.get('players_open_ended') is True and bool(game.get('players_source')))
+
+
+def player_label(game):
+    if game['players_max'] is None:
+        return f"{game['players_min']}人以上" if game.get('players_open_ended') and game.get('players_source') else '人数未確認'
+    if game['players_min'] == game['players_max']:
+        return f"{game['players_min']}人対応"
+    return f"{game['players_min']}〜{game['players_max']}人"
+
+
 GAMES=[
 g("catan","カタン",3,4,60,90,10,"3434413143121","資源交換のひと言から毎回ドラマが生まれる定番戦略ゲーム。","資源を受け取る|資源を交換して道や街を建てる|先に規定点へ到達した人が勝ち","友達とじっくり|家族の休日|戦略ゲーム","カタン スタンダード ボードゲーム","friends|family|strategy"),
 g("carcassonne","カルカソンヌ",2,5,35,45,7,"2422314454222","タイルを置くだけなのに先読みが止まらない。","地形タイルを1枚引く|絵がつながるように置く|完成した地形から得点する","夫婦で30分|家族|配置ゲーム","カルカソンヌ 日本語版 ボードゲーム","couple|family|strategy"),
@@ -101,6 +115,12 @@ g("hellapagos","ヘルパゴス",3,12,20,20,10,"2245523232553","無人島で協�
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 for game in GAMES:
+    if game['game_id'] == 'codenames-duet':
+        # CGE's original edition explicitly specifies 2+, not a maximum of two.
+        game['players_max'] = None
+        game['players_open_ended'] = True
+        game['players_source'] = 'https://www.czechgames.com/games/codenames-duet-2017'
+    game['players_label'] = player_label(game)
     game["cooperative"]=game["game_id"] in COOPERATIVE_IDS
     if game["cooperative"]:
         game["cooperation"]=5
