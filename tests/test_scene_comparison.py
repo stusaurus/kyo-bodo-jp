@@ -56,3 +56,17 @@ def test_open_ended_player_count_requires_explicit_publisher_evidence():
     assert m.player_label(unknown) == '人数未確認'
     assert not m.supports_players(dict(duet,players_open_ended=False),3)
     assert m.player_label(dict(duet,players_max=2)) == '2人対応'
+
+
+def test_duet_edition_values_and_short_filter_match_current_japanese_publisher():
+    from scripts.fetch_rakuten import match_item
+    duet = m.BY_ID['codenames-duet']
+    assert duet['edition'] == '2025年新版 日本語版'
+    assert (duet['play_time_min'],duet['play_time_max'],duet['age']) == (15,15,11)
+    assert duet['players_source'] == 'https://hobbyjapan.games/codename_duet/'
+    assert match_item(duet,{'itemName':'コードネーム：デュエット 2025年新版 日本語版'})[0]
+    for title in ('コードネーム：デュエット 日本語版','コードネーム：デュエット 2018年版 日本語版',
+                  'コードネーム：デュエット 2025年新版 英語版'):
+        assert not match_item(duet,{'itemName':title})[0]
+    short = next(s for s in m.SCENES if s['scene_id']=='short')
+    assert m.scene_score(duet,short) >= 50

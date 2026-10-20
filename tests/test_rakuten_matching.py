@@ -37,7 +37,7 @@ def test_expansions_and_accessories_are_rejected():
 def test_sibling_games_do_not_cross_match():
     assert not m.match_item(game("ito"),item("ito レインボー アークライト ボードゲーム"))[0]
     assert not m.match_item(game("codenames"),item("コードネーム デュエット 日本語版 ボードゲーム"))[0]
-    assert m.match_item(game("codenames-duet"),item("コードネーム デュエット 日本語版 ボードゲーム"))[0]
+    assert m.match_item(game("codenames-duet"),item("コードネーム デュエット 2025年新版 日本語版 ボードゲーム"))[0]
 
 def test_generic_titles_need_game_context():
     assert not m.match_item(game("heat"),item("HEAT ヒート 保温グッズ"))[0]
@@ -48,6 +48,8 @@ def test_generic_titles_need_game_context():
 def test_every_catalog_title_can_match_a_safe_synthetic_listing():
     for g in m.GAMES:
         name=g["title"]+" ボードゲーム"
+        if g['game_id']=='codenames-duet':
+            name+=' 2025年新版 日本語版'
         if g["game_id"]=="ito":
             name+=" アークライト"
         if g["game_id"]=="ito-rainbow":
