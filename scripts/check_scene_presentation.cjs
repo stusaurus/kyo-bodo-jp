@@ -24,7 +24,7 @@ function serve(root,port){return new Promise(resolve=>{
     const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
     const response=await page.goto(`http://127.0.0.1:${8765+index}/kyo-bodo-jp/scenes/two-player/?test=1`,{waitUntil:'networkidle'});
     assert.equal(response.status(),200);
-    const images=page.locator('.game-card img');
+    const images=page.locator('.game-card img');const imageCount=await images.count();
     for(let i=0;i<await images.count();i++){await images.nth(i).scrollIntoViewIfNeeded();await images.nth(i).evaluate(img=>img.decode());}
     await page.evaluate(()=>scrollTo(0,0));
     const snapshot=await page.evaluate(()=>({
@@ -42,13 +42,46 @@ function serve(root,port){return new Promise(resolve=>{
     assert(snapshot.documentWidth<=width+2,'document overflow');assert.equal(errors.length,0,errors.join(','));
     await page.screenshot({path:path.join(out,`${label}-${width}.png`),fullPage:true,animations:'disabled'});
     if(index){assert(snapshot.note.includes('カタログ掲載順'));assert(!snapshot.body.includes('None人'));assert(snapshot.body.includes('2人以上'));}
+    if(index){
+     const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),2);
+     for(let group=0;group<2;group++){
+      const details=groups.nth(group);await details.locator('summary').click();
+      const count=Number((await details.locator('summary').textContent()).match(/（(\d+)本）/)[1]);
+      assert.equal(await details.locator('li').count(),count);assert(count>0);
+      assert(await details.locator('[data-choice-game="sky-team"]').isVisible());
+      const links=await details.locator('a').evaluateAll(els=>els.map(a=>a.getAttribute('href')));
+      for(const href of links){const response=await page.request.get(`http://127.0.0.1:8766${href}`);assert.equal(response.status(),200);}
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'expanded choices overflow');
+     }
+     await page.screenshot({path:path.join(out,`choices-${width}.png`),fullPage:true,animations:'disabled'});
+     await page.locator('#two-player-choices a[data-game-id="sky-team"]').first().click();
+     assert((await page.locator('h1').textContent()).includes('スカイチーム'));
+     const purchase=page.locator('.product-panel [data-affiliate]');
+     assert.equal(await purchase.getAttribute('rel'),'sponsored noopener');
+     assert((await purchase.getAttribute('href')).startsWith('https://'));
+     assert.equal(errors.length,0,errors.join(','));
+    }
     const {note,table,body,...stable}=snapshot;snapshots.push(stable);
-    records.push({label,width,documentWidth:snapshot.documentWidth,images:await images.count(),errors,tableScroll:snapshot.table,note:snapshot.note});
+    records.push({label,width,documentWidth:snapshot.documentWidth,images:imageCount,errors,tableScroll:snapshot.table,note:snapshot.note});
     await page.close();
    }
    assert.deepEqual(snapshots[1],snapshots[0],'SEO/order/product links or images changed');
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
+  // A finite before/after quality check using the same actual offer snapshot.
+  const {default:lighthouse}=await import(require.resolve('lighthouse'));
+  const launcher=await import(require.resolve('chrome-launcher'));
+  const chrome=await launcher.launch({chromePath:chromium.executablePath(),chromeFlags:['--headless','--no-sandbox']});
+  try{
+   for(const desktop of [false,true])for(const [index,label] of ['before','after'].entries()){
+    const result=await lighthouse(`http://127.0.0.1:${8765+index}/kyo-bodo-jp/scenes/two-player/?test=1`,
+      {port:chrome.port,output:'json',onlyCategories:['performance','accessibility','best-practices','seo'],
+       ...(desktop?{formFactor:'desktop',screenEmulation:{mobile:false,width:1440,height:900,deviceScaleFactor:1,disabled:false},throttlingMethod:'provided'}:{})});
+    assert(!result.lhr.runtimeError,JSON.stringify(result.lhr.runtimeError));
+    fs.writeFileSync(path.join(out,`lighthouse-${label}-${desktop?'desktop':'mobile'}.json`),result.report);
+    console.log('LIGHTHOUSE',label,desktop?'desktop':'mobile',JSON.stringify(Object.fromEntries(Object.entries(result.lhr.categories).map(([k,v])=>[k,v.score]))));
+   }
+  }finally{await chrome.kill();}
  }finally{await browser.close();servers.forEach(s=>s.close());}
 })().catch(error=>{fs.writeFileSync(path.join(out,'failure.txt'),String(error.stack));console.error(error);process.exitCode=1;});

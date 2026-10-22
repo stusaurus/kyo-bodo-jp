@@ -58,6 +58,39 @@ def test_open_ended_player_count_requires_explicit_publisher_evidence():
     assert m.player_label(dict(duet,players_max=2)) == '2人対応'
 
 
+def test_two_player_choices_use_full_catalog_and_exact_conditions():
+    scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
+    guide = m.scene_selection_guide(scene, m.GAMES[:12])
+    groups = re.findall(r'<details class="two-player-choices">(.*?)</details>', guide)
+    assert len(groups) == 2
+    eligible = [g for g in m.GAMES if m.supports_players(g, 2)]
+    expected = [
+        [g for g in eligible if g['players_min'] == g['players_max'] == 2],
+        [g for g in eligible if g['cooperative'] and g['play_time_max'] <= 20],
+    ]
+    for group, games in zip(groups, expected):
+        assert re.findall(r'data-choice-game="([^"]+)"', group) == [g['game_id'] for g in games]
+        assert f'（{len(games)}本）' in group
+        for game in games:
+            assert m.u('games/' + game['game_id'] + '/') in group
+            assert f'{game["play_time_min"]}〜{game["play_time_max"]}分' in group
+            assert f'対象{game["age"]}歳〜' in group
+    # Known valid choices were unreachable in the old 12-card shortlist.
+    assert 'data-choice-game="sky-team"' in groups[0]
+    assert 'data-choice-game="sky-team"' in groups[1]
+    assert 'data-choice-game="codenames-duet"' not in groups[0]
+    assert 'data-choice-game="codenames-duet"' in groups[1]
+    assert 'data-choice-game="pandemic"' not in guide
+    assert '人気順・優劣の順位ではありません' in guide
+
+
+def test_other_scene_guides_keep_existing_three_picks():
+    scene = next(s for s in m.SCENES if s['scene_id'] == 'short')
+    guide = m.scene_selection_guide(scene, m.GAMES[:3])
+    assert '掲載データから見比べる3本' in guide
+    assert 'two-player-choices' not in guide
+
+
 def test_duet_edition_values_and_short_filter_match_current_japanese_publisher():
     from scripts.fetch_rakuten import match_item
     duet = m.BY_ID['codenames-duet']

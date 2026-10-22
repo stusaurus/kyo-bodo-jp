@@ -111,7 +111,7 @@ def test_scene_pages_use_visual_hero():
 def test_scene_selection_guide_uses_actual_catalog_and_related_existing_scenes():
     scene = next(x for x in m.SCENES if x["scene_id"] == "two-player")
     page = m.scene_page(scene)
-    assert "掲載データから見比べる3本" in page
+    assert "人数と遊び方から候補を選ぶ" in page
     assert "2人対応のゲームでも所要時間や会話量は異なります" in page
     assert m.u("scenes/couple/") in page
     assert m.u("scenes/short/") in page
