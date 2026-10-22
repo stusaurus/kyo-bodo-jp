@@ -211,6 +211,36 @@ def scene_selection_guide(s, ranked):
         f' {e(g["appeal"])}</li>'
         for g in ranked[:3]
     )
+    choices = f'<h3>掲載データから見比べる3本</h3><ol>{picks}</ol>'
+    if s['scene_id'] == 'two-player':
+        # Use the full catalog, not the first 12 cards. These are factual
+        # conditions, not popularity or editorial quality rankings.
+        eligible = [g for g in GAMES if supports_players(g, 2)]
+        groups = (
+            ('人数表記が2人のゲーム', [g for g in eligible
+              if g['players_min'] == g['players_max'] == 2]),
+            ('2人対応・20分以内で協力するゲーム', [g for g in eligible
+              if g['cooperative'] and g['play_time_max'] <= 20]),
+        )
+        sections = []
+        for label, games in groups:
+            items = ''.join(
+                f'<li data-choice-game="{e(g["game_id"])}"><a data-track="game_detail_click" '
+                f'data-game-id="{e(g["game_id"])}" data-source="two_player_choices" '
+                f'href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
+                f' — {e(player_label(g))}／{g["play_time_min"]}〜{g["play_time_max"]}分'
+                f'／対象{g["age"]}歳〜／{"協力" if g["cooperative"] else "対戦"}。'
+                f' {e(g["appeal"])}</li>' for g in games
+            )
+            sections.append(f'<details class="two-player-choices"><summary>{label}（{len(games)}本）</summary>'
+                            f'<ul>{items}</ul></details>')
+        choices = ('<div id="two-player-choices"><h3>人数と遊び方から候補を選ぶ</h3>'
+                   '<p>下の12本以外も含め、掲載カタログ全体から条件に合うゲームを探せます。'
+                   '見出しを開くと、時間・対象年齢・遊び方と詳しい説明へのリンクが表示されます。</p>'
+                   + ''.join(sections) +
+                   '<p class="small">各条件内はカタログ掲載順で、人気順・優劣の順位ではありません。'
+                   '複数条件に同じゲームが入ることがあります。人数表記が2人でも、'
+                   '2人以上に対応するゲームより優れているという意味ではありません。</p></div>')
     related = {
         'two-player': ('couple', 'short'),
         'family': ('children', 'cooperative'),
@@ -227,8 +257,7 @@ def scene_selection_guide(s, ranked):
 <div class="eyebrow">HOW TO CHOOSE</div>
 <h2>{e(s['title'])}ときの選び方</h2>
 <p>{e(tip)}</p>
-<h3>掲載データから見比べる3本</h3>
-<ol>{picks}</ol>
+{choices}
 <p class="small">人数・時間・対象年齢は掲載ゲームデータの参考値です。実際の版・ルールは販売店やメーカーで確認してください。</p>
 <nav aria-label="別の遊び方から探す">{related_links}</nav>
 </section>'''
