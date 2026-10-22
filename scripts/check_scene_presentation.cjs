@@ -46,7 +46,8 @@ function serve(root,port){return new Promise(resolve=>{
      const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),2);
      for(let group=0;group<2;group++){
       const details=groups.nth(group);await details.locator('summary').click();
-      assert.equal(await details.locator('li').count(),group===0?9:7);
+      const count=Number((await details.locator('summary').textContent()).match(/（(\d+)本）/)[1]);
+      assert.equal(await details.locator('li').count(),count);assert(count>0);
       assert(await details.locator('[data-choice-game="sky-team"]').isVisible());
       const links=await details.locator('a').evaluateAll(els=>els.map(a=>a.getAttribute('href')));
       for(const href of links){const response=await page.request.get(`http://127.0.0.1:8766${href}`);assert.equal(response.status(),200);}
@@ -68,5 +69,19 @@ function serve(root,port){return new Promise(resolve=>{
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
+  // A finite before/after quality check using the same actual offer snapshot.
+  const {default:lighthouse}=await import(require.resolve('lighthouse'));
+  const launcher=await import(require.resolve('chrome-launcher'));
+  const chrome=await launcher.launch({chromePath:chromium.executablePath(),chromeFlags:['--headless','--no-sandbox']});
+  try{
+   for(const desktop of [false,true])for(const [index,label] of ['before','after'].entries()){
+    const result=await lighthouse(`http://127.0.0.1:${8765+index}/kyo-bodo-jp/scenes/two-player/?test=1`,
+      {port:chrome.port,output:'json',onlyCategories:['performance','accessibility','best-practices','seo'],
+       ...(desktop?{formFactor:'desktop',screenEmulation:{mobile:false,width:1440,height:900,deviceScaleFactor:1,disabled:false},throttlingMethod:'provided'}:{})});
+    assert(!result.lhr.runtimeError,JSON.stringify(result.lhr.runtimeError));
+    fs.writeFileSync(path.join(out,`lighthouse-${label}-${desktop?'desktop':'mobile'}.json`),result.report);
+    console.log('LIGHTHOUSE',label,desktop?'desktop':'mobile',JSON.stringify(Object.fromEntries(Object.entries(result.lhr.categories).map(([k,v])=>[k,v.score]))));
+   }
+  }finally{await chrome.kill();}
  }finally{await browser.close();servers.forEach(s=>s.close());}
 })().catch(error=>{fs.writeFileSync(path.join(out,'failure.txt'),String(error.stack));console.error(error);process.exitCode=1;});
