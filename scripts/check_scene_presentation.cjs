@@ -45,8 +45,8 @@ function serve(root,port){return new Promise(resolve=>{
     if(index){
      const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),2);
      for(let group=0;group<2;group++){
-      const details=groups.nth(group);await details.locator('summary').click();
-      const count=Number((await details.locator('summary').textContent()).match(/（(\d+)本）/)[1]);
+      const details=groups.nth(group);await details.locator(':scope > summary').click();
+      const count=Number((await details.locator(':scope > summary').textContent()).match(/（(\d+)本）/)[1]);
       assert.equal(await details.locator(':scope > ul > li').count(),count);assert(count>0);
       const rules=details.locator('details.choice-rules').first();
       await rules.locator('summary').click();
