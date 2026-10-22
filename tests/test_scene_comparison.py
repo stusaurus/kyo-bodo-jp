@@ -61,7 +61,7 @@ def test_open_ended_player_count_requires_explicit_publisher_evidence():
 def test_two_player_choices_use_full_catalog_and_exact_conditions():
     scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
     guide = m.scene_selection_guide(scene, m.GAMES[:12])
-    groups = re.findall(r'<details class="two-player-choices">(.*?)</details>', guide)
+    groups = re.findall(r'<details class="two-player-choices">(.*?)</ul></details>', guide)
     assert len(groups) == 2
     eligible = [g for g in m.GAMES if m.supports_players(g, 2)]
     expected = [
@@ -75,6 +75,9 @@ def test_two_player_choices_use_full_catalog_and_exact_conditions():
             assert m.u('games/' + game['game_id'] + '/') in group
             assert f'{game["play_time_min"]}〜{game["play_time_max"]}分' in group
             assert f'対象{game["age"]}歳〜' in group
+            for step in game['how_to_play']:
+                assert f'<li>{m.e(step)}</li>' in group
+        assert group.count('class="choice-rules"') == len(games)
     # Known valid choices were unreachable in the old 12-card shortlist.
     assert 'data-choice-game="sky-team"' in groups[0]
     assert 'data-choice-game="sky-team"' in groups[1]

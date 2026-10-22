@@ -230,13 +230,18 @@ def scene_selection_guide(s, ranked):
                 f'href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
                 f' — {e(player_label(g))}／{g["play_time_min"]}〜{g["play_time_max"]}分'
                 f'／対象{g["age"]}歳〜／{"協力" if g["cooperative"] else "対戦"}。'
-                f' {e(g["appeal"])}</li>' for g in games
+                f' {e(g["appeal"])}'
+                '<details class="choice-rules"><summary>遊び方の手順を読む</summary><ol>'
+                + ''.join(f'<li>{e(step)}</li>' for step in g['how_to_play'])
+                + '</ol></details></li>' for g in games
             )
             sections.append(f'<details class="two-player-choices"><summary>{label}（{len(games)}本）</summary>'
                             f'<ul>{items}</ul></details>')
         choices = ('<div id="two-player-choices"><h3>人数と遊び方から候補を選ぶ</h3>'
                    '<p>下の12本以外も含め、掲載カタログ全体から条件に合うゲームを探せます。'
                    '見出しを開くと、時間・対象年齢・遊び方と詳しい説明へのリンクが表示されます。</p>'
+                   '<p>初めて遊ぶときは「遊び方の手順」を開いて、何をするゲームか比べてください。'
+                   '掲載時間とは別に、説明・準備の時間も見込んでください。</p>'
                    + ''.join(sections) +
                    '<p class="small">各条件内はカタログ掲載順で、人気順・優劣の順位ではありません。'
                    '複数条件に同じゲームが入ることがあります。人数表記が2人でも、'
