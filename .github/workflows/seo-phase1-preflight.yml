@@ -39,7 +39,7 @@ jobs:
         run: python scripts/prepare_scene_comparison.py
       - name: Verify scene comparison at 320, 390 and 1440 pixels
         run: |
-          npm install --prefix /tmp/scene-qa --no-audit --no-fund playwright@1.56.1
+          npm install --prefix /tmp/scene-qa --no-audit --no-fund playwright@1.56.1 lighthouse@12.8.2
           /tmp/scene-qa/node_modules/.bin/playwright install --with-deps chromium
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_scene_presentation.cjs
       - name: Save unpublished scene evidence
