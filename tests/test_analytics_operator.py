@@ -1,11 +1,16 @@
 """Verify boardgame GA4 operator classification without sending analytics requests."""
+import importlib.util
 import json
+from pathlib import Path
 import shutil
 import subprocess
 
 import pytest
 
-from scripts import build_site
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("build_site", ROOT / "scripts" / "build_site.py")
+build_site = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(build_site)
 
 
 def test_automatic_pageview_receives_operator_parameter():
