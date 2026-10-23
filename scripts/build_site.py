@@ -49,7 +49,7 @@ var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URL
 try{op=localStorage.getItem("kyo_bodo_operator_test")==="1"}catch(_){}
 if(p.get("test")==="1"||p.get("test")==="0"){op=p.get("test")==="1";try{if(op)localStorage.setItem("kyo_bodo_operator_test","1");else localStorage.removeItem("kyo_bodo_operator_test")}catch(_){}}
 window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){dataLayer.push(arguments)};
-if(id){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);document.head.appendChild(s);gtag("js",new Date());gtag("config",id)}
+if(id){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);document.head.appendChild(s);gtag("js",new Date());gtag("config",id,{operator_test:op?"1":"0"})}
 window.kyoTrack=function(name,data){data=data||{};data.page_path=location.pathname;data.operator_test=op?"1":"0";
 try{var ctx=JSON.parse(sessionStorage.getItem("kyo_bodo_journey")||"{}");if(data.conversion_source)ctx.conversion_source=data.conversion_source;if(name==="diagnosis_complete"){ctx.journey="diagnosis";ctx.players=data.players;ctx.mood=data.mood;ctx.desired_time=data.desired_time;}if(name==="scene_view"){ctx.journey="scene";ctx.scene_id=data.scene_id;}if(data.game_id)ctx.game_id=data.game_id;sessionStorage.setItem("kyo_bodo_journey",JSON.stringify(ctx));Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})}catch(_){}gtag("event",name,data)};
 document.addEventListener("click",function(ev){var a=ev.target.closest&&ev.target.closest("a");if(!a)return;
