@@ -43,6 +43,10 @@ function serve(root,port){return new Promise(resolve=>{
     await page.screenshot({path:path.join(out,`${label}-${width}.png`),fullPage:true,animations:'disabled'});
     if(index){assert(snapshot.note.includes('カタログ掲載順'));assert(!snapshot.body.includes('None人'));assert(snapshot.body.includes('2人以上'));}
     if(index){
+     const shortcut=page.locator('.scene-hero-copy a[href="#two-player-choices"]');
+     assert.equal(await shortcut.count(),1); await shortcut.click();
+     assert.equal(await page.evaluate(()=>location.hash),"#two-player-choices");
+     assert(await page.locator("#two-player-choices").isVisible());
      const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),2);
      for(let group=0;group<2;group++){
       const details=groups.nth(group);await details.locator(':scope > summary').click();
