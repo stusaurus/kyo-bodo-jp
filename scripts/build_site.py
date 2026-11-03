@@ -321,7 +321,7 @@ aria-labelledby="two-player-format-title">
             + '''</div>
 <p class="small">各欄は掲載カタログ内の人数・時間・遊び方に基づく一部の例です。
 人気ランキングではありません。詳細で対象年齢やルールを確認し、販売版のメーカー表記も確認してください。</p>
-<p><a class="text-link" href="#two-player-comparison">2人対応の掲載12本を表で比べる →</a>
+<p><a class="text-link" href="#two-player-comparison">2人対応の候補を表で比べる →</a>
 <a class="text-link" href="#two-player-choices">条件別の候補をすべて見る →</a></p>
 </section>''')
 
