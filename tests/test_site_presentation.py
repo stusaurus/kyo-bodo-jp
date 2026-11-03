@@ -9,7 +9,9 @@ SPEC.loader.exec_module(m)
 
 def test_home_has_clear_primary_flow():
     page=m.home()
-    assert "今のメンバーで診断する" in page
+    assert "おすすめ3本を先に見る" in page
+    assert page.index('id="today-games"') < page.index('id="scenes"')
+    assert 'href="#today-games"' in page
     assert "選ぶ」時間を短くする" in page
     assert "2人で" in page
     assert "小学生と" in page
@@ -51,7 +53,7 @@ def test_home_uses_illustrated_hero_asset():
     assert "assets/hero-kyo-bodo.webp" in page
     assert "hero-visual" in page
     assert "登録不要" in page
-    assert "1分ルールつき" in page
+    assert "診断しなくても選べます" in page
     assert m.HERO_ASSET.name=="hero-kyo-bodo.webp"
 
 
