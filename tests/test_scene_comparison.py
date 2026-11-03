@@ -62,10 +62,11 @@ def test_two_player_choices_use_full_catalog_and_exact_conditions():
     scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
     guide = m.scene_selection_guide(scene, m.GAMES[:12])
     groups = re.findall(r'<details class="two-player-choices">(.*?)</ul></details>', guide)
-    assert len(groups) == 2
+    assert len(groups) == 3
     eligible = [g for g in m.GAMES if m.supports_players(g, 2)]
     expected = [
         [g for g in eligible if g['players_min'] == g['players_max'] == 2],
+        [g for g in eligible if g['play_time_max'] <= 15],
         [g for g in eligible if g['cooperative'] and g['play_time_max'] <= 20],
     ]
     for group, games in zip(groups, expected):
@@ -80,10 +81,16 @@ def test_two_player_choices_use_full_catalog_and_exact_conditions():
         assert group.count('class="choice-rules"') == len(games)
     # Known valid choices were unreachable in the old 12-card shortlist.
     assert 'data-choice-game="sky-team"' in groups[0]
-    assert 'data-choice-game="sky-team"' in groups[1]
+    assert 'data-choice-game="sky-team"' not in groups[1]
+    assert 'data-choice-game="sky-team"' in groups[2]
+    assert 'data-choice-game="gobblet-gobblers"' in groups[1]
     assert 'data-choice-game="codenames-duet"' not in groups[0]
     assert 'data-choice-game="codenames-duet"' in groups[1]
+    assert 'data-choice-game="codenames-duet"' in groups[2]
     assert 'data-choice-game="pandemic"' not in guide
+    assert '2人対応・15分以内で遊べるゲーム' in groups[1]
+    assert 'data-choice-game="gobblet-gobblers"' not in groups[2]
+    assert all(g['play_time_max'] <= 15 and m.supports_players(g, 2) for g in expected[1])
     assert '人気順・優劣の順位ではありません' in guide
 
 
