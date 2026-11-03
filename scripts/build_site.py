@@ -219,6 +219,8 @@ def scene_selection_guide(s, ranked):
         groups = (
             ('人数表記が2人のゲーム', [g for g in eligible
               if g['players_min'] == g['players_max'] == 2]),
+            ('2人対応・15分以内で遊べるゲーム', [g for g in eligible
+              if g['play_time_max'] <= 15]),
             ('2人対応・20分以内で協力するゲーム', [g for g in eligible
               if g['cooperative'] and g['play_time_max'] <= 20]),
         )
@@ -239,6 +241,7 @@ def scene_selection_guide(s, ranked):
                             f'<ul>{items}</ul></details>')
         choices = ('<div id="two-player-choices"><h3>人数と遊び方から候補を選ぶ</h3>'
                    '<p>下の12本以外も含め、掲載カタログ全体から条件に合うゲームを探せます。'
+                   '15分以内の候補もカタログの所要時間上限から選べます。'
                    '見出しを開くと、時間・対象年齢・遊び方と詳しい説明へのリンクが表示されます。</p>'
                    '<p>初めて遊ぶときは「遊び方の手順」を開いて、何をするゲームか比べてください。'
                    '掲載時間とは別に、説明・準備の時間も見込んでください。</p>'
