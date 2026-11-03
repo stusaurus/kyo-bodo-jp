@@ -69,6 +69,23 @@ function serve(root,port){return new Promise(resolve=>{
      assert((await purchase.getAttribute('href')).startsWith('https://'));
      assert.equal(errors.length,0,errors.join(','));
     }
+    if(index){
+     for(const preset of ['two-short','two-coop','unknown']){
+      await page.goto('http://127.0.0.1:8766/kyo-bodo-jp/diagnosis/?test=1&preset='+preset,{waitUntil:'networkidle'});
+      const count=preset==='unknown'?6:4;
+      assert((await page.locator('.step-counter').textContent()).includes('/ 0'+count));
+      if(count===4){assert(await page.locator('.preset-context').isVisible());}
+      const choices=preset==='two-short'?['couple','think','1','half']:preset==='two-coop'?['couple','30','1','half']:['couple','2','coop','30','1','half'];
+      for(const value of choices)await page.locator('.answer[data-v="'+value+'"]').click();
+      const event=await page.evaluate(()=>window.dataLayer.map(x=>Array.from(x)).find(x=>x[0]==='event'&&x[1]==='diagnosis_complete'));
+      assert(event);assert.equal(event[2].players,'2');assert.equal(event[2].operator_test,'1');
+      if(preset==='two-short')assert.equal(event[2].desired_time,'15');
+      if(preset==='two-coop')assert.equal(event[2].mood,'coop');
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+      assert.deepEqual(errors,[]);
+      await page.screenshot({path:path.join(out,`preset-${preset}-${width}.png`),fullPage:true});
+     }
+    }
     const {note,table,body,...stable}=snapshot;snapshots.push(stable);
     records.push({label,width,documentWidth:snapshot.documentWidth,images:imageCount,errors,tableScroll:snapshot.table,note:snapshot.note});
     await page.close();

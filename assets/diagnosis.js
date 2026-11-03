@@ -9,6 +9,12 @@ var qs=[
 ["balance","運と実力なら？",[["luck","運多め"],["half","半々"],["skill","実力重視"]]]
 ],a={},i=0,games=[],links={};
 var placeholder="<div class=\"game-placeholder\" aria-label=\"\u5546\u54c1\u753b\u50cf\u306f\u672a\u53d6\u5f97\"><svg class=\"placeholder-dice\" viewBox=\"0 0 80 80\" fill=\"none\" aria-hidden=\"true\"><rect x=\"15\" y=\"15\" width=\"50\" height=\"50\" rx=\"13\" stroke=\"currentColor\" stroke-width=\"2\"/><g fill=\"currentColor\"><circle cx=\"28\" cy=\"28\" r=\"3\"/><circle cx=\"52\" cy=\"28\" r=\"3\"/><circle cx=\"40\" cy=\"40\" r=\"3\"/><circle cx=\"28\" cy=\"52\" r=\"3\"/><circle cx=\"52\" cy=\"52\" r=\"3\"/></g></svg></div>";
+var originalKeys=qs.map(function(q){return q[0]});
+var preset=new URLSearchParams(location.search).get('preset');
+var presetLabel='';
+if(preset==='two-short'){a.players='2';a.time='15';presetLabel='2人・15分以内';}
+if(preset==='two-coop'){a.players='2';a.mood='coop';presetLabel='2人・協力';}
+if(presetLabel){document.querySelector('.diagnosis-subtitle').textContent='2人の条件を引き継ぎ、残り4問で選べます。';qs=qs.filter(function(q){return !Object.prototype.hasOwnProperty.call(a,q[0])});}
 var questionSub=["遊ぶ人の顔を思い浮かべて。","みんなで一緒に遊べる1本を。","今日ほしいのはどんな時間？","今ある時間に無理なく収まるものを。","ルール説明も、気軽に？じっくり？","最後は、好きな遊び方を。"];
 function label(key,val){var q=qs.filter(function(x){return x[0]===key})[0],z=q&&q[2].filter(function(x){return x[0]===val})[0];return z?z[1]:val}
 function score(g){
@@ -60,9 +66,9 @@ function results(){
 }
 function render(){
   if(i>=qs.length){results();return}
-  var q=qs[i],pct=Math.round(i/qs.length*100),scene=[1,4,2,5,3,6][i];
+  var q=qs[i],qi=originalKeys.indexOf(q[0]),pct=Math.round(i/qs.length*100),scene=[1,4,2,5,3,6][qi];
   root.className='diagnosis-state';root.setAttribute('aria-busy','false');
-  root.innerHTML='<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 06</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="6" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(i+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">一緒に遊ぶ時間を、思い浮かべて。</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[i]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+q[2].map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
+  root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">一緒に遊ぶ時間を、思い浮かべて。</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[qi]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+q[2].map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
   root.querySelector('h2').focus({preventScroll:true});
   root.querySelectorAll('.answer').forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack('diagnosis_answer',{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}});
   var back=root.querySelector('.question-back');if(back)back.onclick=function(){i--;render()};
