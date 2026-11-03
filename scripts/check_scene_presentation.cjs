@@ -25,15 +25,39 @@ function serve(root,port){return new Promise(resolve=>{
     const response=await page.goto(`http://127.0.0.1:${8765+index}/kyo-bodo-jp/scenes/two-player/?test=1`,{waitUntil:'networkidle'});
     assert.equal(response.status(),200);
     const images=page.locator('.game-card img');const imageCount=await images.count();
-    for(let i=0;i<await images.count();i++){await images.nth(i).scrollIntoViewIfNeeded();await images.nth(i).evaluate(img=>img.decode());}
+    // Preserve original sources from published HTML, independent of volatile
+    // third-party image availability and the intentional accessible fallback.
+    const sourceImages=await page.evaluate(markup=>{
+      const source=new DOMParser().parseFromString(markup,'text/html');
+      return [...source.querySelectorAll('.game-card')].map(card=>
+        card.querySelector('img')?.getAttribute('src')||null);
+    },await response.text());
+    const media=page.locator('.game-card .game-media');
+    for(let i=0;i<await media.count();i++){
+      const img=media.nth(i).locator('img');
+      if(await img.count()){
+        await img.scrollIntoViewIfNeeded();
+        // A Rakuten thumbnail may fail; the site's own accessible fallback
+        // must render rather than treating an unrenderable image as success.
+        await img.evaluate(el=>el.decode()).catch(()=>{});
+      }
+      await page.waitForFunction(idx=>{
+        const cell=document.querySelectorAll('.game-card .game-media')[idx];
+        if(!cell)return false;
+        const picture=cell.querySelector('img');
+        if(picture?.complete && picture.naturalWidth>0)return true;
+        const replacement=cell.querySelector('.game-placeholder');
+        return !!(replacement && replacement.getAttribute('aria-label'));
+      },i,{timeout:10000});
+    }
     await page.evaluate(()=>scrollTo(0,0));
     const snapshot=await page.evaluate(()=>({
      title:document.title,description:document.querySelector('meta[name="description"]').content,
      canonical:document.querySelector('link[rel="canonical"]').href,h1:document.querySelector('h1').textContent,
      schema:JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent),
-     cards:[...document.querySelectorAll('.game-card')].map(el=>({title:el.querySelector('h3').textContent,
+     cards:[...document.querySelectorAll('.game-card')].map((el,i)=>({title:el.querySelector('h3').textContent,
       game:el.querySelector('[data-affiliate]').dataset.gameId,href:el.querySelector('[data-affiliate]').href,
-      image:el.querySelector('img')?.getAttribute('src')||null})),
+      image:sourceImages[i]})),
      width:innerWidth,documentWidth:document.documentElement.scrollWidth,
      note:document.querySelector('.scene-result-head span').textContent,
      table:document.querySelector('.scene-table-scroll').scrollWidth>document.querySelector('.scene-table-scroll').clientWidth,
