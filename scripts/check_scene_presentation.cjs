@@ -47,8 +47,8 @@ function serve(root,port){return new Promise(resolve=>{
      assert.equal(await shortcut.count(),1); await shortcut.click();
      assert.equal(await page.evaluate(()=>location.hash),"#two-player-choices");
      assert(await page.locator("#two-player-choices").isVisible());
-     const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),2);
-     for(let group=0;group<2;group++){
+     const groups=page.locator('details.two-player-choices');assert.equal(await groups.count(),3);
+     for(let group=0;group<3;group++){
       const details=groups.nth(group);await details.locator(':scope > summary').click();
       const count=Number((await details.locator(':scope > summary').textContent()).match(/（(\d+)本）/)[1]);
       assert.equal(await details.locator(':scope > ul > li').count(),count);assert(count>0);
@@ -56,7 +56,15 @@ function serve(root,port){return new Promise(resolve=>{
       await rules.locator('summary').click();
       assert(await rules.locator('ol').isVisible());
       assert((await rules.locator('ol > li').count())>0);
-      assert(await details.locator('[data-choice-game="sky-team"]').isVisible());
+      if(group===1){
+       assert.match(await details.locator(':scope > summary').innerText(),/15分以内/);
+       assert(await details.locator('[data-choice-game="gobblet-gobblers"]').isVisible());
+       assert.equal(await details.locator('[data-choice-game="sky-team"]').count(),0);
+       const times=await details.locator(':scope > ul > li').evaluateAll(els=>els.map(el=>(el.textContent||'').match(/(\d+)〜(\d+)分/)?.[2]));
+       assert(times.length>0&&times.every(t=>Number(t)<=15),'15-minute section must contain only actual 15-minute games');
+      }else{
+       assert(await details.locator('[data-choice-game="sky-team"]').isVisible());
+      }
       const links=await details.locator('a').evaluateAll(els=>els.map(a=>a.getAttribute('href')));
       for(const href of links){const response=await page.request.get(`http://127.0.0.1:8766${href}`);assert.equal(response.status(),200);}
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'expanded choices overflow');
