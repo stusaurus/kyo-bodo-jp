@@ -51,7 +51,7 @@ function serve(root,port){return new Promise(resolve=>{
      assert.equal(await formatGroups.count(),2);
      for(const group of ['two-only','multi']){
       const panel=guide.locator('[data-format-group="'+group+'"]');
-      const count=Number((await panel.locator('h3').innerText()).match(/(\\d+)本/)[1]);
+      const count=Number((await panel.locator('h3').innerText()).match(/(\d+)本/)[1]);
       assert(count>0);
       const links=panel.locator('a[data-two-player-sample]');
       assert.equal(await links.count(),Math.min(3,count));
