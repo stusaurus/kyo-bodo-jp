@@ -51,18 +51,18 @@ function serve(root,port){return new Promise(resolve=>{
       },i,{timeout:10000});
     }
     await page.evaluate(()=>scrollTo(0,0));
-    const snapshot=await page.evaluate(()=>({
+    const snapshot=await page.evaluate(originalImages=>({
      title:document.title,description:document.querySelector('meta[name="description"]').content,
      canonical:document.querySelector('link[rel="canonical"]').href,h1:document.querySelector('h1').textContent,
      schema:JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent),
      cards:[...document.querySelectorAll('.game-card')].map((el,i)=>({title:el.querySelector('h3').textContent,
       game:el.querySelector('[data-affiliate]').dataset.gameId,href:el.querySelector('[data-affiliate]').href,
-      image:sourceImages[i]})),
+      image:originalImages[i]})),
      width:innerWidth,documentWidth:document.documentElement.scrollWidth,
      note:document.querySelector('.scene-result-head span').textContent,
      table:document.querySelector('.scene-table-scroll').scrollWidth>document.querySelector('.scene-table-scroll').clientWidth,
      body:document.body.textContent
-    }));
+    }),sourceImages);
     assert(snapshot.documentWidth<=width+2,'document overflow');assert.equal(errors.length,0,errors.join(','));
     await page.screenshot({path:path.join(out,`${label}-${width}.png`),fullPage:true,animations:'disabled'});
     if(index){assert(snapshot.note.includes('カタログ掲載順'));assert(!snapshot.body.includes('None人'));assert(snapshot.body.includes('2人以上'));}
