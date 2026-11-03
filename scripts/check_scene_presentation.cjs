@@ -43,6 +43,31 @@ function serve(root,port){return new Promise(resolve=>{
     await page.screenshot({path:path.join(out,`${label}-${width}.png`),fullPage:true,animations:'disabled'});
     if(index){assert(snapshot.note.includes('カタログ掲載順'));assert(!snapshot.body.includes('None人'));assert(snapshot.body.includes('2人以上'));}
     if(index){
+     const guide=page.locator('[data-two-player-format]');
+     assert.equal(await guide.count(),1);
+     assert((await guide.innerText()).includes('掲載人数が2人だけ'));
+     assert((await guide.innerText()).includes('2人を含む複数人数に対応'));
+     const formatGroups=guide.locator('[data-format-group]');
+     assert.equal(await formatGroups.count(),2);
+     for(const group of ['two-only','multi']){
+      const panel=guide.locator('[data-format-group="'+group+'"]');
+      const count=Number((await panel.locator('h3').innerText()).match(/(\\d+)本/)[1]);
+      assert(count>0);
+      const links=panel.locator('a[data-two-player-sample]');
+      assert.equal(await links.count(),Math.min(3,count));
+      for(const href of await links.evaluateAll(els=>els.map(el=>el.getAttribute('href')))){
+       assert(href.startsWith('/kyo-bodo-jp/games/'));
+       assert.equal((await page.request.get('http://127.0.0.1:8766'+href)).status(),200);
+      }
+     }
+     assert((await guide.locator('a[href="#two-player-comparison"]').count())===1);
+     await guide.locator('a[href="#two-player-comparison"]').click();
+     assert.equal(await page.evaluate(()=>location.hash),'#two-player-comparison');
+     assert(await page.locator('#two-player-comparison').isVisible());
+     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+     await guide.screenshot({path:path.join(out,'player-format-'+width+'.png'),animations:'disabled'});
+    }
+    if(index){
      const shortcut=page.locator('.scene-hero-copy a[href="#two-player-choices"]');
      assert.equal(await shortcut.count(),1); await shortcut.click();
      assert.equal(await page.evaluate(()=>location.hash),"#two-player-choices");
