@@ -45,6 +45,7 @@ function server(root,port){
       assert.equal(await page.locator('.today-pick').count(),3);
       await page.locator('[data-today-mode="two"]').click();
       assert.equal(await page.locator('[data-today-mode="two"]').getAttribute('aria-pressed'),'true');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('kyo_bodo_today_mode_v1')),null,'filter must not persist without opt-in');
       const twoIds=await page.locator('.today-pick [data-game-id][data-track]').evaluateAll(els=>els.map(x=>x.dataset.gameId));
       assert(twoIds.length>0&&twoIds.length<=3);
       for(const id of twoIds){
