@@ -143,11 +143,19 @@ function serve(root,port){return new Promise(resolve=>{
       await page.screenshot({path:path.join(out,`preset-${preset}-${width}.png`),fullPage:true});
      }
     }
-    const {note,table,body,...stable}=snapshot;snapshots.push(stable);
-    records.push({label,width,documentWidth:snapshot.documentWidth,images:imageCount,errors,tableScroll:snapshot.table,note:snapshot.note});
+    // Only the intended two-player title, description and H1 may differ.
+    // All canonical, structured data, actual ranked offers, links and images remain identical.
+    if(index){
+      assert(snapshot.title.includes('2人用ボードゲームおすすめ比較'),'SEO title not search aligned');
+      assert(snapshot.description.includes('2人専用と複数人数対応'),'SEO description not specific');
+      assert(snapshot.h1.includes('2人用・2人でも遊べる'),'SEO H1 not specific');
+      assert(snapshot.description.includes('人気順位ではありません'),'no popularity overclaim allowed');
+    }
+    const {note,table,body,title,description,h1,...stable}=snapshot;snapshots.push(stable);
+    records.push({label,width,documentWidth:snapshot.documentWidth,images:imageCount,errors,tableScroll:snapshot.table,note:snapshot.note,title:snapshot.title,h1:snapshot.h1});
     await page.close();
    }
-   assert.deepEqual(snapshots[1],snapshots[0],'SEO/order/product links or images changed');
+   assert.deepEqual(snapshots[1],snapshots[0],'Canonical, structured data, product order, links or images changed');
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
