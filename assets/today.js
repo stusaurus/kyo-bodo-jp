@@ -96,6 +96,8 @@
   }
   function render() {
     var selected=selectGames(games,mode,now);
+    var insights=window.KyoDecisionInsights;
+    var insightConditions=mode==="two"?{players:2}:mode==="short"?{minutes:30}:null;
     root.innerHTML=selected.length?'<div class="today-grid">'+selected.map(function(g,k){
       var l=links[g.game_id]||{};
       var search="https://search.rakuten.co.jp/search/mall/"+encodeURIComponent(g.rakuten_query||g.title)+"/";
@@ -106,7 +108,9 @@
       var id=String(g.game_id),isSaved=saved.indexOf(id)>=0;
       return '<article class="today-pick '+(k===0?'featured':'')+'"><div class="game-media">'+art+'</div><div class="today-pick-body">'+
         (k===0?'<div class="eyebrow">まずは、この候補から</div>':'')+
-        '<div class="today-reason">'+escapeText(reason(g,mode,now))+'</div><h3>'+escapeText(g.title)+'</h3><p>'+escapeText(g.appeal)+'</p>'+
+        '<div class="today-reason">'+escapeText(reason(g,mode,now))+'</div>'+
+        (insights&&insightConditions?(function(){var verdict=insights.explain(g,insightConditions);return '<p class="small" data-decision-insight="'+escapeText(verdict.status)+'">'+escapeText(verdict.title)+': '+escapeText(verdict.reasons.join("／"))+'</p>';})():"")+
+        '<h3>'+escapeText(g.title)+'</h3><p>'+escapeText(g.appeal)+'</p>'+
         '<div class="card-meta"><span>'+escapeText(g.players_label)+'</span><span>'+num(g.play_time_min)+'〜'+num(g.play_time_max)+'分</span></div>'+
         '<div class="card-actions"><a class="'+(k===0?'btn primary':'text-link')+'" data-track="game_detail_click" data-game-id="'+escapeText(id)+'" data-source="today_'+mode+'" data-rank="'+(k+1)+'" href="'+escapeText(B+'games/'+encodeURIComponent(id)+'/')+'">特徴・遊び方を見る →</a>'+
         '<a class="text-link" data-affiliate="rakuten" data-game-id="'+escapeText(id)+'" data-source="today_'+mode+'" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+escapeText(url)+'">'+(l.url?'楽天で確認':'楽天で探す')+' ↗</a>'+
