@@ -1,6 +1,6 @@
 const assert=require("node:assert/strict");
 const {fit,explain,compare}=require("../assets/decision-insights.js");
-const g={game_id:"a",players_min:2,players_max:4,play_time_max:30,age_min:8};
+const g={game_id:"a",players_min:2,players_max:4,play_time_max:30,age:8};
 assert.equal(fit(g,{players:2,minutes:30,youngestAge:8}).status,"eligible");
 assert.deepEqual(fit(g,{players:5}).problems,["対応人数が合いません"]);
 assert.equal(fit(g,{minutes:20}).status,"excluded");
