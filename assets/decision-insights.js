@@ -32,7 +32,7 @@
     }
     var age=numberOrNull(conditions.youngestAge);
     if(age!==null){
-      var minAge=numberOrNull(game.age_min);
+      var minAge=numberOrNull(game.age);
       if(minAge===null)unknown.push("対象年齢を確認できません");
       else if(age<minAge)problems.push("対象年齢を満たしていません");
     }
