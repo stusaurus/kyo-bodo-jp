@@ -68,6 +68,10 @@ assert.equal(engine.fit({...catalog,age:undefined},{youngestAge:8}).status,'unve
 const source=fs.readFileSync('./assets/today.js','utf8');
 assert(source.includes('window.KyoDecisionInsights'));
 assert(source.includes('data-decision-insight'));
+assert(source.includes('data-decision-change'));
+assert(source.includes('previousChoice'));
+assert.equal(engine.compare({players:2},{players:2},{game_id:'a'},{game_id:'b'})[0].type,'rank_change');
+assert.equal(engine.compare({players:2},{players:2},{game_id:'a'},{game_id:'a'}).length,0);
 """
     result=subprocess.run(["node","-e",code],cwd=ROOT,capture_output=True,text=True)
     assert result.returncode==0,result.stderr
