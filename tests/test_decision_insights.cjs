@@ -1,0 +1,15 @@
+const assert=require("node:assert/strict");
+const {fit,explain,compare}=require("../assets/decision-insights.js");
+const g={game_id:"a",players_min:2,players_max:4,play_time_max:30,age_min:8};
+assert.equal(fit(g,{players:2,minutes:30,youngestAge:8}).status,"eligible");
+assert.deepEqual(fit(g,{players:5}).problems,["対応人数が合いません"]);
+assert.equal(fit(g,{minutes:20}).status,"excluded");
+assert.equal(fit(g,{youngestAge:7}).status,"excluded");
+assert.equal(fit({players_min:2,players_max:null},{players:3}).status,"unverified");
+assert.equal(fit({players_min:2,players_max:null,players_open_ended:true,players_source:"publisher"},{players:3}).status,"eligible");
+assert.equal(fit({players_min:2,players_max:4},{players:2,minutes:20}).status,"unverified");
+assert.equal(fit({players_min:2,players_max:4,play_time_max:30},{players:2,youngestAge:8}).status,"unverified");
+assert.equal(explain(g,{players:5}).status,"excluded");
+assert.equal(compare({players:2},{players:3},{game_id:"a"},{game_id:"b"})[0].type,"rank_change");
+assert.deepEqual(compare({players:2},{players:2},{game_id:"a"},{game_id:"a"}),[]);
+console.log("decision insights: all assertions passed");
