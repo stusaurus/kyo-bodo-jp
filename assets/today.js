@@ -76,7 +76,7 @@
   var B=(window.KYO_BODO_CONFIG||{}).basePath||"/kyo-bodo-jp/";
   var now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Tokyo"}));
   var placeholder='<div class="game-placeholder" aria-label="商品画像は未取得"><svg class="placeholder-dice" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="15" y="15" width="50" height="50" rx="13" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><circle cx="28" cy="28" r="3"/><circle cx="52" cy="28" r="3"/><circle cx="40" cy="40" r="3"/><circle cx="28" cy="52" r="3"/><circle cx="52" cy="52" r="3"/></g></svg></div>';
-  var games=[],byId={},links={},saved=[],mode="all",remember=false;
+  var games=[],byId={},links={},saved=[],mode="all",remember=false,previousChoice=null;
   function storageGet(key) {try{return localStorage.getItem(key)}catch(_){return null}}
   function storageSet(key,value) {try{localStorage.setItem(key,value)}catch(_){}}
   function storageRemove(key) {try{localStorage.removeItem(key)}catch(_){}}
@@ -98,7 +98,10 @@
     var selected=selectGames(games,mode,now);
     var insights=window.KyoDecisionInsights;
     var insightConditions=mode==="two"?{players:2}:mode==="short"?{minutes:30}:null;
-    root.innerHTML=selected.length?'<div class="today-grid">'+selected.map(function(g,k){
+    var changeInsights=insights&&previousChoice?insights.compare(previousChoice.conditions,insightConditions,previousChoice.top,selected[0]):[];
+    previousChoice={conditions:insightConditions,top:selected[0]||null};
+    var insightHtml=changeInsights.filter(function(x){return x.type==="rank_change"}).map(function(x){return '<p class="small" role="status" data-decision-change="'+escapeText(x.type)+'"><strong>'+escapeText(x.title)+'</strong> '+escapeText(x.detail)+'</p>';}).join("");
+    root.innerHTML=selected.length?insightHtml+'<div class="today-grid">'+selected.map(function(g,k){
       var l=links[g.game_id]||{};
       var search="https://search.rakuten.co.jp/search/mall/"+encodeURIComponent(g.rakuten_query||g.title)+"/";
       var url=typeof l.url==="string"&&/^https:\/\//.test(l.url)?l.url:search;
