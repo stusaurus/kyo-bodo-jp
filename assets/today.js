@@ -140,6 +140,7 @@
     var index=saved.indexOf(id);
     if(index>=0)saved.splice(index,1);
     else if(saved.length<12)saved.push(id);
+    else return; // Never report saving when the local shelf is at capacity.
     storageSet(SAVE_KEY,JSON.stringify(saved));
     render();
     track("today_save_toggle",{game_id:id,saved:index<0?"1":"0",view_mode:mode});
