@@ -88,7 +88,9 @@ def test_home_has_six_visual_scene_cards():
 
 def test_today_recommendations_have_featured_layout():
     assert "today-grid" in m.CSS
-    assert "今日のイチオシ" in m.TODAY
+    assert "まずは、この候補から" in m.TODAY
+    assert "today-choice-row" in m.CSS
+    assert "data-today-save" in m.TODAY
     assert "featured" in m.TODAY
 
 def test_diagnosis_first_result_is_visually_prioritized():

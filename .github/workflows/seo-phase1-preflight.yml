@@ -42,10 +42,13 @@ jobs:
           npm install --prefix /tmp/scene-qa --no-audit --no-fund playwright@1.56.1 lighthouse@12.8.2
           /tmp/scene-qa/node_modules/.bin/playwright install --with-deps chromium
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_scene_presentation.cjs
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_today_choices.cjs
       - name: Save unpublished scene evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scene-presentation-evidence
-          path: audit-results/scene-presentation/
+          path: |
+            audit-results/scene-presentation/
+            audit-results/today-choice/
           retention-days: 14
