@@ -281,12 +281,15 @@ def scene_comparison_table(s, ranked):
         players = e(player_label(game))
         if game.get('players_source'):
             players += f'<br><a href="{e(game["players_source"])}" target="_blank" rel="noopener">人数の公式情報</a>'
-        rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th><td>{players}</td><td>{game["play_time_min"]}〜{game["play_time_max"]}分</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
+        format_cell = ('<td>2人専用の人数表記</td>' if game['players_min'] == game['players_max'] == 2
+                       else '<td>2人を含む複数人数対応</td>') if s['scene_id'] == 'two-player' else ''
+        rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th><td>{players}</td>{format_cell}<td>{game["play_time_min"]}〜{game["play_time_max"]}分</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
     note = ('2人対応の人数・時間・遊び方を見比べられます。「2人対応」は2人専用という意味ではありません。静かに対戦したい日と、2人で相談して協力したい日でも選び方が変わります。'
             if s['scene_id'] == 'two-player' else 'このページは掲載データの上限が20分以内のゲームに絞っています。説明・準備・片付けの時間は別に見込んでください。')
     compare_id = ' id="two-player-comparison"' if s['scene_id'] == 'two-player' else ''
+    format_heading = '<th scope="col">2人専用／複数人数対応</th>' if s['scene_id'] == 'two-player' else ''
     return f'''<section class="section scene-quick-comparison"{compare_id}><div class="eyebrow">COMPARE AT A GLANCE</div><h2>人数・時間・遊び方を早見表で比較</h2><p>{note}</p>
-<p class="small">表は横にスクロールできます。</p><div class="scene-table-scroll" role="region" aria-label="ゲーム比較表。横にスクロールできます" tabindex="0"><table class="scene-data-table"><caption>このページの候補{len(ranked)}本。掲載順は下の商品カードと同じです。</caption><thead><tr><th scope="col">ゲーム・遊び方</th><th scope="col">人数</th><th scope="col">時間目安</th><th scope="col">対象年齢</th><th scope="col">協力／対戦</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
+<p class="small">表は横にスクロールできます。</p><div class="scene-table-scroll" role="region" aria-label="ゲーム比較表。横にスクロールできます" tabindex="0"><table class="scene-data-table"><caption>このページの候補{len(ranked)}本。掲載順は下の商品カードと同じです。</caption><thead><tr><th scope="col">ゲーム・遊び方</th><th scope="col">人数</th>{format_heading}<th scope="col">時間目安</th><th scope="col">対象年齢</th><th scope="col">協力／対戦</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <p class="small">人数・時間・対象年齢は掲載データの参考値です。購入前に販売されている版のメーカー表示を確認してください。</p><a class="text-link" href="{u("diagnosis/?src=scene_comparison")}">時間・気分も合わせて診断する →</a></section>'''
 
 
