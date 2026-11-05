@@ -22,6 +22,8 @@ jobs:
         run: |
           node --check assets/diagnosis.js
           node --check assets/today.js
+          node --check assets/decision-insights.js
+          node tests/test_decision_insights.cjs
           node --check assets/media.js
       - name: Validate diagnosis, game pages and SEO files
         env:

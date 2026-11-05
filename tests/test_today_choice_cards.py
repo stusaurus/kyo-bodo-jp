@@ -51,3 +51,29 @@ assert.deepEqual(m.selectGames([], 'two',dt),[]);
     assert result.returncode==0,result.stderr
     result=subprocess.run(["node","-e",code],cwd=ROOT,capture_output=True,text=True)
     assert result.returncode==0,result.stderr
+
+def test_decision_insights_integration():
+    page=site.home()
+    assert 'decision-insights.js' in page
+    assert page.index('decision-insights.js') < page.index('today.js')
+    code=r"""
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const engine=require('./assets/decision-insights.js');
+const catalog={game_id:'sample',players_min:2,players_max:4,play_time_max:30,age:8};
+assert.equal(engine.fit(catalog,{players:2,minutes:30,youngestAge:8}).status,'eligible');
+assert.equal(engine.fit(catalog,{youngestAge:7}).status,'excluded');
+assert.equal(engine.fit({...catalog,age:undefined},{youngestAge:8}).status,'unverified');
+const source=fs.readFileSync('./assets/today.js','utf8');
+assert(source.includes('window.KyoDecisionInsights'));
+assert(source.includes('data-decision-insight'));
+assert(source.includes('data-decision-change'));
+assert(source.includes('previousChoice'));
+assert.equal(engine.compare({players:2},{players:2},{game_id:'a'},{game_id:'b'})[0].type,'rank_change');
+assert.equal(engine.compare({players:2},{players:2},{game_id:'a'},{game_id:'a'}).length,0);
+"""
+    result=subprocess.run(["node","-e",code],cwd=ROOT,capture_output=True,text=True)
+    assert result.returncode==0,result.stderr
+    result=subprocess.run(["node","tests/test_decision_insights.cjs"],cwd=ROOT,capture_output=True,text=True)
+    assert result.returncode==0,result.stderr

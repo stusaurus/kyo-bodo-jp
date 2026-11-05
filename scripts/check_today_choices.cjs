@@ -46,6 +46,9 @@ function server(root,port){
       await page.locator('[data-today-mode="two"]').click();
       assert.equal(await page.locator('[data-today-mode="two"]').getAttribute('aria-pressed'),'true');
       assert.equal(await page.evaluate(()=>localStorage.getItem('kyo_bodo_today_mode_v1')),null,'filter must not persist without opt-in');
+      const twoInsights=page.locator('.today-pick [data-decision-insight]');
+      assert.equal(await twoInsights.count(),await page.locator('.today-pick').count());
+      for(const verdict of await twoInsights.all())assert.equal(await verdict.getAttribute('data-decision-insight'),'eligible','only publisher-supported 2-player candidates may be recommended');
       const twoIds=await page.locator('.today-pick [data-game-id][data-track]').evaluateAll(els=>els.map(x=>x.dataset.gameId));
       assert(twoIds.length>0&&twoIds.length<=3);
       for(const id of twoIds){
@@ -66,6 +69,9 @@ function server(root,port){
       const familyIds=await page.locator('.today-pick [data-game-id][data-track]').evaluateAll(els=>els.map(x=>x.dataset.gameId));
       for(const id of familyIds)assert(Number(byId.get(id).family)>=4);
       await page.locator('[data-today-mode="short"]').click();
+      const shortInsights=page.locator('.today-pick [data-decision-insight]');
+      assert.equal(await shortInsights.count(),await page.locator('.today-pick').count());
+      for(const verdict of await shortInsights.all())assert.equal(await verdict.getAttribute('data-decision-insight'),'eligible','short-play recommendation requires confirmed duration');
       const shortIds=await page.locator('.today-pick [data-game-id][data-track]').evaluateAll(els=>els.map(x=>x.dataset.gameId));
       for(const id of shortIds)assert(Number(byId.get(id).play_time_max)<=30);
       await page.locator('[data-today-remember]').click();
