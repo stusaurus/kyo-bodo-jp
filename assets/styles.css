@@ -356,3 +356,27 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
   .today-pick .card-actions{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.today-choice-button{transition:none}}
+
+
+/* 2-player page: progressively reveal a factual shortlist, not a popularity rank. */
+.two-player-quick{margin:24px auto;padding:clamp(16px,3vw,28px);background:#fff;border:1px solid var(--line);border-radius:22px;max-width:1100px}
+.two-player-quick h2{font-size:clamp(21px,3vw,29px);line-height:1.4;margin:6px 0 8px}
+.two-player-quick>p{font-size:14px;color:var(--muted);line-height:1.7}
+.two-player-quick form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.two-player-quick fieldset{min-width:0;border:1px solid var(--line);border-radius:14px;padding:12px;margin:0}
+.two-player-quick legend{font-size:14px;font-weight:700;padding:0 6px}
+.two-quick-options{display:flex;flex-wrap:wrap;gap:8px}
+.two-quick-option{position:relative;cursor:pointer}
+.two-quick-option input{position:absolute;inset:0;opacity:0}
+.two-quick-option span{display:inline-flex;min-height:44px;align-items:center;justify-content:center;text-align:center;border:1px solid #d2dce7;border-radius:999px;padding:8px 14px;font-size:13px;line-height:1.4;background:#fafcff;color:var(--ink)}
+.two-quick-option input:checked+span{border-color:var(--blue);background:#e8f0ff;font-weight:700}
+.two-quick-option input:focus-visible+span{outline:3px solid var(--orange);outline-offset:3px}
+.two-player-quick [hidden]{display:none!important}
+.two-quick-count{font-weight:700;color:var(--ink)!important;min-height:28px}
+.two-quick-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));list-style:none;gap:12px;padding:0;margin:12px 0 18px}
+.two-quick-results li{min-width:0}
+.two-quick-results li a{display:flex;flex-direction:column;gap:8px;padding:16px;min-height:110px;height:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);text-decoration:none}
+.two-quick-results li a strong{font-size:16px;line-height:1.5}
+.two-quick-results li a span{font-size:12px;line-height:1.6;color:var(--muted)}
+.two-quick-results li a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+@media(max-width:400px){.two-player-quick{margin:16px 0;padding:14px}.two-player-quick form{grid-template-columns:minmax(0,1fr)}.two-quick-results{grid-template-columns:minmax(0,1fr)}}
