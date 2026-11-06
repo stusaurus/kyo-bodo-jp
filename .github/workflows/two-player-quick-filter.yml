@@ -1,0 +1,37 @@
+name: Two-player progressive shortlist QA
+on:
+  pull_request:
+    paths:
+      - 'scripts/two_player_quick_filter.py'
+      - 'scripts/build_site.py'
+      - 'assets/two-player-quick-filter.js'
+      - 'assets/styles.css'
+      - 'tests/test_two_player_quick_filter.py'
+      - 'tests/two-player-quick-filter.test.cjs'
+      - '.github/workflows/two-player-quick-filter.yml'
+permissions:
+  contents: read
+jobs:
+  shortlist:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify factual shortlist contract and scene isolation
+        run: python3 -m unittest discover -s tests -p 'test_two_player_quick_filter.py' -v
+      - name: Verify shortlist JS syntax and simulated user interactions
+        run: |
+          node --check assets/two-player-quick-filter.js
+          node --test tests/two-player-quick-filter.test.cjs
+      - name: Build public static site and prove asset is included
+        run: |
+          python3 scripts/build_site.py
+          test -s site/assets/two-player-quick-filter.js
+          grep -F 'data-two-player-quick-filter' site/scenes/two-player/index.html
+          grep -F 'two-player-quick-filter.js' site/scenes/two-player/index.html
