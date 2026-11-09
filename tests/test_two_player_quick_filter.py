@@ -45,6 +45,26 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
                 continue
             self.assertNotIn('data-two-player-quick-filter', scene_page(scene))
 
+    def test_two_player_page_quick_selector_uses_full_verified_catalog(self):
+        page = scene_page(self.scene)
+        section = re.search(r'<section class="two-player-quick".*?</section>', page, re.S)
+        self.assertIsNotNone(section)
+        quick = section.group(0)
+        self.assertEqual(quick.count(' data-two-game '), len(self.games))
+        self.assertIn('掲載カタログの2人対応' + str(len(self.games)) + '本', quick)
+        self.assertIn('href="#two-player-format-title"', quick)
+        self.assertIn('2人専用の候補を先に見る', quick)
+        self.assertNotIn('全12本', quick)
+        only_two = [g for g in self.games if g["players_min"] == g["players_max"] == 2]
+        self.assertTrue(only_two)
+        for game in only_two:
+            self.assertIn('data-game-id="' + game["game_id"] + '"', quick)
+        for game in GAMES:
+            if not supports_players(game, 2):
+                self.assertNotIn('data-game-id="' + game["game_id"] + '"', quick)
+        self.assertLess(page.index('data-two-player-quick-filter'), page.index('data-two-player-format'))
+        self.assertEqual(page.count('<h1>'), 1)
+
     def test_schema_and_eligibility_not_derived_from_rank(self):
         html = render_two_player_quick_filter(self.games[:3], u, asset, player_label, supports_players)
         for g in self.games[:3]:
