@@ -34,6 +34,13 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
         self.assertIn('遊べる時間', html)
         self.assertIn('協力するゲーム', html)
         self.assertIn('一番小さい人の年齢', html)
+        # The catalog includes two-person games for children under 8.
+        # Never force a six-year-old to select an older child or skip age validation.
+        self.assertTrue(any(g["age"] <= 4 for g in self.games))
+        self.assertTrue(any(g["age"] == 6 for g in self.games))
+        for age in ("4", "6", "8", "10", "12"):
+            self.assertIn(f'name="age" value="{age}"', html)
+        self.assertLess(html.index('name="age" value="4"'), html.index('name="age" value="6"'))
 
     def test_real_two_player_page_only(self):
         html = scene_page(self.scene)
