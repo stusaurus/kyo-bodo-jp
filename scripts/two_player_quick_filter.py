@@ -30,7 +30,7 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
     choices = (
         ("minutes", "遊べる時間", (("0", "指定なし"), ("15", "15分以内"), ("30", "30分以内"))),
         ("style", "遊び方", (("any", "どちらでも"), ("cooperative", "協力するゲーム"))),
-        ("age", "一番小さい人の年齢", (("0", "指定なし"), ("8", "8歳"), ("10", "10歳"), ("12", "12歳"))),
+        ("age", "一番小さい人の年齢", (("0", "指定なし"), ("4", "4歳"), ("6", "6歳"), ("8", "8歳"), ("10", "10歳"), ("12", "12歳"))),
     )
     filters = []
     for name, legend, options in choices:
