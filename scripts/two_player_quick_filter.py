@@ -45,7 +45,7 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
         ' aria-labelledby="two-player-quick-title">'
         '<div class="eyebrow">CHOOSE IN THREE TAPS</div>'
         '<h2 id="two-player-quick-title">2人で遊ぶ、条件から3本を見つける</h2>'
-        '<p>このページに掲載する' + str(len(rows)) + '本から、時間・遊び方・年齢で絞ります。'
+        '<p>掲載カタログの2人対応' + str(len(rows)) + '本から、時間・遊び方・年齢で絞ります。'
         '確認できた対応人数・所要時間上限・対象年齢だけで判定。'
         '人気・優劣・購入可能性の順位ではありません。</p>'
         '<form aria-label="2人用ゲームの簡単な絞り込み">' + "".join(filters) + '</form>'
@@ -54,7 +54,8 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
         '<p class="two-quick-empty" data-two-quick-empty hidden>'
         '条件を広げるか、掲載されている全候補をご覧ください。</p>'
         '<ul class="two-quick-results">' + "".join(rows) + '</ul>'
-        '<p><a class="text-link" href="#two-player-choices">遊び方の詳しい比較を見る →</a></p>'
+        '<p><a class="text-link" href="#two-player-format-title">2人専用の候補を先に見る →</a> ' +
+        '<a class="text-link" href="#two-player-choices">遊び方の詳しい比較を見る →</a></p>'
         '</section>'
         '<script defer src="' + escape(asset_url("two-player-quick-filter.js"), quote=True) + '"></script>'
     )

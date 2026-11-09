@@ -61,6 +61,21 @@ test('progressively refine using proven max play-time, cooperation and age',()=>
   assert.deepEqual(app.visible(),[0,1,2]);
 });
 
+test('catalog-wide records remain filterable beyond the first twelve without ranking',()=>{
+  const records=Array.from({length:64},(_,i)=>({
+    minutes:i===40?15:50,
+    age:i===40?8:12,
+    coop:i===40
+  }));
+  const app=build(records);
+  assert.deepEqual(app.visible(),[0,1,2]);
+  assert.match(app.counter.textContent,/64本が条件に一致/);
+  app.change({minutes:'15',style:'cooperative',age:'8'});
+  assert.deepEqual(app.visible(),[40]);
+  assert.match(app.counter.textContent,/1本が条件に一致/);
+  assert.doesNotMatch(source,/全12本/);
+});
+
 test('no matching eligible listing shows calm empty state instead of fake choice',()=>{
   const app=build([{minutes:60,age:12,coop:false}]);
   app.change({minutes:'15',style:'cooperative',age:'8'});

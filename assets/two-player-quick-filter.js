@@ -27,7 +27,7 @@
       empty.hidden=matched.length>0;
       counter.textContent=matched.length
         ?matched.length+'本が条件に一致。うち'+chosen.length+'本を表示（優劣・人気順ではありません）'
-        :'この条件に合う掲載候補はありません。条件を広げるか、全12本から探してください。';
+        :'この条件に合う掲載候補はありません。条件を広げるか、2人対応の全候補から探してください。';
     }
     form.addEventListener('change',filter);
     filter();
