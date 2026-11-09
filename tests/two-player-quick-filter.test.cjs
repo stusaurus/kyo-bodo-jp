@@ -61,6 +61,24 @@ test('progressively refine using proven max play-time, cooperation and age',()=>
   assert.deepEqual(app.visible(),[0,1,2]);
 });
 
+test('four- and six-year-old choices exclude older-only games without recommendation claims',()=>{
+  const app=build([
+    {minutes:20,age:4,coop:false},
+    {minutes:15,age:5,coop:false},
+    {minutes:15,age:6,coop:true},
+    {minutes:15,age:8,coop:true}
+  ]);
+  app.change({age:'4'});
+  assert.deepEqual(app.visible(),[0]);
+  app.change({age:'6',minutes:'15'});
+  assert.deepEqual(app.visible(),[1,2]);
+  app.change({style:'cooperative'});
+  assert.deepEqual(app.visible(),[2]);
+  assert.match(app.counter.textContent,/1本が条件に一致/);
+  app.change({age:'0',minutes:'0',style:'any'});
+  assert.deepEqual(app.visible(),[0,1,2]);
+});
+
 test('catalog-wide records remain filterable beyond the first twelve without ranking',()=>{
   const records=Array.from({length:64},(_,i)=>({
     minutes:i===40?15:50,
