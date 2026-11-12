@@ -22,6 +22,18 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
         self.assertNotIn('人気順におすすめ', html)
         self.assertNotIn('楽天で購入', html)
 
+    def test_default_three_include_one_genuine_two_only_example(self):
+        page = render_two_player_quick_filter(self.games, u, asset, player_label, supports_players)
+        first_three = re.findall(r'<li data-two-game[^>]*>.*?data-game-id="([^"]+)"', page, re.S)[:3]
+        self.assertEqual(len(first_three), 3)
+        self.assertEqual(first_three[0], 'quarto')
+        self.assertTrue(any(g['game_id'] == first_three[0] and
+                            g['players_min'] == g['players_max'] == 2 for g in self.games))
+        self.assertIn('掲載人数が2人だけ', page)
+        self.assertEqual(page.count(' data-two-game '), len(self.games))
+        self.assertEqual(len(set(re.findall(r'data-game-id="([^"]+)"', page))), len(self.games))
+        self.assertIn('人気・優劣・購入可能性の順位ではありません', page)
+
     def test_non_matching_game_never_enters_shortlist(self):
         game = dict(self.games[0], players_min=3, players_max=5)
         html = render_two_player_quick_filter([game], u, asset, player_label, supports_players)

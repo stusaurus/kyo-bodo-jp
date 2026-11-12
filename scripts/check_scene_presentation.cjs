@@ -143,19 +143,64 @@ function serve(root,port){return new Promise(resolve=>{
       await page.screenshot({path:path.join(out,`preset-${preset}-${width}.png`),fullPage:true});
      }
     }
-    // Only the intended two-player title, description and H1 may differ.
-    // All canonical, structured data, actual ranked offers, links and images remain identical.
+    // An intentional, bounded 12-item sample correction is permitted here.
+    // Every retained offer and every newly surfaced offer is checked against
+    // the *same* public, original-sale snapshot; no affiliate links, images,
+    // or edition details can change silently with the presentation sample.
     if(index){
       assert(snapshot.title.includes('2人用ボードゲームおすすめ比較'),'SEO title not search aligned');
       assert(snapshot.description.includes('2人専用と複数人数対応'),'SEO description not specific');
       assert(snapshot.h1.includes('2人用・2人でも遊べる'),'SEO H1 not specific');
       assert(snapshot.description.includes('人気順位ではありません'),'no popularity overclaim allowed');
     }
-    const {note,table,body,title,description,h1,...stable}=snapshot;snapshots.push(stable);
+    snapshots.push(snapshot);
     records.push({label,width,documentWidth:snapshot.documentWidth,images:imageCount,errors,tableScroll:snapshot.table,note:snapshot.note,title:snapshot.title,h1:snapshot.h1});
+    // Baseline detail pages are the existing source of truth for newly
+    // featured items. Validate them *before* closing the browser page.
+    if(index){
+      const previouslyShown=new Set(snapshots[0].cards.map(c=>c.game));
+      for(const card of snapshot.cards.filter(c=>!previouslyShown.has(c.game))){
+        const response=await page.request.get(`http://127.0.0.1:8765/kyo-bodo-jp/games/${card.game}/`);
+        assert.equal(response.status(),200,'New sample must have an existing baseline game page');
+        const detail=await page.evaluate(source=>{
+          const doc=new DOMParser().parseFromString(source,'text/html');
+          return {title:doc.querySelector('.game-hero-copy h1')?.textContent,
+                  href:doc.querySelector('.product-panel [data-affiliate]')?.getAttribute('href'),
+                  image:doc.querySelector('.game-hero-art img')?.getAttribute('src')||null};
+        },await response.text());
+        assert.deepEqual({title:card.title,href:card.href,image:card.image},detail,
+          'Newly featured offer/image/title differs from existing baseline game detail');
+      }
+    }
     await page.close();
    }
-   assert.deepEqual(snapshots[1],snapshots[0],'Canonical, structured data, product order, links or images changed');
+   const [before,after]=snapshots;
+   assert.equal(before.canonical,after.canonical,'Canonical changed');
+   assert.equal(before.title,after.title,'No SEO title rewrite requested');
+   assert.equal(before.description,after.description,'No meta description rewrite requested');
+   assert.equal(before.h1,after.h1,'No H1 rewrite requested');
+   assert.equal(before.width,after.width,'Browser viewport changed');
+   assert.equal(before.documentWidth,after.documentWidth,'Unexpected horizontal page width change');
+   const oldIds=['carcassonne','splendor','dobble','ito','ito-rainbow','nanjamonja',
+     'codenames-duet','love-letter','coyote','ubongo','blokus','word-basket'];
+   const newIds=['quarto','carcassonne','splendor','dobble','gobblet-gobblers','ito',
+     'ito-rainbow','nanjamonja','patchwork','codenames-duet','love-letter','coyote'];
+   assert.deepEqual(before.cards.map(c=>c.game),oldIds,'Unexpected main baseline, stop rather than mask unrelated changes');
+   assert.deepEqual(after.cards.map(c=>c.game),newIds,'Only approved three strict two-player samples may replace three multi-player examples');
+   const baselineByGame=new Map(before.cards.map(c=>[c.game,c]));
+   for(const card of after.cards){
+     if(baselineByGame.has(card.game)){
+       assert.deepEqual(card,baselineByGame.get(card.game),
+         'Existing displayed offer title, image, affiliate URL or ID changed');
+     }
+   }
+   assert.equal(after.schema['@context'],before.schema['@context']);
+   assert.equal(after.schema['@type'],'ItemList');
+   assert.equal(after.schema.name,before.schema.name);
+   assert.deepEqual(after.schema.itemListElement.map(x=>({url:x.url,name:x.name,position:x.position})),
+     after.cards.map((c,i)=>({url:'https://stusaurus.github.io/kyo-bodo-jp/games/'+c.game+'/',
+       name:c.title,position:i+1})),
+     'Structured-data ItemList must exactly match approved page cards, not an invented ranking');
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));

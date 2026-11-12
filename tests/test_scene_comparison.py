@@ -5,8 +5,7 @@ from test_site_presentation import m
 def test_comparison_preserves_ranked_itemlist_and_catalog_values():
     for sid in ('two-player', 'short'):
         scene = next(s for s in m.SCENES if s['scene_id'] == sid)
-        ranked = sorted(m.GAMES, key=lambda g: m.scene_score(g, scene), reverse=True)
-        ranked = [g for g in ranked if m.scene_score(g, scene) >= 50][:12]
+        ranked = m.scene_representatives(scene)
         page = m.scene_page(scene)
         schema = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page).group(1))
         table = page.split('<tbody>')[1].split('</tbody>')[0]
@@ -31,18 +30,45 @@ def test_other_scenes_are_outside_the_pilot():
             assert m.scene_comparison_table(scene, m.GAMES[:3]) == ''
 
 
-def test_two_player_catalog_order_is_not_a_quality_ranking():
+def test_two_player_representatives_include_both_formats_without_ranking():
     scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
-    ranked = [g for g in m.GAMES if m.scene_score(g, scene) >= 50][:12]
+    ranked = m.scene_representatives(scene)
     assert [g['game_id'] for g in ranked] == [
-        'carcassonne','splendor','dobble','ito','ito-rainbow','nanjamonja',
-        'codenames-duet','love-letter','coyote','ubongo','blokus','word-basket']
+        'quarto', 'carcassonne', 'splendor', 'dobble',
+        'gobblet-gobblers', 'ito', 'ito-rainbow', 'nanjamonja',
+        'patchwork', 'codenames-duet', 'love-letter', 'coyote']
     assert {m.scene_score(g,scene) for g in ranked} == {100}
+    assert len(ranked) == len({g['game_id'] for g in ranked}) == 12
+    only_two = [g for g in ranked if g['players_min'] == g['players_max'] == 2]
+    multi = [g for g in ranked if g not in only_two]
+    assert len(only_two) == 3 and len(multi) == 9
+    assert [g['game_id'] for g in only_two] == ['quarto','gobblet-gobblers','patchwork']
+    assert [g['game_id'] for g in multi] == [g['game_id'] for g in m.GAMES
+                                            if m.supports_players(g, 2)
+                                            and not g['players_min'] == g['players_max'] == 2][:9]
     page = m.scene_page(scene)
-    assert 'カタログ掲載順に紹介' in page
+    assert '各グループ内はカタログ掲載順' in page
+    assert '人気順・優劣の順位ではありません' in page
     assert 'おすすめ度の高い順' not in page
-    assert '2人専用</td>' not in page
+    assert '2人専用の人数表記</td>' in page
+    assert '2人を含む複数人数対応</td>' in page
     assert '2人以上' in page and '人数の公式情報' in page
+
+
+def test_two_player_compatibility_and_other_scene_order_are_unchanged():
+    scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
+    all_two = [g for g in m.GAMES if m.supports_players(g, 2)]
+    assert len(all_two) > 12
+    assert len(m.scene_representatives(scene)) == 12
+    assert m.scene_representatives(scene) == m.scene_representatives(scene)
+    for other in m.SCENES:
+        if other['scene_id'] == 'two-player':
+            continue
+        expected = [g for g in sorted(m.GAMES, key=lambda g:m.scene_score(g, other), reverse=True)
+                    if m.scene_score(g, other) >= 50][:12]
+        assert m.scene_representatives(other) == expected
+    assert m.BY_ID['codenames-duet']['players_max'] is None
+    assert m.BY_ID['codenames-duet'] in m.scene_representatives(scene)
 
 
 def test_open_ended_player_count_requires_explicit_publisher_evidence():

@@ -285,7 +285,7 @@ def scene_comparison_table(s, ranked):
         format_cell = ('<td>2人専用の人数表記</td>' if game['players_min'] == game['players_max'] == 2
                        else '<td>2人を含む複数人数対応</td>') if s['scene_id'] == 'two-player' else ''
         rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th><td>{players}</td>{format_cell}<td>{game["play_time_min"]}〜{game["play_time_max"]}分</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
-    note = ('2人対応の人数・時間・遊び方を見比べられます。「2人対応」は2人専用という意味ではありません。静かに対戦したい日と、2人で相談して協力したい日でも選び方が変わります。'
+    note = ('掲載人数が2人だけのゲームと、2人を含む複数人数に対応するゲームを、同じ表で比較できます。2人専用の人数表記は「2人のときに必ず優れている」という意味ではありません。時間・対象年齢・協力／対戦も一緒に確認してください。'
             if s['scene_id'] == 'two-player' else 'このページは掲載データの上限が20分以内のゲームに絞っています。説明・準備・片付けの時間は別に見込んでください。')
     compare_id = ' id="two-player-comparison"' if s['scene_id'] == 'two-player' else ''
     format_heading = '<th scope="col">2人専用／複数人数対応</th>' if s['scene_id'] == 'two-player' else ''
@@ -333,10 +333,45 @@ aria-labelledby="two-player-format-title">
 </section>''')
 
 
+def scene_representatives(s, limit=12):
+    """Factual two-player comparison examples, not a best-of ranking.
+
+    A pure catalog-order prefix previously exposed zero strict two-person
+    entries despite the page promising to compare those with multi-player
+    games. Preserve catalog order *within each format*, and do not change
+    which games are eligible for the full quick filter or diagnosis.
+    """
+    ranked = sorted(GAMES, key=lambda g: scene_score(g, s), reverse=True)
+    eligible = [g for g in ranked if scene_score(g, s) >= 50]
+    if s['scene_id'] != 'two-player' or limit < 2:
+        return eligible[:limit]
+    only_two = [g for g in eligible if g['players_min'] == g['players_max'] == 2]
+    multi = [g for g in eligible if g not in only_two]
+    if not only_two or not multi:
+        return eligible[:limit]
+
+    # Representative balance: at most three strictly two-person examples,
+    # alongside multi-player examples. This is not a quality or popularity
+    # score; game entries retain their original per-format catalog order.
+    chosen_two = only_two[:min(3, len(only_two), max(1, limit // 4))]
+    chosen_multi = multi[:max(0, limit - len(chosen_two))]
+    selected = []
+    for index, game in enumerate(chosen_two):
+        selected.append(game)
+        selected.extend(chosen_multi[index * 3:(index + 1) * 3])
+    selected.extend(chosen_multi[len(chosen_two) * 3:])
+    if len(selected) < limit:
+        existing_ids = {g['game_id'] for g in selected}
+        selected.extend(g for g in eligible if g['game_id'] not in existing_ids)
+    return selected[:limit]
+
+
 def scene_page(s):
-    ranked=sorted(GAMES,key=lambda g:scene_score(g,s),reverse=True)
-    ranked=[g for g in ranked if scene_score(g,s)>=50][:12]
-    order_note = ('2人対応の候補をカタログ掲載順に紹介。人気順・優劣の順位ではありません。'
+    ranked = scene_representatives(s)
+    order_note = ('2人だけの人数表記と複数人数対応を組み合わせた比較例。'
+                  '各グループ内はカタログ掲載順で、人気順・優劣の順位ではありません。'
+                  if s['scene_id'] == 'two-player' else
+                  '2人対応の候補をカタログ掲載順に紹介。人気順・優劣の順位ではありません。'
                   if s['rule']['type'] == 'players' else
                   'シーン条件と編集評価による適合度順。同点はカタログ掲載順です。')
     scene_i=SCENE_ART[s["scene_id"]]

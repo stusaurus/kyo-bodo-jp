@@ -6,6 +6,13 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
     eligible = [g for g in games if supports_players(g, 2)]
     if not eligible:
         return ""
+    # Place one factual two-person-format example among the initially visible
+    # three, without changing which of the entire catalog can be filtered.
+    # The selection is first in catalog order, never a popularity ranking.
+    first_two = next((g for g in eligible
+                      if g["players_min"] == g["players_max"] == 2), None)
+    if first_two is not None:
+        eligible = [first_two] + [g for g in eligible if g is not first_two]
     rows = []
     for i, g in enumerate(eligible):
         time = int(g["play_time_max"])
@@ -15,13 +22,15 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
         title = escape(str(g["title"]), quote=True)
         gid = escape(str(g["game_id"]), quote=True)
         label = escape(str(player_label(g)), quote=True)
+        format_label = ("掲載人数が2人だけ · "
+                        if g["players_min"] == g["players_max"] == 2 else "")
         rows.append(
             f'<li data-two-game data-time-max="{time}" data-min-age="{age}"'
             f' data-cooperative="{1 if g["cooperative"] else 0}"'
             f'{" hidden" if i >= 3 else ""}>'
             f'<a data-track="game_detail_click" data-source="two_player_quick"'
             f' data-game-id="{gid}" href="{escape(url("games/" + g["game_id"] + "/"), quote=True)}">'
-            f'<strong>{title}</strong><span>{label} · '
+            f'<strong>{title}</strong><span>{label} · {format_label}'
             f'{int(g["play_time_min"])}〜{time}分 · 対象{age}歳〜 · '
             f'{"協力" if g["cooperative"] else "非協力"}</span></a></li>'
         )
