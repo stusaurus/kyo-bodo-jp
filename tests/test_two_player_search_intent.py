@@ -37,3 +37,26 @@ def test_no_promises_of_all_game_popularity_or_changes_to_other_scenes():
         html=m.scene_page(other)
         assert "2人用・2人でも遊べる" not in html
         assert "<h1>"+m.e(other["title"])+"<br>ボードゲーム</h1>" in html
+
+def test_two_player_rule_contrasts_answer_actual_gameplay_without_new_rankings():
+    s = next(x for x in m.SCENES if x["scene_id"] == "two-player")
+    page = m.scene_page(s)
+    assert page.count('class="two-player-contrast"') == 1 or 'class="section two-player-contrast"' in page
+    assert page.index('id="two-player-contrast-title"') < page.index('id="two-player-format-title"')
+    for gid in ("gobblet-gobblers", "quarto", "codenames-duet", "sky-team"):
+        game = m.BY_ID[gid]
+        assert m.supports_players(game, 2)
+        assert m.u("games/" + gid + "/") in m.two_player_rule_contrasts()
+        assert m.e(game["how_to_play"][1]) in m.two_player_rule_contrasts()
+        assert f'{game["play_time_min"]}〜{game["play_time_max"]}分' in m.two_player_rule_contrasts()
+        assert f'対象{game["age"]}歳〜' in m.two_player_rule_contrasts()
+    assert page.count('class="two-player-contrast-card"') == 2
+    assert "人気・優劣の順位ではありません" in page
+    for other in m.SCENES:
+        if other["scene_id"] != "two-player":
+            assert 'id="two-player-contrast-title"' not in m.scene_page(other)
+
+def test_home_has_descriptive_link_to_existing_two_player_search_entry():
+    home = m.home()
+    assert '2人用ボードゲームの対戦・協力と遊び方を比べる' in home
+    assert f'<a href="{m.u("scenes/two-player/")}">2人用ボードゲーム' in home
