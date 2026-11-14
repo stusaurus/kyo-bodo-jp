@@ -90,6 +90,21 @@ function serve(root,port){return new Promise(resolve=>{
      assert(await page.locator('#two-player-comparison').isVisible());
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
      await guide.screenshot({path:path.join(out,'player-format-'+width+'.png'),animations:'disabled'});
+     const table=page.locator('#two-player-comparison .scene-data-table');
+     assert.equal(await table.locator('thead th').count(),7,'Factual play-step column missing');
+     assert.equal(await table.locator('tbody tr').count(),12);
+     const quick=page.locator('[data-two-player-quick-filter]');
+     await quick.locator('input[name="style"][value="versus"]').check();
+     assert.equal(await quick.locator('[data-two-game]:visible').count(),3);
+     assert((await quick.locator('[data-two-game]:visible').evaluateAll(els=>els.map(x=>x.dataset.cooperative))).every(x=>x==='0'));
+     await quick.locator('input[name="style"][value="cooperative"]').check();
+     assert((await quick.locator('[data-two-game]:visible').evaluateAll(els=>els.map(x=>x.dataset.cooperative))).every(x=>x==='1'));
+     await quick.locator('input[name="age"][value="4"]').check();
+     assert.equal(await quick.locator('[data-two-game]:visible').count(),0);
+     assert.equal(await quick.locator('[data-two-quick-count]').innerText(),'この条件に合う掲載候補はありません。');
+     assert(await quick.locator('[data-two-quick-empty]').isVisible());
+     await quick.locator('input[name="style"][value="any"]').check();
+     await quick.locator('input[name="age"][value="0"]').check();
     }
     if(index){
      const shortcut=page.locator('.scene-hero-copy a[href="#two-player-choices"]');
@@ -181,12 +196,8 @@ function serve(root,port){return new Promise(resolve=>{
    assert.equal(before.h1,after.h1,'No H1 rewrite requested');
    assert.equal(before.width,after.width,'Browser viewport changed');
    assert.equal(before.documentWidth,after.documentWidth,'Unexpected horizontal page width change');
-   const oldIds=['carcassonne','splendor','dobble','ito','ito-rainbow','nanjamonja',
-     'codenames-duet','love-letter','coyote','ubongo','blokus','word-basket'];
-   const newIds=['quarto','carcassonne','splendor','dobble','gobblet-gobblers','ito',
-     'ito-rainbow','nanjamonja','patchwork','codenames-duet','love-letter','coyote'];
-   assert.deepEqual(before.cards.map(c=>c.game),oldIds,'Unexpected main baseline, stop rather than mask unrelated changes');
-   assert.deepEqual(after.cards.map(c=>c.game),newIds,'Only approved three strict two-player samples may replace three multi-player examples');
+   assert.deepEqual(after.cards.map(c=>c.game),before.cards.map(c=>c.game),
+     'This text/selector-only change must preserve the current published 12 cards');
    const baselineByGame=new Map(before.cards.map(c=>[c.game,c]));
    for(const card of after.cards){
      if(baselineByGame.has(card.game)){

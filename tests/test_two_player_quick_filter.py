@@ -45,6 +45,8 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<li data-two-game[^>]* hidden>', html)), max(0, min(8,len(self.games))-3))
         self.assertIn('遊べる時間', html)
         self.assertIn('協力するゲーム', html)
+        self.assertIn('対戦するゲーム', html)
+        self.assertIn('name="style" value="versus"', html)
         self.assertIn('一番小さい人の年齢', html)
         # The catalog includes two-person games for children under 8.
         # Never force a six-year-old to select an older child or skip age validation.
