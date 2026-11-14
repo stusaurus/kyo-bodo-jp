@@ -143,7 +143,7 @@ def home():
     pop="".join(card(BY_ID[x],"popular") for x in ["ito","catan","splendor"])
     body=f'''<section class="hero"><div class="hero-shell"><div class="hero-copy"><div class="hero-message"><p class="hero-eyebrow">みんなで遊ぶと、今日がちょっと特別に。</p><h1><span>今日</span>なにやる？</h1><p class="hero-summary">まずは今日のおすすめから。<span>もっと絞りたい人だけ、人数・時間で診断。</span></p></div><div class="hero-action-block"><div class="hero-actions"><a class="btn primary large" href="#today-games">おすすめ3本を先に見る <span aria-hidden="true">↓</span></a><a class="btn secondary" href="{u("diagnosis/?src=hero")}">人数・時間でもっと絞る <span aria-hidden="true">→</span></a></div><p class="hero-note">診断しなくても選べます　／　診断は任意・6問　／　登録不要</p></div></div><figure class="hero-visual"><img src="{asset("hero-kyo-bodo.webp")}" alt="暖かな光の中で、家族がテーブルを囲んでボードゲームを楽しむイラスト" width="1536" height="1024" fetchpriority="high" decoding="async"></figure></div></section>
 <section class="today-section" id="today-games" aria-label="今日のおすすめ商品"><div class="today-inner"><div class="section-lead"><div><div class="eyebrow">TODAY'S PICKS</div><h2>今日のおすすめ3本</h2></div><p class="section-sub">いつもの時間に、ひとつ遊びを。</p></div><div id="todayChoiceControls" hidden aria-label="今日の遊び方で絞り込む"></div><div id="todayGames" aria-live="polite"><p class="small">本日のおすすめを更新中。まずは定番の3本から選べます。</p><div class="grid popular-grid">{pop}</div></div><section class="today-saved-games" id="todaySavedGames" hidden aria-label="あとで比べるゲーム"></section></div></section>
-<section class="section scene-section" id="scenes"><div class="section-lead"><div><div class="eyebrow">PLAY TOGETHER</div><h2>今日は、誰と遊ぶ？</h2></div><a class="text-link" href="{u("scenes/")}">すべてのシーン <span class="arrow" aria-hidden="true">→</span></a></div>{scene_navigation()}</section>
+<section class="section scene-section" id="scenes"><div class="section-lead"><div><div class="eyebrow">PLAY TOGETHER</div><h2>今日は、誰と遊ぶ？</h2></div><a class="text-link" href="{u("scenes/")}">すべてのシーン <span class="arrow" aria-hidden="true">→</span></a></div>{scene_navigation()}<p class="scene-growth-link">2人で遊ぶ予定なら、<a href="{u("scenes/two-player/")}">2人用ボードゲームの対戦・協力と遊び方を比べる</a>ところから。</p></section>
 <section class="section"><div class="section-lead"><div><div class="eyebrow">FIND YOUR GAME</div><h2>「選ぶ」時間を短くする</h2></div></div><div class="steps"><div class="step-card"><span class="step-no">01</span><h3>今のメンバーを教えて</h3><p>人数・時間・気分を、6問で。</p></div><div class="step-card"><span class="step-no">02</span><h3>今日に合う候補が見つかる</h3><p>あなたたちに合う5本をご提案。</p></div><div class="step-card"><span class="step-no">03</span><h3>1分ルールで、遊ぶ姿を想像</h3><p>楽しそうと思ったら、その1本を。</p></div></div><div class="steps-action"><a class="text-link" href="{u("diagnosis/?src=how_it_works")}">今日の1本を診断する <span class="arrow" aria-hidden="true">→</span></a></div></section>
 <section class="section"><div class="section-lead"><div><div class="eyebrow">TIMELESS FAVORITES</div><h2>迷ったら、この定番から</h2></div><a class="text-link" href="{u("games/")}">{len(GAMES)}本のゲーム <span class="arrow" aria-hidden="true">→</span></a></div><div class="grid popular-grid">{pop}</div></section><script defer src="{asset("decision-insights.js")}"></script><script defer src="{asset("today.js")}"></script>'''
     return shell("きょうボド","ボードゲーム選びに迷ったら。人数・気分・時間の6問から、今日のメンバーに合う5本を30秒で診断。1分ルールで遊び方まで分かります。",body)
@@ -297,6 +297,41 @@ def scene_comparison_table(s, ranked):
 <p class="small">人数・時間・対象年齢は掲載データの参考値です。購入前に販売されている版のメーカー表示を確認してください。</p><a class="text-link" href="{u("diagnosis/?src=scene_comparison")}">時間・気分も合わせて診断する →</a></section>'''
 
 
+def two_player_rule_contrasts():
+    """Short, source-backed differences in what two people actually do."""
+    pairs = (
+        ("対戦：短い時間でも、考え方が違う", ("gobblet-gobblers", "quarto")),
+        ("協力：言葉で伝えるか、相談せず動くか", ("codenames-duet", "sky-team")),
+    )
+    cards = []
+    for heading, ids in pairs:
+        games = [BY_ID[gid] for gid in ids]
+        if not all(supports_players(g, 2) for g in games):
+            raise ValueError("2-player contrast includes an unsupported player count")
+        if games[0]["cooperative"] != games[1]["cooperative"]:
+            raise ValueError("2-player contrast mixes cooperative and versus games")
+        entries = []
+        for g in games:
+            fmt = ("2人だけの人数表記" if g["players_min"] == g["players_max"] == 2
+                   else "2人を含む複数人数対応")
+            entries.append(
+                f'<li><a href="{u("games/" + g["game_id"] + "/")}">'
+                f'<strong>{e(g["title"])}</strong></a>'
+                f'<span>{g["play_time_min"]}〜{g["play_time_max"]}分・対象{g["age"]}歳〜・{fmt}</span>'
+                f'<p>すること：{e(g["how_to_play"][1])}</p></li>'
+            )
+        cards.append('<article class="two-player-contrast-card"><h3>'
+                     + e(heading) + '</h3><ul>' + ''.join(entries) + '</ul></article>')
+    return ('''<section class="section two-player-contrast" aria-labelledby="two-player-contrast-title">
+<div class="eyebrow">HOW THEY PLAY</div>
+<h2 id="two-player-contrast-title">2人で遊べても、することはこんなに違う</h2>
+<p>時間や協力・対戦が似ていても、遊びの動きは異なります。4作品をルールの一手で比較します。</p>
+<div class="two-player-contrast-grid">''' + ''.join(cards) + '''</div>
+<p class="small">掲載ゲームのルール・人数・時間・対象年齢を使った比較例で、人気・優劣の順位ではありません。
+販売版の表示も確認してください。<a href="#two-player-comparison">12本の比較表へ</a></p>
+</section>''')
+
+
 def two_player_format_guide():
     """Help visitors choose using only the published player-count fields."""
     eligible = [g for g in GAMES if supports_players(g, 2)]
@@ -386,7 +421,7 @@ def scene_page(s):
                        '<p class="small">条件を引き継ぎ、残り4問で候補を選べます。診断中に条件を変更できます。</p></nav>')
 
     scene_h1 = ("2人用・2人でも遊べる" if s["scene_id"] == "two-player" else s["title"])
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     seo={
         "two-player":("2人用ボードゲームおすすめ比較｜2人専用と2人対応の違い", "2人でできるボードゲームを2人専用と複数人数対応に分けて紹介。カップル・友人・夫婦で、遊べる時間・対戦か協力か・対象年齢を確認。人気順位ではありません。"),
