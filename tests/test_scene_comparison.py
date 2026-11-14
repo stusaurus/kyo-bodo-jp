@@ -9,13 +9,19 @@ def test_comparison_preserves_ranked_itemlist_and_catalog_values():
         page = m.scene_page(scene)
         schema = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page).group(1))
         table = page.split('<tbody>')[1].split('</tbody>')[0]
+        if sid == 'two-player':
+            assert '<th scope="col">何をする？</th>' in page
+        else:
+            assert '<th scope="col">何をする？</th>' not in page
         assert table.count('<tr>') == len(ranked)
         assert [x['name'] for x in schema['itemListElement']] == [g['title'] for g in ranked]
         for row, game in zip(table.split('</tr>'), ranked):
             assert m.e(game['title']) in row
             assert f"{game['play_time_min']}〜{game['play_time_max']}分" in row
             assert ('協力' if game['cooperative'] else '対戦') in row
-            if sid == 'two-player': assert m.supports_players(game,2)
+            if sid == 'two-player':
+                assert m.supports_players(game,2)
+                assert m.e(game['how_to_play'][1]) in row
             else: assert game['play_time_max'] <= 20
 
 def test_short_snippet_matches_existing_twenty_minute_filter():
