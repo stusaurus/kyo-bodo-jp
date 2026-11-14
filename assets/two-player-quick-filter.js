@@ -15,19 +15,21 @@
       var settings=new FormData(form);
       var max=Number(settings.get('minutes')||0);
       var age=Number(settings.get('age')||0);
-      var coop=settings.get('style')==='cooperative';
+      var style=settings.get('style');
+      var coop=style==='cooperative',versus=style==='versus';
       var matched=items.filter(function(node){
         var time=Number(node.dataset.timeMax),minAge=Number(node.dataset.minAge);
         return Number.isFinite(time)&&time>0&&Number.isFinite(minAge)&&minAge>=0
           &&(!max||time<=max)&&(!age||minAge<=age)
-          &&(!coop||node.dataset.cooperative==='1');
+          &&(!coop||node.dataset.cooperative==='1')
+          &&(!versus||node.dataset.cooperative==='0');
       });
       var chosen=matched.slice(0,3);
       items.forEach(function(node){node.hidden=!chosen.includes(node);});
       empty.hidden=matched.length>0;
       counter.textContent=matched.length
         ?matched.length+'本が条件に一致。うち'+chosen.length+'本を表示（優劣・人気順ではありません）'
-        :'この条件に合う掲載候補はありません。条件を広げるか、2人対応の全候補から探してください。';
+        :'この条件に合う掲載候補はありません。';
     }
     form.addEventListener('change',filter);
     filter();
