@@ -94,12 +94,27 @@ test('catalog-wide records remain filterable beyond the first twelve without ran
   assert.doesNotMatch(source,/全12本/);
 });
 
+test('versus mode uses existing cooperation metadata and combines with age and duration',()=>{
+  const app=build([
+    {minutes:20,age:6,coop:false},{minutes:15,age:8,coop:true},
+    {minutes:15,age:7,coop:false},{minutes:30,age:12,coop:false}
+  ]);
+  app.change({style:'versus'});
+  assert.deepEqual(app.visible(),[0,2,3]);
+  app.change({minutes:'15',age:'8'});
+  assert.deepEqual(app.visible(),[2]);
+  app.change({style:'cooperative'});
+  assert.deepEqual(app.visible(),[1]);
+  app.change({style:'any'});
+  assert.deepEqual(app.visible(),[1,2]);
+});
+
 test('no matching eligible listing shows calm empty state instead of fake choice',()=>{
   const app=build([{minutes:60,age:12,coop:false}]);
   app.change({minutes:'15',style:'cooperative',age:'8'});
   assert.deepEqual(app.visible(),[]);
   assert.equal(app.empty.hidden,false);
-  assert.match(app.counter.textContent,/掲載候補はありません/);
+  assert.equal(app.counter.textContent,'この条件に合う掲載候補はありません。');
 });
 
 test('unverified duration or invalid age never pass filters',()=>{
