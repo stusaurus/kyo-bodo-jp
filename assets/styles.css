@@ -380,3 +380,19 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 .two-quick-results li a span{font-size:12px;line-height:1.6;color:var(--muted)}
 .two-quick-results li a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 @media(max-width:400px){.two-player-quick{margin:16px 0;padding:14px}.two-player-quick form{grid-template-columns:minmax(0,1fr)}.two-quick-results{grid-template-columns:minmax(0,1fr)}}
+
+/* Real two-player rule differences: factual links, no popularity ranking. */
+.scene-growth-link{margin:18px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.scene-growth-link a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.two-player-contrast{padding-top:18px;padding-bottom:18px}
+.two-player-contrast>p{max-width:72ch;line-height:1.7}
+.two-player-contrast-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.two-player-contrast-card{min-width:0;padding:18px;background:#fff;border:1px solid var(--line);border-radius:16px}
+.two-player-contrast-card h3{font-size:17px;line-height:1.5;margin:0 0 14px}
+.two-player-contrast-card ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.two-player-contrast-card li{padding:12px;background:var(--paper);border-radius:10px;min-width:0}
+.two-player-contrast-card li a{display:inline-block;font-size:15px;line-height:1.5;text-decoration:underline;text-underline-offset:3px}
+.two-player-contrast-card li span{display:block;font-size:12px;line-height:1.6;color:var(--muted);margin-top:3px}
+.two-player-contrast-card li p{font-size:13px;line-height:1.6;margin:5px 0 0}
+.two-player-contrast-card a:focus-visible,.scene-growth-link a:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+@media(max-width:680px){.two-player-contrast-grid{grid-template-columns:minmax(0,1fr);gap:12px}.two-player-contrast-card{padding:14px}}
