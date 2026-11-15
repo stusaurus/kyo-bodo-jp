@@ -32,7 +32,7 @@ def test_samples_and_counts_are_backed_by_catalog_player_ranges():
     assert html.count('data-two-player-sample') == min(3,len(only_two))+min(3,len(flexible))
     for g in only_two[:3]+flexible[:3]:
         assert 'href="/kyo-bodo-jp/games/' + g['game_id'] + '/"' in html
-        assert str(g["play_time_min"]) + '〜' + str(g["play_time_max"]) + '分' in html
+        assert site.format_play_time(g) in html
     assert '星5' not in html
 
 

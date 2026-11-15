@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from data.catalog import GAMES, supports_players, player_label
 from scripts.fetch_rakuten import match_item, valid_url
-from scripts.two_player_quick_filter import render_two_player_quick_filter
+from scripts.two_player_quick_filter import format_play_time, render_two_player_quick_filter
 SITE=ROOT/"site"
 BASE=os.environ.get("SITE_BASE_PATH","/kyo-bodo-jp/")
 if not BASE.startswith("/"): BASE="/"+BASE
@@ -121,7 +121,7 @@ def edition_note(g):
 def card(g,source="list",rank=""):
     r,img,label=load_rakuten(g)
     art=f'<img class="game-thumb" src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
-    return f'''<article class="game-card"><div class="game-media">{art}</div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="card-meta"><span>{e(player_label(g))}</span><span>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span>{g["age"]}歳〜</span></div><div class="card-actions"><a class="text-link" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？ <span class="arrow" aria-hidden="true">→</span></a><a class="btn secondary" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
+    return f'''<article class="game-card"><div class="game-media">{art}</div><div class="game-card-body"><h3>{e(g["title"])}</h3><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="card-meta"><span>{e(player_label(g))}</span><span>{format_play_time(g)}</span><span>{g["age"]}歳〜</span></div><div class="card-actions"><a class="text-link" data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" href="{u("games/"+g["game_id"]+"/")}">どんなゲーム？ <span class="arrow" aria-hidden="true">→</span></a><a class="btn secondary" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="{e(source)}" data-rank="{e(rank)}" target="_blank" rel="sponsored noopener" href="{e(r)}">{label}</a></div></div></article>'''
 
 
 def scene_score(g,s):
@@ -160,7 +160,7 @@ def games_index():
         _,img,_=load_rakuten(g)
         attrs=f'data-pmin="{g["players_min"]}" data-pmax="{g["players_max"]}" data-two="{1 if supports_players(g,2) else 0}" data-short="{1 if g["play_time_max"]<=30 else 0}" data-family="{1 if g["family"]>=4 else 0}" data-beginner="{1 if g["beginner"]>=4 else 0}"'
         art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
-        rows.append(f'<a class="catalog-card game-list-card" {attrs} data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="games_index" href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}</div><div class="catalog-body"><strong>{e(g["title"])}</strong><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="catalog-meta">{e(player_label(g))}　／　{g["play_time_min"]}〜{g["play_time_max"]}分</div><div class="catalog-arrow">どんなゲーム？ <span aria-hidden="true">→</span></div></div></a>')
+        rows.append(f'<a class="catalog-card game-list-card" {attrs} data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="games_index" href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}</div><div class="catalog-body"><strong>{e(g["title"])}</strong><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="catalog-meta">{e(player_label(g))}　／　{format_play_time(g)}</div><div class="catalog-arrow">どんなゲーム？ <span aria-hidden="true">→</span></div></div></a>')
     body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">THE GAME SHELF</div><h1>次に遊びたい、{len(GAMES)}本。</h1><p>気になった1本から、遊びの世界をのぞいてみよう。</p></section><section class="section"><div class="filter-bar" role="group" aria-label="ゲームの絞り込み"><button class="filter-btn active" aria-pressed="true" data-filter="all">すべて</button><button class="filter-btn" aria-pressed="false" data-filter="two">2人で遊べる</button><button class="filter-btn" aria-pressed="false" data-filter="family">家族向け</button><button class="filter-btn" aria-pressed="false" data-filter="short">30分以内</button><button class="filter-btn" aria-pressed="false" data-filter="beginner">初心者向け</button></div><p class="small filter-count" id="filterCount" aria-live="polite">{len(GAMES)}本のゲーム</p><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active");x.setAttribute("aria-pressed","false")}});b.classList.add("active");b.setAttribute("aria-pressed","true");var f=b.dataset.filter,count=0;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&c.dataset.two==="1")||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.hidden=!show;if(show)count++}});document.getElementById("filterCount").textContent=count+"本のゲーム";kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
     return shell("ゲーム一覧",f"きょうボド掲載{len(GAMES)}ゲーム。2人、家族、30分以内、初心者向けなどから絞って探せます。",body,"games/")
 
@@ -173,7 +173,7 @@ def game_page(g):
     hero_art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" decoding="async">' if img else PLACEHOLDER
     availability='楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'
     scenes=' ／ '.join(f'<a href="{u("scenes/"+z["scene_id"]+"/")}">{e(z["title"])}</a>' for z in SCENES if scene_score(g,z)>=80)
-    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="game-fast-facts"><span><small>人数</small>{e(player_label(g))}</span><span><small>時間</small>{g["play_time_min"]}〜{g["play_time_max"]}分</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary><p class="small">5段階の特徴はゲーム選びのための編集評価です。公式の難易度・評価ではありません。</p>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar",i+1) for i,x in enumerate(similar))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
+    body=f'''<section class="game-detail-hero"><div class="game-hero-card"><div class="game-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("games/")}">ゲーム</a> / {e(g["title"])}</div><div class="eyebrow">LET'S PLAY</div><h1>{e(g["title"])}</h1><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="game-fast-facts"><span><small>人数</small>{e(player_label(g))}</span><span><small>時間</small>{format_play_time(g)}</span><span><small>対象年齢</small>{g["age"]}歳〜</span></div></div><div class="game-hero-art">{hero_art}</div></div></section><section class="section"><div class="detail-layout"><div class="detail-story"><div class="eyebrow">AT THE TABLE</div><h2>どんな時間になる？</h2><p>{e(g["description"])}</p><div class="detail-summary"><div class="decision-box"><h3>こんな日に合う</h3><p>{e(fit_copy(g))}</p></div><div class="decision-box"><h3>今日は別候補でも</h3><p>{e(caution_copy(g))}</p></div></div><div class="eyebrow">ONE-MINUTE RULES</div><h2>1分で分かる遊び方</h2><ol class="howto">{"".join("<li>"+e(z)+"</li>" for z in g["how_to_play"])}</ol><h2>こんな場面で</h2><p class="recommended-scenes">{scenes}</p><details class="game-profile"><summary>ゲームの特徴を詳しく</summary><p class="small">5段階の特徴はゲーム選びのための編集評価です。公式の難易度・評価ではありません。</p>{axis}<p class="small">タイプ：{"協力寄り" if g["cooperation"]>=4 else "対戦・競争寄り"}</p></details></div><aside><div class="product-panel"><div class="eyebrow">BRING IT TO YOUR TABLE</div><h2>このゲームを見てみる</h2><p class="small">版や対象年齢、在庫を確認して、今日のメンバーに合う1本を。</p><a class="btn rakuten large" data-affiliate="rakuten" data-game-id="{e(g["game_id"])}" data-source="game_detail" target="_blank" rel="sponsored noopener" href="{e(r)}">{label} <span aria-hidden="true">↗</span></a><div class="product-availability">{availability}</div><p class="small">PR：購入前に販売ページで版・対象年齢・在庫を確認してください。</p><a class="btn secondary" href="{u("diagnosis/?src=game_detail")}">診断で他の候補も見る</a></div></aside></div></section><section class="section related-section"><div class="section-lead"><div><div class="eyebrow">YOU MIGHT ALSO LIKE</div><h2>これと迷うなら</h2></div></div><div class="grid">{"".join(card(x,"similar",i+1) for i,x in enumerate(similar))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("game_detail_view",{{game_id:{json.dumps(g["game_id"])},page_path:location.pathname}})}})</script>'''
     game_url=canon("games/"+g["game_id"]+"/")
     schema=json.dumps({"@context":"https://schema.org","@graph":[
         {"@type":"WebPage","name":g["title"]+"｜きょうボド","description":g["description"],"url":game_url,"isPartOf":{"@type":"WebSite","name":"きょうボド","url":SITE_URL}},
@@ -208,7 +208,7 @@ def scene_selection_guide(s, ranked):
     tip = tips.get(s['scene_id'], '参加する人数、対象年齢、所要時間と遊び方を先に比較してください。好みが分かれる場合は診断でも候補を見直せます。')
     picks = ''.join(
         f'<li><a href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
-        f' — {e(player_label(g))}／{g["play_time_min"]}〜{g["play_time_max"]}分／対象{g["age"]}歳〜。'
+        f' — {e(player_label(g))}／{format_play_time(g)}／対象{g["age"]}歳〜。'
         f' {e(g["appeal"])}</li>'
         for g in ranked[:3]
     )
@@ -231,7 +231,7 @@ def scene_selection_guide(s, ranked):
                 f'<li data-choice-game="{e(g["game_id"])}"><a data-track="game_detail_click" '
                 f'data-game-id="{e(g["game_id"])}" data-source="two_player_choices" '
                 f'href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
-                f' — {e(player_label(g))}／{g["play_time_min"]}〜{g["play_time_max"]}分'
+                f' — {e(player_label(g))}／{format_play_time(g)}'
                 f'／対象{g["age"]}歳〜／{"協力" if g["cooperative"] else "対戦"}。'
                 f' {e(g["appeal"])}'
                 '<details class="choice-rules"><summary>遊び方の手順を読む</summary><ol>'
@@ -286,7 +286,7 @@ def scene_comparison_table(s, ranked):
                        else '<td>2人を含む複数人数対応</td>') if s['scene_id'] == 'two-player' else ''
         mechanic_cell = (f'<td>{e(game["how_to_play"][1])}</td>'
                          if s['scene_id'] == 'two-player' else '')
-        rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th>{mechanic_cell}<td>{players}</td>{format_cell}<td>{game["play_time_min"]}〜{game["play_time_max"]}分</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
+        rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th>{mechanic_cell}<td>{players}</td>{format_cell}<td>{format_play_time(game)}</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
     note = ('掲載人数が2人だけのゲームと、2人を含む複数人数に対応するゲームを、同じ表で比較できます。2人専用の人数表記は「2人のときに必ず優れている」という意味ではありません。時間・対象年齢・協力／対戦も一緒に確認してください。'
             if s['scene_id'] == 'two-player' else 'このページは掲載データの上限が20分以内のゲームに絞っています。説明・準備・片付けの時間は別に見込んでください。')
     compare_id = ' id="two-player-comparison"' if s['scene_id'] == 'two-player' else ''
@@ -317,7 +317,7 @@ def two_player_rule_contrasts():
             entries.append(
                 f'<li><a href="{u("games/" + g["game_id"] + "/")}">'
                 f'<strong>{e(g["title"])}</strong></a>'
-                f'<span>{g["play_time_min"]}〜{g["play_time_max"]}分・対象{g["age"]}歳〜・{fmt}</span>'
+                f'<span>{format_play_time(g)}・対象{g["age"]}歳〜・{fmt}</span>'
                 f'<p>すること：{e(g["how_to_play"][1])}</p></li>'
             )
         cards.append('<article class="two-player-contrast-card"><h3>'
@@ -342,7 +342,7 @@ def two_player_format_guide():
         # Catalog order is deliberately retained; these are not ranked picks.
         previews = ''.join(
             f'<li><a data-two-player-sample href="{u("games/" + g["game_id"] + "/")}">'
-            f'{e(g["title"])}</a><span>{g["play_time_min"]}〜{g["play_time_max"]}分・'
+            f'{e(g["title"])}</a><span>{format_play_time(g)}・'
             f'{"協力" if g["cooperative"] else "対戦"}</span></li>'
             for g in games[:3]
         )

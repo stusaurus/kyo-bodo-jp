@@ -2,6 +2,13 @@
 from html import escape
 
 
+def format_play_time(game):
+    """Show one duration as one value, without misleading 15〜15分 ranges."""
+    lower = int(game["play_time_min"])
+    upper = int(game["play_time_max"])
+    return f"{lower}分" if lower == upper else f"{lower}〜{upper}分"
+
+
 def render_two_player_quick_filter(games, url, asset_url, player_label, supports_players):
     eligible = [g for g in games if supports_players(g, 2)]
     if not eligible:
@@ -31,7 +38,7 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
             f'<a data-track="game_detail_click" data-source="two_player_quick"'
             f' data-game-id="{gid}" href="{escape(url("games/" + g["game_id"] + "/"), quote=True)}">'
             f'<strong>{title}</strong><span>{label} · {format_label}'
-            f'{int(g["play_time_min"])}〜{time}分 · 対象{age}歳〜 · '
+            f'{format_play_time(g)} · 対象{age}歳〜 · '
             f'{"協力" if g["cooperative"] else "非協力"}</span></a></li>'
         )
     if not rows:

@@ -17,7 +17,7 @@ def test_comparison_preserves_ranked_itemlist_and_catalog_values():
         assert [x['name'] for x in schema['itemListElement']] == [g['title'] for g in ranked]
         for row, game in zip(table.split('</tr>'), ranked):
             assert m.e(game['title']) in row
-            assert f"{game['play_time_min']}〜{game['play_time_max']}分" in row
+            assert m.format_play_time(game) in row
             assert ('協力' if game['cooperative'] else '対戦') in row
             if sid == 'two-player':
                 assert m.supports_players(game,2)
@@ -106,7 +106,7 @@ def test_two_player_choices_use_full_catalog_and_exact_conditions():
         assert f'（{len(games)}本）' in group
         for game in games:
             assert m.u('games/' + game['game_id'] + '/') in group
-            assert f'{game["play_time_min"]}〜{game["play_time_max"]}分' in group
+            assert m.format_play_time(game) in group
             assert f'対象{game["age"]}歳〜' in group
             for step in game['how_to_play']:
                 assert f'<li>{m.e(step)}</li>' in group
@@ -145,3 +145,13 @@ def test_duet_edition_values_and_short_filter_match_current_japanese_publisher()
         assert not match_item(duet,{'itemName':title})[0]
     short = next(s for s in m.SCENES if s['scene_id']=='short')
     assert m.scene_score(duet,short) >= 50
+
+
+def test_equal_min_max_minutes_are_not_rendered_as_a_range():
+    duet = m.BY_ID['codenames-duet']
+    assert m.format_play_time(duet) == '15分'
+    assert m.format_play_time(dict(duet, play_time_min=10, play_time_max=20)) == '10〜20分'
+    scene = next(s for s in m.SCENES if s['scene_id'] == 'two-player')
+    html = m.scene_page(scene)
+    assert '15〜15分' not in html
+    assert '>15分</td>' in html

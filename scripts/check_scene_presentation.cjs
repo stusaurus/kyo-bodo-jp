@@ -124,8 +124,12 @@ function serve(root,port){return new Promise(resolve=>{
        assert.match(await details.locator(':scope > summary').innerText(),/15分以内/);
        assert(await details.locator('[data-choice-game="gobblet-gobblers"]').isVisible());
        assert.equal(await details.locator('[data-choice-game="sky-team"]').count(),0);
-       const times=await details.locator(':scope > ul > li').evaluateAll(els=>els.map(el=>(el.textContent||'').match(/(\d+)〜(\d+)分/)?.[2]));
-       assert(times.length>0&&times.every(t=>Number(t)<=15),'15-minute section must contain only actual 15-minute games');
+       const times=await details.locator(':scope > ul > li').evaluateAll(els=>els.map(el=>{
+        // Point estimates ("15分") and ranges ("10〜15分") both use the same catalog max.
+        const match=(el.textContent||'').match(/／(\d+)(?:〜(\d+))?分／対象/);
+        return match?Number(match[2]??match[1]):null;
+       }));
+       assert(times.length>0&&times.every(t=>Number.isInteger(t)&&t>0&&t<=15),'15-minute section must contain only actual 15-minute games');
       }else{
        assert(await details.locator('[data-choice-game="sky-team"]').isVisible());
       }

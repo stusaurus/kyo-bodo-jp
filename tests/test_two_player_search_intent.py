@@ -48,7 +48,7 @@ def test_two_player_rule_contrasts_answer_actual_gameplay_without_new_rankings()
         assert m.supports_players(game, 2)
         assert m.u("games/" + gid + "/") in m.two_player_rule_contrasts()
         assert m.e(game["how_to_play"][1]) in m.two_player_rule_contrasts()
-        assert f'{game["play_time_min"]}〜{game["play_time_max"]}分' in m.two_player_rule_contrasts()
+        assert m.format_play_time(game) in m.two_player_rule_contrasts()
         assert f'対象{game["age"]}歳〜' in m.two_player_rule_contrasts()
     assert page.count('class="two-player-contrast-card"') == 2
     assert "人気・優劣の順位ではありません" in page
