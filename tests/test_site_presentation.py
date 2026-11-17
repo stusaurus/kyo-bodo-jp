@@ -150,7 +150,16 @@ def test_all_game_details_keep_rules_and_attribution():
         assert g_description_present(page, game)
         assert f'data-game-id="{game["game_id"]}"' in page
         assert 'data-source="game_detail"' in page
-        assert 'rel="sponsored noopener"' in page
+        # An unresolved game is a plain external search, not an affiliate offer.
+        # Check the purchase-panel link itself (related cards can have different status).
+        detail_link = page.split('<a class="btn rakuten large" ', 1)[1].split("</a>", 1)[0]
+        if m.RAKUTEN.get(game["game_id"], {}).get("url"):
+            assert 'data-affiliate="rakuten"' in detail_link
+            assert 'rel="sponsored noopener"' in detail_link
+        else:
+            assert 'data-track="rakuten_search_click"' in detail_link
+            assert 'data-affiliate="rakuten"' not in detail_link
+            assert 'rel="noopener"' in detail_link
         assert f'href="{m.canon("games/" + game["game_id"] + "/")}"' in page
 
 
