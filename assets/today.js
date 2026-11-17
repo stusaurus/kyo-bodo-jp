@@ -116,7 +116,7 @@
         '<h3>'+escapeText(g.title)+'</h3><p>'+escapeText(g.appeal)+'</p>'+
         '<div class="card-meta"><span>'+escapeText(g.players_label)+'</span><span>'+num(g.play_time_min)+'〜'+num(g.play_time_max)+'分</span></div>'+
         '<div class="card-actions"><a class="'+(k===0?'btn primary':'text-link')+'" data-track="game_detail_click" data-game-id="'+escapeText(id)+'" data-source="today_'+mode+'" data-rank="'+(k+1)+'" href="'+escapeText(B+'games/'+encodeURIComponent(id)+'/')+'">特徴・遊び方を見る →</a>'+
-        '<a class="text-link" data-affiliate="rakuten" data-game-id="'+escapeText(id)+'" data-source="today_'+mode+'" data-rank="'+(k+1)+'" target="_blank" rel="sponsored noopener" href="'+escapeText(url)+'">'+(l.url?'楽天で確認':'楽天で探す')+' ↗</a>'+
+        '<a class="text-link" '+(l.url?'data-affiliate="rakuten"':'data-track="rakuten_search_click"')+' data-game-id="'+escapeText(id)+'" data-source="today_'+mode+'" data-rank="'+(k+1)+'" target="_blank" rel="'+(l.url?'sponsored noopener':'noopener')+'" href="'+escapeText(url)+'">'+(l.url?'楽天で確認':'楽天で探す')+' ↗</a>'+
         '<button type="button" class="today-save-button" aria-pressed="'+isSaved+'" data-today-save="'+escapeText(id)+'">'+(isSaved?'保存済み ✓':'あとで比べる ＋')+'</button></div></div></article>';
     }).join("")+'</div>':'<p class="small">この条件に合う掲載ゲームがありません。<a href="'+escapeText(B+'games/')+'">ゲーム一覧から探す</a></p>';
     renderSaved();
