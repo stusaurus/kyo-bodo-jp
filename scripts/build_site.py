@@ -33,7 +33,7 @@ def asset(name):
     version=hashlib.sha256(path.read_bytes()).hexdigest()[:12] if path.exists() else "1"
     return u("assets/"+name)+"?v="+version
 
-SCENE_ART={"two-player":1,"couple":1,"family":2,"children":3,"friends":4,"large-group":4,"first-meeting":4,"drinking":4,"short":5,"long":1,"think":1,"laugh":4,"cooperative":6,"beginner":2}
+SCENE_ART={"two-player":1,"solo":5,"couple":1,"family":2,"children":3,"friends":4,"large-group":4,"first-meeting":4,"drinking":4,"short":5,"long":1,"think":1,"laugh":4,"cooperative":6,"beginner":2}
 MAIN_SCENES=[("two-player","2人で","ふたりの時間に",1),("family","家族で","みんなで、もう1回",2),("children","小学生と","大人も一緒に夢中",3),("large-group","大人数で","笑い声の真ん中に",4),("short","短時間で","ちょっとの時間も楽しく",5),("cooperative","協力して","一緒にできた、がうれしい",6)]
 
 BRAND_MARK='<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="#386fc1"><rect x="14" y="2" width="23" height="23" rx="6" transform="rotate(12 25 13)"/><rect x="2" y="20" width="22" height="22" rx="6" transform="rotate(-12 13 31)"/></g><rect x="25" y="24" width="21" height="21" rx="6" fill="#eb612e" transform="rotate(12 35 34)"/><g fill="#fff"><circle cx="21" cy="9" r="1.7"/><circle cx="29" cy="10.5" r="1.7"/><circle cx="24.5" cy="14" r="1.7"/><circle cx="20" cy="17" r="1.7"/><circle cx="28" cy="18.5" r="1.7"/><circle cx="8" cy="27" r="1.7"/><circle cx="16" cy="25.5" r="1.7"/><circle cx="12" cy="31" r="1.7"/><circle cx="9" cy="36.5" r="1.7"/><circle cx="17" cy="35" r="1.7"/><circle cx="31" cy="29" r="1.7"/><circle cx="39" cy="31" r="1.7"/><circle cx="34.5" cy="35" r="1.7"/><circle cx="30" cy="39" r="1.7"/><circle cx="38" cy="41" r="1.7"/></g></svg>'
@@ -168,10 +168,10 @@ def games_index():
     rows=[]
     for g in GAMES:
         _,img,_=load_rakuten(g)
-        attrs=f'data-pmin="{g["players_min"]}" data-pmax="{g["players_max"]}" data-two="{1 if supports_players(g,2) else 0}" data-short="{1 if g["play_time_max"]<=30 else 0}" data-family="{1 if g["family"]>=4 else 0}" data-beginner="{1 if g["beginner"]>=4 else 0}"'
+        attrs=f'data-pmin="{g["players_min"]}" data-pmax="{g["players_max"]}" data-two="{1 if supports_players(g,2) else 0}" data-solo="{1 if supports_players(g,1) else 0}" data-short="{1 if g["play_time_max"]<=30 else 0}" data-family="{1 if g["family"]>=4 else 0}" data-beginner="{1 if g["beginner"]>=4 else 0}"'
         art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" loading="lazy" decoding="async">' if img else PLACEHOLDER
         rows.append(f'<a class="catalog-card game-list-card" {attrs} data-track="game_detail_click" data-game-id="{e(g["game_id"])}" data-source="games_index" href="{u("games/"+g["game_id"]+"/")}"><div class="catalog-media">{art}</div><div class="catalog-body"><strong>{e(g["title"])}</strong><p>{e(g["appeal"])}</p>{edition_note(g)}<div class="catalog-meta">{e(player_label(g))}　／　{format_play_time(g)}</div><div class="catalog-arrow">どんなゲーム？ <span aria-hidden="true">→</span></div></div></a>')
-    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">THE GAME SHELF</div><h1>次に遊びたい、{len(GAMES)}本。</h1><p>気になった1本から、遊びの世界をのぞいてみよう。</p></section><section class="section"><div class="filter-bar" role="group" aria-label="ゲームの絞り込み"><button class="filter-btn active" aria-pressed="true" data-filter="all">すべて</button><button class="filter-btn" aria-pressed="false" data-filter="two">2人で遊べる</button><button class="filter-btn" aria-pressed="false" data-filter="family">家族向け</button><button class="filter-btn" aria-pressed="false" data-filter="short">30分以内</button><button class="filter-btn" aria-pressed="false" data-filter="beginner">初心者向け</button></div><p class="small filter-count" id="filterCount" aria-live="polite">{len(GAMES)}本のゲーム</p><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active");x.setAttribute("aria-pressed","false")}});b.classList.add("active");b.setAttribute("aria-pressed","true");var f=b.dataset.filter,count=0;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&c.dataset.two==="1")||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.hidden=!show;if(show)count++}});document.getElementById("filterCount").textContent=count+"本のゲーム";kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
+    body=f'''<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / ゲーム一覧</div><div class="eyebrow">THE GAME SHELF</div><h1>次に遊びたい、{len(GAMES)}本。</h1><p>気になった1本から、遊びの世界をのぞいてみよう。</p></section><section class="section"><div class="filter-bar" role="group" aria-label="ゲームの絞り込み"><button class="filter-btn active" aria-pressed="true" data-filter="all">すべて</button><button class="filter-btn" aria-pressed="false" data-filter="solo">1人で遊べる</button><button class="filter-btn" aria-pressed="false" data-filter="two">2人で遊べる</button><button class="filter-btn" aria-pressed="false" data-filter="family">家族向け</button><button class="filter-btn" aria-pressed="false" data-filter="short">30分以内</button><button class="filter-btn" aria-pressed="false" data-filter="beginner">初心者向け</button></div><p class="small filter-count" id="filterCount" aria-live="polite">{len(GAMES)}本のゲーム</p><div class="games-catalog" id="gamesGrid">{"".join(rows)}</div></section><script>document.addEventListener("click",function(ev){{var b=ev.target.closest(".filter-btn");if(!b)return;document.querySelectorAll(".filter-btn").forEach(function(x){{x.classList.remove("active");x.setAttribute("aria-pressed","false")}});b.classList.add("active");b.setAttribute("aria-pressed","true");var f=b.dataset.filter,count=0;document.querySelectorAll(".game-list-card").forEach(function(c){{var show=f==="all"||(f==="two"&&c.dataset.two==="1")||(f==="solo"&&c.dataset.solo==="1")||(f==="family"&&c.dataset.family==="1")||(f==="short"&&c.dataset.short==="1")||(f==="beginner"&&c.dataset.beginner==="1");c.hidden=!show;if(show)count++}});document.getElementById("filterCount").textContent=count+"本のゲーム";kyoTrack("game_filter_use",{{filter:f}})}})</script>'''
     return shell("ゲーム一覧",f"きょうボド掲載{len(GAMES)}ゲーム。2人、家族、30分以内、初心者向けなどから絞って探せます。",body,"games/")
 
 
@@ -217,6 +217,7 @@ def scene_selection_guide(s, ranked):
         'children': '対象年齢の表記は商品版の目安です。読み書きの量や待ち時間なども確認し、大人と子どもが一緒に参加しやすい1本を探しましょう。',
         'short': 'プレイ時間には説明や準備の時間が含まれないことがあります。予定の時間に余裕を持たせて選びましょう。',
         'large-group': '最大人数に入るだけでなく、全員が同時に参加しやすいか、順番待ちが長くならないかを確認しましょう。',
+        'solo': '1人に対応する作品でも、ソロ用のルールや遊ぶ手順が通常と異なる場合があります。購入する版で1人用ルールと所要時間を確認してください。',
         'cooperative': '協力ゲームでも相談の多さや難しさは違います。全員が意思決定に参加できる内容かを確認しましょう。',
     }
     tip = tips.get(s['scene_id'], '参加する人数、対象年齢、所要時間と遊び方を先に比較してください。好みが分かれる場合は診断でも候補を見直せます。')
@@ -266,6 +267,7 @@ def scene_selection_guide(s, ranked):
                    '2人以上に対応するゲームより優れているという意味ではありません。</p></div>')
     related = {
         'two-player': ('couple', 'short'),
+        'solo': ('think', 'short'),
         'family': ('children', 'cooperative'),
         'children': ('family', 'beginner'),
         'short': ('two-player', 'beginner'),
@@ -288,11 +290,11 @@ def scene_selection_guide(s, ranked):
 
 def scene_comparison_table(s, ranked):
     # Only the two pilot entry pages; retain their existing ranking and catalog.
-    if s['scene_id'] not in ('two-player', 'short'):
+    if s['scene_id'] not in ('two-player', 'short', 'solo'):
         return ''
     rows = []
     for game in ranked:
-        mode = '協力' if game['cooperative'] else '対戦'
+        mode = 'ソロ対応（版のルールを要確認）' if s['scene_id'] == 'solo' else ('協力' if game['cooperative'] else '対戦')
         players = e(player_label(game))
         if game.get('players_source'):
             players += f'<br><a href="{e(game["players_source"])}" target="_blank" rel="noopener">人数の公式情報</a>'
@@ -302,12 +304,13 @@ def scene_comparison_table(s, ranked):
                          if s['scene_id'] == 'two-player' else '')
         rows.append(f'<tr><th scope="row"><a href="{u("games/" + game["game_id"] + "/")}">{e(game["title"])}</a>{edition_note(game)}</th>{mechanic_cell}<td>{players}</td>{format_cell}<td>{format_play_time(game)}</td><td>{game["age"]}歳〜</td><td>{mode}</td></tr>')
     note = ('掲載人数が2人だけのゲームと、2人を含む複数人数に対応するゲームを、同じ表で比較できます。2人専用の人数表記は「2人のときに必ず優れている」という意味ではありません。時間・対象年齢・協力／対戦も一緒に確認してください。'
-            if s['scene_id'] == 'two-player' else 'このページは掲載データの上限が20分以内のゲームに絞っています。説明・準備・片付けの時間は別に見込んでください。')
+            if s['scene_id'] == 'two-player' else ('1人対応の登録情報をもとにした作品一覧です。ソロ用ルールは通常の複数人用ルールと異なる場合があります。版のメーカー情報をご確認ください。' if s['scene_id'] == 'solo' else 'このページは掲載データの上限が20分以内のゲームに絞っています。説明・準備・片付けの時間は別に見込んでください。'))
     compare_id = ' id="two-player-comparison"' if s['scene_id'] == 'two-player' else ''
     format_heading = '<th scope="col">2人専用／複数人数対応</th>' if s['scene_id'] == 'two-player' else ''
+    mode_heading = '1人対応の確認' if s['scene_id'] == 'solo' else '協力／対戦'
     mechanic_heading = '<th scope="col">何をする？</th>' if s['scene_id'] == 'two-player' else ''
     return f'''<section class="section scene-quick-comparison"{compare_id}><div class="eyebrow">COMPARE AT A GLANCE</div><h2>人数・時間・遊び方を早見表で比較</h2><p>{note}</p>
-<p class="small">表は横にスクロールできます。</p><div class="scene-table-scroll" role="region" aria-label="ゲーム比較表。横にスクロールできます" tabindex="0"><table class="scene-data-table"><caption>このページの候補{len(ranked)}本。掲載順は下の商品カードと同じです。</caption><thead><tr><th scope="col">ゲーム・遊び方</th>{mechanic_heading}<th scope="col">人数</th>{format_heading}<th scope="col">時間目安</th><th scope="col">対象年齢</th><th scope="col">協力／対戦</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
+<p class="small">表は横にスクロールできます。</p><div class="scene-table-scroll" role="region" aria-label="ゲーム比較表。横にスクロールできます" tabindex="0"><table class="scene-data-table"><caption>このページの候補{len(ranked)}本。掲載順は下の商品カードと同じです。</caption><thead><tr><th scope="col">ゲーム・遊び方</th>{mechanic_heading}<th scope="col">人数</th>{format_heading}<th scope="col">時間目安</th><th scope="col">対象年齢</th><th scope="col">{mode_heading}</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <p class="small">人数・時間・対象年齢は掲載データの参考値です。購入前に販売されている版のメーカー表示を確認してください。</p><a class="text-link" href="{u("diagnosis/?src=scene_comparison")}">時間・気分も合わせて診断する →</a></section>'''
 
 
@@ -395,6 +398,9 @@ def scene_representatives(s, limit=12):
     """
     ranked = sorted(GAMES, key=lambda g: scene_score(g, s), reverse=True)
     eligible = [g for g in ranked if scene_score(g, s) >= 50]
+    if s['scene_id'] == 'solo':
+        # Show every one-player-compatible title, not an arbitrary 12-card prefix.
+        return eligible
     if s['scene_id'] != 'two-player' or limit < 2:
         return eligible[:limit]
     only_two = [g for g in eligible if g['players_min'] == g['players_max'] == 2]
@@ -423,7 +429,7 @@ def scene_page(s):
     order_note = ('2人だけの人数表記と複数人数対応を組み合わせた比較例。'
                   '各グループ内はカタログ掲載順で、人気順・優劣の順位ではありません。'
                   if s['scene_id'] == 'two-player' else
-                  '2人対応の候補をカタログ掲載順に紹介。人気順・優劣の順位ではありません。'
+                  '1人対応の全掲載候補をカタログ掲載順に表示。人気順・優劣の順位ではありません。' if s['scene_id'] == 'solo' else '2人対応の候補をカタログ掲載順に紹介。人気順・優劣の順位ではありません。'
                   if s['rule']['type'] == 'players' else
                   'シーン条件と編集評価による適合度順。同点はカタログ掲載順です。')
     scene_i=SCENE_ART[s["scene_id"]]
@@ -435,13 +441,14 @@ def scene_page(s):
                        '<p class="small">条件を引き継ぎ、残り4問で候補を選べます。診断中に条件を変更できます。</p></nav>')
 
     scene_h1 = ("2人用・2人でも遊べる" if s["scene_id"] == "two-player" else s["title"])
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">PLAY TOGETHER</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">このメンバーで診断する <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     seo={
         "two-player":("2人用ボードゲームおすすめ比較｜2人専用と2人対応の違い", "2人でできるボードゲームを2人専用と複数人数対応に分けて紹介。カップル・友人・夫婦で、遊べる時間・対戦か協力か・対象年齢を確認。人気順位ではありません。"),
         "family":("家族で遊べるボードゲームおすすめ", "家族で遊べるボードゲームを紹介。小学生を含む家族でも選びやすいよう、人数・対象年齢・プレイ時間を確認できます。"),
         "children":("小学生と遊べるボードゲームおすすめ", "小学生と大人が一緒に遊びやすいボードゲームを紹介。対象年齢・人数・プレイ時間を見ながら今日の1本を探せます。"),
         "short":("20分以内・短時間で遊べるボードゲームおすすめ", "掲載時間が20分以内のボードゲームを紹介。平日夜やすきま時間に遊ぶ1本を、人数・対象年齢と一緒に選べます。"),
+        "solo":("1人で遊べるボードゲーム比較｜ソロプレイ対応作品", "1人でも遊べる掲載作品を人数の登録情報から選出。短時間・じっくり系の遊び方や対象年齢を比較。ソロ用ルール・版は購入前に確認してください。"),
     }
     title,desc=seo.get(s["scene_id"],(s["title"]+"ボードゲーム",s["intro"]))
     return shell(title,desc,body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')

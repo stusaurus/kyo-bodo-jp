@@ -129,7 +129,7 @@ def test_scene_directory_uses_visual_tiles():
     for scene in m.SCENES:
         assert f'href="{m.u("scenes/" + scene["scene_id"] + "/")}"' in page
     assert page.count('class="scene-card"') == 6
-    assert page.count('class="scene-directory-card"') == 8
+    assert page.count('class="scene-directory-card"') == len(m.SCENES) - len(m.MAIN_SCENES)
 
 
 def test_game_catalog_uses_visual_cards():

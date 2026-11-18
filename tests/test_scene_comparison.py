@@ -32,7 +32,7 @@ def test_short_snippet_matches_existing_twenty_minute_filter():
 
 def test_other_scenes_are_outside_the_pilot():
     for scene in m.SCENES:
-        if scene['scene_id'] not in ('two-player','short'):
+        if scene['scene_id'] not in ('two-player','short','solo'):
             assert m.scene_comparison_table(scene, m.GAMES[:3]) == ''
 
 
@@ -71,7 +71,11 @@ def test_two_player_compatibility_and_other_scene_order_are_unchanged():
         if other['scene_id'] == 'two-player':
             continue
         expected = [g for g in sorted(m.GAMES, key=lambda g:m.scene_score(g, other), reverse=True)
-                    if m.scene_score(g, other) >= 50][:12]
+                    if m.scene_score(g, other) >= 50]
+        if other['scene_id'] != 'solo':
+            expected = expected[:12]
+        else:
+            assert all(m.supports_players(g, 1) for g in expected)
         assert m.scene_representatives(other) == expected
     assert m.BY_ID['codenames-duet']['players_max'] is None
     assert m.BY_ID['codenames-duet'] in m.scene_representatives(scene)

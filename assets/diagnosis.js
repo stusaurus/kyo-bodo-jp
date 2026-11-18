@@ -1,8 +1,8 @@
 (function(){
 var root=document.getElementById("diagnosisApp");if(!root)return;var B=(window.KYO_BODO_CONFIG||{}).basePath||"/kyo-bodo-jp/";
 var qs=[
-["who","誰と遊ぶ？",[["couple","夫婦・カップル"],["family","家族"],["friends","友達"],["children","子ども"],["large","大人数"],["first","初対面がいる"]]],
-["players","何人で遊ぶ？",[["2", "2人"], ["3", "3人"], ["4", "4人"], ["5", "5人"], ["6", "6人"], ["7", "7人"], ["8", "8人"], ["9", "9人"], ["10", "10人"], ["11", "11人"], ["12", "12人"], ["13", "13人"], ["14", "14人"]]],
+["who","誰と遊ぶ？",[["solo","1人で"],["couple","夫婦・カップル"],["family","家族"],["friends","友達"],["children","子ども"],["large","大人数"],["first","初対面がいる"]]],
+["players","何人で遊ぶ？",[["1", "1人"], ["2", "2人"], ["3", "3人"], ["4", "4人"], ["5", "5人"], ["6", "6人"], ["7", "7人"], ["8", "8人"], ["9", "9人"], ["10", "10人"], ["11", "11人"], ["12", "12人"], ["13", "13人"], ["14", "14人"]]],
 ["mood","どんな時間にしたい？",[["laugh","とにかく笑いたい"],["compete","真剣に勝負したい"],["think","頭を使いたい"],["coop","みんなで協力したい"],["relax","ゆるく遊びたい"],["chat","会話を楽しみたい"]]],
 ["time","どのくらい遊べる？",[["15","10〜15分"],["30","30分くらい"],["60","1時間くらい"],["120","じっくり"]]],
 ["difficulty","難しいルールは？",[["1","苦手"],["3","少しならOK"],["5","問題なし"]]],
@@ -58,8 +58,8 @@ function results(){
   root.className='results-state';
   root.parentElement.classList.add('results-wrap');
   document.querySelector('.diagnosis-header').classList.add('has-results');
-  document.querySelector('.diagnosis-heading').textContent='あなたたちの、今日の1本。';
-  document.querySelector('.diagnosis-subtitle').textContent='今のメンバーに、今の気分に。';
+  document.querySelector('.diagnosis-heading').textContent=a.who==='solo'?'あなたの、今日の1本。':'あなたたちの、今日の1本。';
+  document.querySelector('.diagnosis-subtitle').textContent=a.who==='solo'?'ひとりの時間に、今の気分に。':'今のメンバーに、今の気分に。';
   var intro=relaxedCount?'<div class="result-intro"><h2 class="sr-only" tabindex="-1">今日は、これで遊ぼう。</h2><p>まずは条件ぴったりの候補。足りない分だけ、遊ぶ時間を少し広げた候補も載せています。</p></div>':'<div class="result-intro"><h2 class="sr-only" tabindex="-1">今日は、これで遊ぼう。</h2><p>今日の条件に合う候補から選ぼう。</p></div>';
   root.innerHTML=intro+(r.length?resultMarkup(r[0][0],0,r[0][2]):'<p>人数・時間・協力の条件を満たす候補がありません。遊べる時間を延ばすなど、条件を変えてお試しください。</p>')+(r.length>1?'<h2 class="results-alternatives-title">こんな1本も、きっと楽しい。</h2><div class="result-alternatives">'+r.slice(1).map(function(x,k){return resultMarkup(x[0],k+1,x[2])}).join('')+'</div>':'')+'<div class="result-retry"><p>同じメンバーでも、気分が変われば遊びも変わる。</p><a class="btn secondary" href="'+B+'diagnosis/">条件を変えてもう一度</a></div>';
   root.querySelector('h2').focus({preventScroll:true});
@@ -68,8 +68,9 @@ function results(){
 function render(){
   if(i>=qs.length){results();return}
   var q=qs[i],qi=originalKeys.indexOf(q[0]),pct=Math.round(i/qs.length*100),scene=[1,4,2,5,3,6][qi];
+  var options=q[0]==='players'&&a.who==='solo'?[['1','1人']]:q[0]==='mood'&&a.who==='solo'?[['think','じっくり考えたい'],['relax','気軽に遊びたい'],['compete','自分の記録に挑みたい']]:q[2];
   root.className='diagnosis-state';root.setAttribute('aria-busy','false');
-  root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">一緒に遊ぶ時間を、思い浮かべて。</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[qi]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+q[2].map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
+  root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">'+(a.who==='solo'?'ひとりの時間を、楽しもう。':'一緒に遊ぶ時間を、思い浮かべて。')+'</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[qi]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+options.map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
   root.querySelector('h2').focus({preventScroll:true});
   root.querySelectorAll('.answer').forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack('diagnosis_answer',{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}});
   var back=root.querySelector('.question-back');if(back)back.onclick=function(){i--;render()};
