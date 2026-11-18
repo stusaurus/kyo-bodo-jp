@@ -8,11 +8,13 @@ ROOT=Path(__file__).resolve().parents[1];SITE=ROOT/'site';BASE='/kyo-bodo-jp/';O
 sys.path.insert(0,str(ROOT))
 from data.catalog import GAMES
 class Page(HTMLParser):
-    def __init__(self): super().__init__();self.links=[];self.canonical=[];self.h1=0;self.schemas=[];self.schema=False
+    def __init__(self): super().__init__();self.links=[];self.assets=[];self.canonical=[];self.h1=0;self.schemas=[];self.schema=False
     def handle_starttag(self,tag,attrs):
         a=dict(attrs)
         if tag=='h1':self.h1+=1
         if tag=='a' and a.get('href'):self.links.append(a['href'])
+        if tag=='script' and a.get('src'):self.assets.append(a['src'])
+        if tag=='link' and a.get('rel')=='stylesheet' and a.get('href'):self.assets.append(a['href'])
         if tag=='link' and a.get('rel')=='canonical':self.canonical.append(a.get('href'))
         if tag=='script' and a.get('type')=='application/ld+json':self.schema=True
     def handle_data(self,data):
@@ -27,6 +29,15 @@ for path in SITE.rglob('*.html'):
     expected=ORIGIN+BASE+(rel[:-10] if rel.endswith('index.html') else rel)
     if rel=='404.html':continue
     assert p.canonical==[expected],(rel,p.canonical,expected);urls.add(expected)
+    # Generated pages must never reference scripts or styles that were not
+    # copied into the deployed artifact. This catches missing JS even when
+    # HTML links, sitemap and JSON-LD are otherwise valid.
+    for asset in p.assets:
+        dest=urlparse(asset)
+        if not dest.path.startswith(BASE) or dest.netloc not in ('','stusaurus.github.io'):continue
+        target=(SITE/unquote(dest.path[len(BASE):])).resolve()
+        assert target.is_relative_to(SITE.resolve()),(rel,asset,'path traversal')
+        assert target.is_file(),(rel,asset,'missing deployed script or stylesheet')
     for link in p.links:
         dest=urlparse(link)
         if not dest.path.startswith(BASE) or dest.netloc not in ('','stusaurus.github.io'):continue
