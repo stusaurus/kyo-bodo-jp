@@ -87,7 +87,7 @@ PER_GAME_BLOCK={
     "wingspan":["東洋の翼","欧州の翼","大洋の翼","中南米の翼","asia"],
     "bomb-busters":["プロキット","prokit"],
     "heat":["ヘヴィレイン","ヘビーレイン","heavy rain","トンネルヴィジョン","tunnel vision"],
-    "the-game":["exit","脱出"],
+    "the-game":["exit","脱出","エクストリーム","extreme","クワンチャイ"],
     "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala","タロット","タペストリー","クロス","用シート"],
     "forbidden-island":["パラサイト","小説","電子書籍"],
     "ice-cool":["リング","ネッククーラー","冷感","クールリング"],
@@ -164,7 +164,7 @@ def match_item(g,item):
             return False,"missing_patchwork_identity",-450
 
     if g["game_id"]=="the-game":
-        exact_second=(has_term(name,"ザゲーム") and (has_term(name,"第2版") or has_term(name,"第二版")) and has_term(name,"日本語"))
+        exact_second=(has_term(name,"ザゲーム") and (has_term(name,"第2版") or has_term(name,"第二版")) and has_term(name,"完全日本語版"))
         if not exact_second:
             return False,"missing_the_game_identity",-450
     if g["game_id"]=="ark-nova":
@@ -188,7 +188,7 @@ def match_item(g,item):
             return False,"missing_sagrada_japanese_identity",-450
 
     required=CONTEXT_RULES.get(g["game_id"])
-    if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork") and not any(has_term(name,t) for t in required):
+    if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork","the-game") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
     # Special-case sibling distinction.
     if g["game_id"]=="ito-rainbow" and not has_term(name,"レインボー"):
@@ -205,6 +205,15 @@ def match_item(g,item):
     if item.get("mediumImageUrls"): s+=2
     if item.get("reviewCount") or 0: s+=1
     return True,"ok",s
+
+def is_preorder_listing(name):
+    """Derive a conservative reservation flag from the current Rakuten offer title.
+
+    A "再販" or "再生産" label alone is not a reservation; do not infer that.
+    This is not an availability or delivery-date guarantee.
+    """
+    return "予約" in unicodedata.normalize("NFKC", name or "")
+
 
 def request_items(keyword):
     p={
@@ -338,6 +347,7 @@ def one(g):
                 "shop_name":best.get("shopName",""),
                 "match_score":s,
                 "matched_query":q,
+                "preorder":is_preorder_listing(best.get("itemName","")),
             }
             return hit,rejected
         time.sleep(1.1)
@@ -382,6 +392,7 @@ def main():
                     "title":g["title"],"status":"ok","reason":"api_current_match",
                     "item_name":hit["item_name"],"item_code":hit["item_code"],
                     "item_url":hit["item_url"],"matched_query":hit["matched_query"],
+                    "preorder":hit["preorder"],
                     "rejected_candidates":len(rejected),
                 }
                 print(f"[{i}/{len(GAMES)}] {g['title']} OK | {hit['item_code']} | {hit['item_name']}")
