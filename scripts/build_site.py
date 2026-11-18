@@ -426,6 +426,69 @@ def scene_representatives(s, limit=12):
     return selected[:limit]
 
 
+def children_age_filter():
+    """Compare factual age, participant count and maximum playtime without popularity claims.
+
+    All catalog items for children-age filters are available as ordinary links,
+    not just the 12 editorial scene cards. Initial results work without JS.
+    """
+    eligible = [g for g in GAMES if g["age"] <= 12
+                and any(supports_players(g, n) for n in range(2, 7))]
+    def initially_visible(g):
+        return g["age"] <= 6 and supports_players(g, 2) and g["play_time_max"] <= 20
+    initial_count = sum(1 for g in eligible if initially_visible(g))
+    rows = []
+    for g in eligible:
+        players = " ".join(str(n) for n in range(2, 7) if supports_players(g, n))
+        hidden = "" if initially_visible(g) else " hidden"
+        rows.append(
+            f'<li class="children-choice-item" data-child-game="{e(g["game_id"])}" '
+            f'data-child-age="{g["age"]}" data-child-players="{players}" '
+            f'data-child-minutes="{g["play_time_max"]}"{hidden}>'
+            f'<a href="{u("games/" + g["game_id"] + "/")}" data-track="game_detail_click" '
+            f'data-game-id="{e(g["game_id"])}" data-source="children_age_filter">'
+            f'<strong>{e(g["title"])}</strong>'
+            f'<span>{e(player_label(g))}／{format_play_time(g)}／対象{g["age"]}歳〜</span>'
+            f'<small>すること：{e(g["how_to_play"][1])}</small>'
+            '</a></li>'
+        )
+    ages = "".join(
+        f'<option value="{n}"' + (' selected' if n == 6 else '') + f'>{n}歳</option>'
+        for n in (6, 8, 10, 12)
+    )
+    players = "".join(
+        f'<option value="{n}"' + (' selected' if n == 2 else '') + f'>{n}人</option>'
+        for n in (2, 3, 4, 5, 6)
+    )
+    times = "".join(
+        f'<option value="{n}"' + (' selected' if n == "20" else '') + f'>{label}</option>'
+        for n, label in (("20", "20分以内"), ("30", "30分以内"), ("60", "60分以内"), ("any", "時間は指定しない"))
+    )
+    return f'''<section class="section children-choice" id="children-age-compare" aria-labelledby="children-choice-heading">
+<div class="eyebrow">CHOOSE WITH CONFIDENCE</div>
+<h2 id="children-choice-heading">子どもの年齢・人数・時間から候補を絞る</h2>
+<p>最年少の子どもの年齢を目安に、参加する人数と遊べる時間を指定できます。
+表示するのは<strong>掲載データの対象年齢以下・人数対応・所要時間上限以内</strong>をすべて満たす作品です。
+人気順や実際に遊んだ評価ではありません。</p>
+<form id="children-choice-form" aria-label="親子向けボードゲームの絞り込み" hidden>
+<label for="children-age">最年少の子どもの年齢<select id="children-age" name="age">{ages}</select></label>
+<label for="children-players">実際に遊ぶ人数（大人も含む）<select id="children-players" name="players">{players}</select></label>
+<label for="children-time">遊べる時間の上限<select id="children-time" name="minutes">{times}</select></label>
+<button id="children-choice-reset" type="button">6歳・2人・20分に戻す</button>
+</form>
+<p class="children-choice-count" role="status" aria-live="polite" aria-atomic="true">
+条件に合う <strong id="children-choice-count">{initial_count}本</strong> ／ カタログ掲載順</p>
+<ul class="children-choice-results" id="children-choice-results">{''.join(rows)}</ul>
+<p class="children-choice-empty" id="children-choice-empty" hidden>この条件に合う掲載作品はありません。年齢はそのままに人数や時間を変えてみてください。</p>
+<p class="small">対象年齢は「その年齢から遊べる目安」で、学年・理解度や一緒に遊ぶ大人の人数を保証するものではありません。
+掲載の時間にはルール説明・準備・片付けが含まれない場合があります。
+購入前に販売版の対象年齢・人数・ソロ用ルール・在庫を確認してください。</p>
+<noscript><p class="small">条件変更にはJavaScriptが必要です。現在は6歳・2人・20分以内の候補を表示しています。
+<a href="{u("games/")}">全作品から探す</a>こともできます。</p></noscript>
+<script defer src="{asset("children-filter.js")}"></script>
+</section>'''
+
+
 def scene_page(s):
     ranked = scene_representatives(s)
     order_note = ('2人だけの人数表記と複数人数対応を組み合わせた比較例。'
@@ -443,7 +506,7 @@ def scene_page(s):
                        '<p class="small">条件を引き継ぎ、残り4問で候補を選べます。診断中に条件を変更できます。</p></nav>')
 
     scene_h1 = ("2人用・2人でも遊べる" if s["scene_id"] == "two-player" else s["title"])
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{children_age_filter() if s["scene_id"] == "children" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     seo={
         "two-player":("2人用ボードゲームおすすめ比較｜2人専用と2人対応の違い", "2人でできるボードゲームを2人専用と複数人数対応に分けて紹介。カップル・友人・夫婦で、遊べる時間・対戦か協力か・対象年齢を確認。人気順位ではありません。"),
