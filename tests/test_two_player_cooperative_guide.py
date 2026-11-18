@@ -17,7 +17,12 @@ def test_guide_contains_all_factual_two_player_cooperative_games_once():
     assert len(games) == 15  # Current real catalog, reviewed 2026-11-18.
     html = m.two_player_cooperative_guide()
     pattern = re.compile(r'<tr data-cooperative-game="([^"]+)">')
-    assert pattern.findall(html) == [g["game_id"] for g in games]
+    expected = (
+        [g["game_id"] for g in games if g["play_time_max"] <= 20]
+        + [g["game_id"] for g in games if 20 < g["play_time_max"] <= 30]
+        + [g["game_id"] for g in games if g["play_time_max"] > 30]
+    )
+    assert pattern.findall(html) == expected
     assert len(set(pattern.findall(html))) == len(games)
     assert "勝ち負けを競う代わりに" in html
     assert "人気順位・実際に遊んだ評価ではありません" in html
