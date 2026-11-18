@@ -68,7 +68,7 @@ function results(){
 function render(){
   if(i>=qs.length){results();return}
   var q=qs[i],qi=originalKeys.indexOf(q[0]),pct=Math.round(i/qs.length*100),scene=[1,4,2,5,3,6][qi];
-  var options=q[0]==='mood'&&a.who==='solo'?[['think','じっくり考えたい'],['relax','気軽に遊びたい'],['compete','自分の記録に挑みたい']]:q[2];
+  var options=q[0]==='players'&&a.who==='solo'?[['1','1人']]:q[0]==='mood'&&a.who==='solo'?[['think','じっくり考えたい'],['relax','気軽に遊びたい'],['compete','自分の記録に挑みたい']]:q[2];
   root.className='diagnosis-state';root.setAttribute('aria-busy','false');
   root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">'+(a.who==='solo'?'ひとりの時間を、楽しもう。':'一緒に遊ぶ時間を、思い浮かべて。')+'</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[qi]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+options.map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
   root.querySelector('h2').focus({preventScroll:true});
