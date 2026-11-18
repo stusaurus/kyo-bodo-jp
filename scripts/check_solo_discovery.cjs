@@ -50,7 +50,8 @@ const server=new Promise(resolve=>{
       await page.locator('[data-filter="solo"]').click();
       assert.equal(await page.locator('[data-filter="solo"]').getAttribute('aria-pressed'),'true');
       const visible=page.locator('.game-list-card:visible');
-      assert.equal(await visible.count(),eligible.length);
+      const catalogCount=await visible.count();
+      assert.equal(catalogCount,eligible.length);
       assert((await page.locator('#filterCount').innerText()).includes(String(eligible.length)));
       assert((await visible.evaluateAll(xs=>xs.map(x=>x.dataset.solo))).every(x=>x==='1'));
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),'catalog overflow '+width);
@@ -83,7 +84,7 @@ const server=new Promise(resolve=>{
       assert.equal(errors.length,0,errors.join('\n'));
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),'diagnosis overflow '+width);
       await page.screenshot({path:path.join(output,'diagnosis-'+width+'.png'),fullPage:true,animations:'disabled'});
-      console.log(JSON.stringify({width,solo:eligible.length,scene:actual.length,catalog:await visible.count().catch(()=>eligible.length),diagnosis:recommendations.length,errors:0,overflow:0}));
+      console.log(JSON.stringify({width,solo:eligible.length,scene:actual.length,catalog:catalogCount,diagnosis:recommendations.length,errors:0,overflow:0}));
       await ctx.close();
     }
   }finally{
