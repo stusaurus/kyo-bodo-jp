@@ -49,10 +49,37 @@ ANALYTICS="""
 var cfg=window.KYO_BODO_CONFIG||{},id=cfg.gaMeasurementId||"",op=false,p=new URLSearchParams(location.search);
 try{op=localStorage.getItem("kyo_bodo_operator_test")==="1"}catch(_){}
 if(p.get("test")==="1"||p.get("test")==="0"){op=p.get("test")==="1";try{if(op)localStorage.setItem("kyo_bodo_operator_test","1");else localStorage.removeItem("kyo_bodo_operator_test")}catch(_){}}
+// Only the published note campaign is recognized. Query strings, referrers,
+// user identifiers and child ages are never added to custom analytics events.
+var noteKey="kyo_bodo_note_entry_v1",noteEntry=null,noteLandingNew=false;
+var campaign="two_player_trial_20261118",now=Date.now();
+try{
+  var saved=JSON.parse(sessionStorage.getItem(noteKey)||"null");
+  if(saved&&saved.campaign===campaign&&saved.at>0&&now>=saved.at&&now-saved.at<30*60*1000){
+    noteEntry=saved;
+  }else{
+    sessionStorage.removeItem(noteKey);
+  }
+  if(p.get("utm_source")==="note"&&p.get("utm_medium")==="referral"&&p.get("utm_campaign")===campaign){
+    if(!noteEntry){
+      noteEntry={campaign:campaign,content:p.get("utm_content")==="coop_guide"?"coop_guide":"unspecified",landing_path:location.pathname,at:now};
+      sessionStorage.setItem(noteKey,JSON.stringify(noteEntry));
+      noteLandingNew=true;
+    }
+  }
+}catch(_){}
 window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){dataLayer.push(arguments)};
 if(id){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);document.head.appendChild(s);gtag("js",new Date());gtag("config",id,{operator_test:op?"1":"0"})}
 window.kyoTrack=function(name,data){data=data||{};data.page_path=location.pathname;data.operator_test=op?"1":"0";
+if(noteEntry&&Date.now()-noteEntry.at<30*60*1000){
+  data.entry_channel="note_campaign";
+  data.entry_campaign=noteEntry.campaign;
+  data.entry_content=noteEntry.content;
+}
 try{var ctx=JSON.parse(sessionStorage.getItem("kyo_bodo_journey")||"{}");if(data.conversion_source)ctx.conversion_source=data.conversion_source;if(name==="diagnosis_complete"){ctx.journey="diagnosis";ctx.players=data.players;ctx.mood=data.mood;ctx.desired_time=data.desired_time;}if(name==="scene_view"){ctx.journey="scene";ctx.scene_id=data.scene_id;}if(data.game_id)ctx.game_id=data.game_id;sessionStorage.setItem("kyo_bodo_journey",JSON.stringify(ctx));Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})}catch(_){}gtag("event",name,data)};
+// Report a UTM-tagged note landing once per tab/session, not every reload.
+// This is campaign attribution, not proof of a verified human or purchase.
+if(noteLandingNew)window.kyoTrack("note_campaign_landing",{landing_path:location.pathname});
 document.addEventListener("click",function(ev){var a=ev.target.closest&&ev.target.closest("a");if(!a)return;
 if(a.dataset.track)kyoTrack(a.dataset.track,{game_id:a.dataset.gameId||"",conversion_source:a.dataset.source||"",rank:a.dataset.rank||""});
 if(a.dataset.affiliate)kyoTrack("affiliate_click",{affiliate:a.dataset.affiliate,game_id:a.dataset.gameId||"",conversion_source:a.dataset.source||"",rank:a.dataset.rank||"",link_url:a.href,page_path:location.pathname});
