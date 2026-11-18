@@ -153,7 +153,7 @@ def home():
     pop="".join(card(BY_ID[x],"popular") for x in ["ito","catan","splendor"])
     body=f'''<section class="hero"><div class="hero-shell"><div class="hero-copy"><div class="hero-message"><p class="hero-eyebrow">みんなで遊ぶと、今日がちょっと特別に。</p><h1><span>今日</span>なにやる？</h1><p class="hero-summary">まずは今日のおすすめから。<span>もっと絞りたい人だけ、人数・時間で診断。</span></p></div><div class="hero-action-block"><div class="hero-actions"><a class="btn primary large" href="#today-games">おすすめ3本を先に見る <span aria-hidden="true">↓</span></a><a class="btn secondary" href="{u("diagnosis/?src=hero")}">人数・時間でもっと絞る <span aria-hidden="true">→</span></a></div><p class="hero-note">診断しなくても選べます　／　診断は任意・6問　／　登録不要</p></div></div><figure class="hero-visual"><img src="{asset("hero-kyo-bodo.webp")}" alt="暖かな光の中で、家族がテーブルを囲んでボードゲームを楽しむイラスト" width="1536" height="1024" fetchpriority="high" decoding="async"></figure></div></section>
 <section class="today-section" id="today-games" aria-label="今日のおすすめ商品"><div class="today-inner"><div class="section-lead"><div><div class="eyebrow">TODAY'S PICKS</div><h2>今日のおすすめ3本</h2></div><p class="section-sub">いつもの時間に、ひとつ遊びを。</p></div><div id="todayChoiceControls" hidden aria-label="今日の遊び方で絞り込む"></div><div id="todayGames" aria-live="polite"><p class="small">本日のおすすめを更新中。まずは定番の3本から選べます。</p><div class="grid popular-grid">{pop}</div></div><section class="today-saved-games" id="todaySavedGames" hidden aria-label="あとで比べるゲーム"></section></div></section>
-<section class="section scene-section" id="scenes"><div class="section-lead"><div><div class="eyebrow">PLAY TOGETHER</div><h2>今日は、誰と遊ぶ？</h2></div><a class="text-link" href="{u("scenes/")}">すべてのシーン <span class="arrow" aria-hidden="true">→</span></a></div>{scene_navigation()}<p class="scene-growth-link">2人で遊ぶ予定なら、<a href="{u("scenes/two-player/")}">2人用ボードゲームの対戦・協力と遊び方を比べる</a>ところから。</p></section>
+<section class="section scene-section" id="scenes"><div class="section-lead"><div><div class="eyebrow">PLAY TOGETHER</div><h2>今日は、誰と遊ぶ？</h2></div><a class="text-link" href="{u("scenes/")}">すべてのシーン <span class="arrow" aria-hidden="true">→</span></a></div>{scene_navigation()}<p class="scene-growth-link">2人で遊ぶ予定なら、<a href="{u("scenes/two-player/")}">2人用ボードゲームの対戦・協力と遊び方を比べる</a>ところから。</p><p class="scene-growth-link">2人で同じ目標を目指すなら、<a href="{u("guides/two-player-cooperative/")}">協力ゲームを会話のしかた・時間から比べる</a>こともできます。</p></section>
 <section class="section"><div class="section-lead"><div><div class="eyebrow">FIND YOUR GAME</div><h2>「選ぶ」時間を短くする</h2></div></div><div class="steps"><div class="step-card"><span class="step-no">01</span><h3>今のメンバーを教えて</h3><p>人数・時間・気分を、6問で。</p></div><div class="step-card"><span class="step-no">02</span><h3>今日に合う候補が見つかる</h3><p>あなたたちに合う5本をご提案。</p></div><div class="step-card"><span class="step-no">03</span><h3>1分ルールで、遊ぶ姿を想像</h3><p>楽しそうと思ったら、その1本を。</p></div></div><div class="steps-action"><a class="text-link" href="{u("diagnosis/?src=how_it_works")}">今日の1本を診断する <span class="arrow" aria-hidden="true">→</span></a></div></section>
 <section class="section"><div class="section-lead"><div><div class="eyebrow">TIMELESS FAVORITES</div><h2>迷ったら、この定番から</h2></div><a class="text-link" href="{u("games/")}">{len(GAMES)}本のゲーム <span class="arrow" aria-hidden="true">→</span></a></div><div class="grid popular-grid">{pop}</div></section><script defer src="{asset("decision-insights.js")}"></script><script defer src="{asset("today.js")}"></script>'''
     return shell("きょうボド","ボードゲーム選びに迷ったら。人数・気分・時間の6問から、今日のメンバーに合う5本を30秒で診断。1分ルールで遊び方まで分かります。",body)
@@ -505,6 +505,11 @@ def scene_page(s):
                        f'<a class="text-link" data-track="diagnosis_entry" href="{u("diagnosis/?src=two_player_coop&preset=two-coop")}">2人で協力するゲームを診断 →</a>'
                        '<p class="small">条件を引き継ぎ、残り4問で候補を選べます。診断中に条件を変更できます。</p></nav>')
 
+    if s["scene_id"] == "two-player":
+        choice_link += (f'<p class="small"><a class="text-link" data-track="guide_entry" '
+                        f'data-source="two_player_scene" href="{u("guides/two-player-cooperative/")}">'
+                        '2人で協力する作品だけを時間・会話から比較 →</a></p>')
+
     scene_h1 = ("2人用・2人でも遊べる" if s["scene_id"] == "two-player" else s["title"])
     body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{children_age_filter() if s["scene_id"] == "children" else ""}{scene_comparison_table(s, ranked)}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
@@ -517,6 +522,130 @@ def scene_page(s):
     }
     title,desc=seo.get(s["scene_id"],(s["title"]+"ボードゲーム",s["intro"]))
     return shell(title,desc,body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
+
+
+def two_player_cooperative_guide():
+    """Search-intent-specific, fact-checked comparison of shared-goal games for two.
+
+    Distinct from the broad two-player and cooperative scene lists: it makes
+    communication restrictions, game mechanics and complete time buckets clear.
+    """
+    matching = [g for g in GAMES if supports_players(g, 2) and g["cooperative"]]
+    if not matching:
+        raise ValueError("No verified 2-player cooperative games found")
+    short = [g for g in matching if g["play_time_max"] <= 20]
+    medium = [g for g in matching if 20 < g["play_time_max"] <= 30]
+    long = [g for g in matching if g["play_time_max"] > 30]
+    exactly_two = [g for g in matching if g["players_min"] == g["players_max"] == 2]
+
+    def row(g):
+        return (
+            '<tr data-cooperative-game="' + e(g["game_id"]) + '">'
+            '<th scope="row"><a data-track="game_detail_click" '
+            'data-source="two_player_cooperative_guide" data-game-id="' + e(g["game_id"]) +
+            '" href="' + u("games/" + g["game_id"] + "/") + '">' + e(g["title"]) +
+            '</a>' + edition_note(g) + '</th>'
+            '<td>' + e(g["how_to_play"][1]) + '</td>'
+            '<td>' + e(player_label(g)) + '</td>'
+            '<td>' + format_play_time(g) + '</td>'
+            '<td>' + str(g["age"]) + '歳〜</td></tr>'
+        )
+
+    def group(heading, games, note):
+        if not games:
+            return ''
+        return (
+            '<section class="two-coop-time-group"><h3>' + heading + '（' +
+            str(len(games)) + '本）</h3><p>' + note + '</p>'
+            '<div class="scene-table-scroll" role="region" tabindex="0" '
+            'aria-label="' + heading + 'の協力ゲーム比較表。横にスクロールできます">'
+            '<table class="scene-data-table"><thead><tr>'
+            '<th scope="col">ゲーム</th><th scope="col">一緒にすること</th>'
+            '<th scope="col">対応人数</th><th scope="col">時間</th><th scope="col">対象年齢</th>'
+            '</tr></thead><tbody>' + ''.join(row(g) for g in games) + '</tbody></table></div></section>'
+        )
+
+    # Use real registered mechanics; never infer hands-on play tests or say
+    # these games are ranked above the remaining catalog candidates.
+    contrasts = (
+        ("話し合わずに動く", "sky-team", "機長・副操縦士でダイスを相談せず配置する"),
+        ("言葉のヒントを交換する", "codenames-duet", "交互の一言ヒントから正解語を探す"),
+        ("タイミングを合わせる", "the-mind", "相談せず数字カードを小さい順に出す"),
+        ("通路を閉じる", "bandido", "道カードをつなぎながら脱出口を塞ぐ"),
+    )
+    examples = []
+    for heading, gid, action in contrasts:
+        g = BY_ID[gid]
+        if g not in matching:
+            raise ValueError("Comparison example is not a 2-player cooperative game: " + gid)
+        examples.append(
+            '<article class="two-coop-method-card"><h3>' + e(heading) + '</h3>'
+            '<a data-track="game_detail_click" data-game-id="' + e(gid) +
+            '" data-source="two_player_cooperative_examples" href="' +
+            u("games/" + gid + "/") + '"><strong>' + e(g["title"]) + '</strong></a>'
+            '<p>' + e(action) + '。' + format_play_time(g) +
+            '／対象' + str(g["age"]) + '歳〜</p></article>'
+        )
+
+    schema = json.dumps({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "2人で協力するボードゲームの比較",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i+1,
+             "url": canon("games/" + g["game_id"] + "/"), "name": g["title"]}
+            for i, g in enumerate(matching)
+        ],
+    }, ensure_ascii=False)
+    content = f'''<section class="page-hero two-coop-hero"><div class="breadcrumb">
+<a href="{u()}">ホーム</a> / <a href="{u("scenes/two-player/")}">2人で遊ぶ</a> / 2人で協力
+</div><div class="eyebrow">TEAM UP FOR TWO</div>
+<h1>2人で協力するボードゲームを比較</h1>
+<p>勝ち負けを競う代わりに、2人で共通の目標を目指すゲームを探している方へ。
+「ヒントを伝える」「相談せずタイミングを合わせる」など、
+<strong>協力のしかた</strong>と遊べる時間で候補を比較します。</p>
+<p class="small">掲載カタログから、2人対応かつ協力型の作品を抽出。
+人気順位・実際に遊んだ評価ではありません。2人対応でも2人での遊び心地を保証するものではありません。</p>
+<a class="text-link" href="#two-coop-by-time">登録情報で{len(matching)}本を比較する →</a>
+</section>
+<section class="section two-coop-guide" aria-labelledby="two-coop-method-heading">
+<div class="eyebrow">WHAT TO DO TOGETHER</div>
+<h2 id="two-coop-method-heading">2人でも、協力のしかたはこんなに違う</h2>
+<p>同じ目標を達成するゲームでも、話せる量や実際にすることは異なります。
+以下は掲載されているルールからの比較例です。人気や難易度の順位ではありません。</p>
+<div class="two-coop-method-grid">{''.join(examples)}</div>
+</section>
+<section class="section two-coop-guide" id="two-coop-by-time" aria-labelledby="two-coop-by-time-heading">
+<div class="eyebrow">COMPARE BY DURATION</div>
+<h2 id="two-coop-by-time-heading">2人で遊ぶ時間から{len(matching)}本を比べる</h2>
+<p>掲載プレイ時間の<strong>上限</strong>が20分以内の作品と、30分以内・30分を超える作品を分けました。
+時間・対象年齢・人数を確認して詳細ページへ進めます。説明や準備の時間は別に見込んでください。</p>
+<p class="small">表は横スクロールできます。各表はカタログ掲載順で人気・優劣の順位ではありません。</p>
+{group("20分以内",short,"食後の空き時間など、上限20分で選びたい場合の候補です。")}
+{group("21〜30分",medium,"相談や推理に少し長く時間を使える場合の候補です。")}
+{group("30分を超える",long,"まとまった時間を確保できる場合の候補です。")}
+</section>
+<section class="section two-coop-guide">
+<div class="eyebrow">BEFORE YOU BUY</div><h2>2人専用と、2人でも遊べる作品を区別する</h2>
+<p>今回の登録情報では、掲載人数が2人だけの協力ゲームは<strong>{len(exactly_two)}本</strong>です。
+残りは2人以外の人数にも対応します。ただし、複数人数に対応する版では
+2人用の特別ルールが必要な場合があります。購入する版の説明をご確認ください。</p>
+<p>「協力するゲーム」と「会話が多いゲーム」は同義ではありません。
+相談に制限のあるゲームもあります。遊び方を確認してから購入先を選んでください。</p>
+<p class="small">商品価格・在庫・販売版は変動します。各作品の詳細ページから販売店で再確認してください。
+リンク先にはアフィリエイト広告を含む場合があります。</p>
+<nav class="two-coop-related" aria-label="関連するボードゲーム比較">
+<a class="text-link" href="{u("scenes/two-player/")}">対戦型も含めて2人用を比較する →</a>
+<a class="text-link" href="{u("scenes/cooperative/")}">3人以上の協力ゲームも探す →</a>
+<a class="text-link" href="{u("diagnosis/?src=two_player_cooperative_guide&preset=two-coop")}">2人・協力の条件で診断する →</a>
+</nav>
+</section>'''
+    return shell(
+        "2人で協力するボードゲーム比較｜時間・会話・遊び方から選ぶ",
+        "2人で協力するボードゲームを掲載情報から比較。スカイチーム、コードネーム：デュエット、ザ・マインドなど、相談・会話制限や20分以内の作品を人数・対象年齢とともに紹介。",
+        content, "guides/two-player-cooperative/",
+        '<script type="application/ld+json">' + schema + '</script>'
+    )
 
 
 def write(rel,text):
@@ -538,7 +667,8 @@ def main():
     write("index.html",home());write("diagnosis/index.html",diagnosis());write("games/index.html",games_index());write("scenes/index.html",scenes_index())
     for g in GAMES: write("games/"+g["game_id"]+"/index.html",game_page(g))
     for s in SCENES: write("scenes/"+s["scene_id"]+"/index.html",scene_page(s))
-    paths=["", "diagnosis/","games/","scenes/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
+    write("guides/two-player-cooperative/index.html",two_player_cooperative_guide())
+    paths=["", "diagnosis/","games/","scenes/","guides/two-player-cooperative/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
     xml='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join("<url><loc>"+e(canon(p))+"</loc></url>" for p in paths)+"</urlset>"
     write("sitemap.xml",xml);write("robots.txt","User-agent: *\nAllow: /\nSitemap: "+canon("sitemap.xml")+"\n")
     write("404.html",shell("ページが見つかりません","ページが見つかりません。",'<section class="page-hero"><h1>ページが見つかりません</h1><a class="btn primary" href="'+u()+'">トップへ</a></section>',extra='<meta name="robots" content="noindex">'))
