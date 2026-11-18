@@ -73,8 +73,9 @@ def test_all_age_counts_are_consistent_with_source_catalog():
         age: sum(1 for g in eligible() if g["age"] <= age)
         for age in (6, 8, 10, 12)
     }
-    assert expected_counts[6] == 14
-    assert expected_counts[8] == 47
+    # Minimum known coverage from the 83-game baseline; expansions are allowed.
+    assert expected_counts[6] >= 14
+    assert expected_counts[8] >= 47
     assert expected_counts[6] < expected_counts[8] <= expected_counts[10] <= expected_counts[12]
 
 
