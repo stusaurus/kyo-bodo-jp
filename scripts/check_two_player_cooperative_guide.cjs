@@ -53,6 +53,14 @@ function makeServer(){
         xs=>xs.map(x=>x.dataset.cooperativeGame));
       const groupedIds=partitions.flat().map(g=>g.game_id);
       assert.deepEqual(rowIds,groupedIds);
+      const sourcedGames=eligible.filter(g=>!!g.specs_source);
+      for(const game of sourcedGames){
+        const row=page.locator('tr[data-cooperative-game="'+game.game_id+'"]');
+        const link=row.locator('a[aria-label$="の人数・時間・年齢の確認元"]');
+        assert.equal(await link.count(),1,'missing explicit source '+game.game_id);
+        assert.equal(await link.getAttribute('href'),game.specs_source);
+        assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+      }
       const counts=await page.locator('.two-coop-time-group').evaluateAll(
         xs=>xs.map(x=>x.querySelectorAll('tbody tr').length));
       assert.deepEqual(counts,partitions.map(x=>x.length));

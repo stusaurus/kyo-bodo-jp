@@ -539,6 +539,9 @@ def two_player_cooperative_guide():
     exactly_two = [g for g in matching if g["players_min"] == g["players_max"] == 2]
 
     def row(g):
+        source = (f'<a href="{e(g["specs_source"])}" target="_blank" '
+                  f'rel="noopener noreferrer" aria-label="{e(g["title"])}の人数・時間・年齢の確認元">取扱元・メーカー</a>'
+                  if g.get("specs_source") else '<span class="small">詳細ページで版をご確認ください</span>')
         return (
             '<tr data-cooperative-game="' + e(g["game_id"]) + '">'
             '<th scope="row"><a data-track="game_detail_click" '
@@ -548,7 +551,8 @@ def two_player_cooperative_guide():
             '<td>' + e(g["how_to_play"][1]) + '</td>'
             '<td>' + e(player_label(g)) + '</td>'
             '<td>' + format_play_time(g) + '</td>'
-            '<td>' + str(g["age"]) + '歳〜</td></tr>'
+            '<td>' + str(g["age"]) + '歳〜</td>'
+            '<td>' + source + '</td></tr>'
         )
 
     def group(heading, games, note):
@@ -561,7 +565,7 @@ def two_player_cooperative_guide():
             'aria-label="' + heading + 'の協力ゲーム比較表。横にスクロールできます">'
             '<table class="scene-data-table"><thead><tr>'
             '<th scope="col">ゲーム</th><th scope="col">一緒にすること</th>'
-            '<th scope="col">対応人数</th><th scope="col">時間</th><th scope="col">対象年齢</th>'
+            '<th scope="col">対応人数</th><th scope="col">時間</th><th scope="col">対象年齢</th><th scope="col">情報の確認元</th>'
             '</tr></thead><tbody>' + ''.join(row(g) for g in games) + '</tbody></table></div></section>'
         )
 
@@ -620,7 +624,8 @@ def two_player_cooperative_guide():
 <h2 id="two-coop-by-time-heading">2人で遊ぶ時間から{len(matching)}本を比べる</h2>
 <p>掲載プレイ時間の<strong>上限</strong>が20分以内の作品と、30分以内・30分を超える作品を分けました。
 時間・対象年齢・人数を確認して詳細ページへ進めます。説明や準備の時間は別に見込んでください。</p>
-<p class="small">表は横スクロールできます。各表はカタログ掲載順で人気・優劣の順位ではありません。</p>
+<p class="small">表は横スクロールできます。各表はカタログ掲載順で人気・優劣の順位ではありません。
+「情報の確認元」は出典を照合できた作品のみ表示し、未確認の作品について根拠を推測で補っていません。</p>
 {group("20分以内",short,"食後の空き時間など、上限20分で選びたい場合の候補です。")}
 {group("21〜30分",medium,"相談や推理に少し長く時間を使える場合の候補です。")}
 {group("30分を超える",long,"まとまった時間を確保できる場合の候補です。")}
