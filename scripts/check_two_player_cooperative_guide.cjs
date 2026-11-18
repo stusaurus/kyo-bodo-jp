@@ -51,7 +51,8 @@ function makeServer(){
         'https://stusaurus.github.io'+target);
       const rowIds=await page.locator('tr[data-cooperative-game]').evaluateAll(
         xs=>xs.map(x=>x.dataset.cooperativeGame));
-      assert.deepEqual(rowIds,eligible.map(g=>g.game_id));
+      const groupedIds=partitions.flat().map(g=>g.game_id);
+      assert.deepEqual(rowIds,groupedIds);
       const counts=await page.locator('.two-coop-time-group').evaluateAll(
         xs=>xs.map(x=>x.querySelectorAll('tbody tr').length));
       assert.deepEqual(counts,partitions.map(x=>x.length));
