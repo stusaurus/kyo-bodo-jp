@@ -530,6 +530,7 @@ def main():
     write("assets/styles.css",CSS);write("assets/analytics.js",ANALYTICS);write("assets/diagnosis.js",DIAGNOSIS);write("assets/today.js",TODAY)
     shutil.copy2(ROOT/"assets/decision-insights.js", SITE/"assets/decision-insights.js")
     shutil.copy2(ROOT/"assets/two-player-quick-filter.js", SITE/"assets/two-player-quick-filter.js")
+    shutil.copy2(ROOT/"assets/children-filter.js", SITE/"assets/children-filter.js")
     if HERO_ASSET.exists(): shutil.copy2(HERO_ASSET,SITE/"assets"/HERO_ASSET.name)
     if SCENE_ASSET.exists(): shutil.copy2(SCENE_ASSET,SITE/"assets"/SCENE_ASSET.name)
     write("data/games.json",json.dumps(GAMES,ensure_ascii=False,separators=(",",":")))
