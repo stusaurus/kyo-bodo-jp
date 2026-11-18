@@ -28,6 +28,7 @@ jobs:
           node --check assets/children-filter.js
           node --check scripts/check_children_age_comparison.cjs
           node --check scripts/check_two_player_cooperative_guide.cjs
+          node --check scripts/check_note_referral_funnel.cjs
           node --check scripts/check_catalog_expansion_pages.cjs
           node --check scripts/check_solo_discovery.cjs
           node --check scripts/check_rakuten_preorder.cjs
@@ -56,6 +57,7 @@ jobs:
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_rakuten_preorder.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_children_age_comparison.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_two_player_cooperative_guide.cjs
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_note_referral_funnel.cjs
       - name: Save unpublished scene evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,4 +71,5 @@ jobs:
             audit-results/rakuten-preorder/
             audit-results/children-age-comparison/
             audit-results/two-player-cooperative/
+            audit-results/note-referral-funnel/
           retention-days: 14
