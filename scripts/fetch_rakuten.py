@@ -27,6 +27,7 @@ CONTEXT_RULES={
     "ito":["アークライト","ボードゲーム","カードゲーム"],
     "ito-rainbow":["アークライト","ボードゲーム","カードゲーム"],
     "love-letter":["ボードゲーム","カードゲーム","アークライト"],
+    "lama":["メビウス","amigo","カードゲーム","ボードゲーム","l.a.m.a."],
     "coyote":["ボードゲーム","カードゲーム"],
     "skull":["ボードゲーム","カードゲーム","ホビージャパン"],
     "hanabi":["ボードゲーム","カードゲーム","ホビージャパン"],
@@ -96,6 +97,8 @@ PER_GAME_BLOCK={
     "terraforming-mars":["ダイスゲーム","dice game","カードゲーム","ares","アレス","プレリュード","prelude"],
     "sagrada":["ライフ","life","パッション","passion","グローリー","glory"],
     "sushi-go-party":["中古","スシゴー！ - ピック","sushigo! - the pick"],
+    "lama":["ラマダイス","ラマ ダイス","ラマパーティ","ラマ パーティ","ラマ・パーティ","ラマカダブラ","ラマ・カダブラ","lama dice","lama party","lama kadabra"],
+    "ark-nova":["マップパック","追加マップ","サンクチュアリ","マリンワールド","marine worlds"],
 }
 
 # Accepted title aliases. Default is the catalog title itself.
@@ -164,6 +167,12 @@ def match_item(g,item):
         exact_second=(has_term(name,"ザゲーム") and (has_term(name,"第2版") or has_term(name,"第二版")) and has_term(name,"日本語"))
         if not exact_second:
             return False,"missing_the_game_identity",-450
+    if g["game_id"]=="ark-nova":
+        if not (has_term(name,"アーク・ノヴァ") and has_term(name,"新たなる方舟") and has_term(name,"日本語版")):
+            return False,"missing_ark_nova_japanese_base_identity",-450
+    if g["game_id"]=="lama":
+        if not (has_term(name,"ラマ") or has_term(name,"l.a.m.a.")):
+            return False,"missing_lama_identity",-450
     if g["game_id"]=="terraforming-mars":
         exact_base=has_term(name,"テラフォーミングマーズ") and has_term(name,"完全日本語版")
         if not exact_base:

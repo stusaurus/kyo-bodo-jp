@@ -108,13 +108,23 @@ g("wingspan","ウイングスパン",1,5,40,70,10,"4531212331111","美しい鳥�
 g("terraforming-mars","テラフォーミング・マーズ",1,5,90,120,12,"5522311321111","企業を率いて火星を開発する、長時間でも没頭できる重量級の代表作。","企業と初期カードを決める|カードを使って資源生産と都市開発を進める|気温・酸素・海洋を満たし最終得点を競う","大人|長時間|戦略","テラフォーミング マーズ 完全日本語版","strategy|long"),
 g("sagrada","サグラダ",1,4,30,45,13,"3441313443112","カラフルなダイスでステンドグラスを作る、見た目と悩ましさが両立。","ダイスを振って共有場へ置く|色と数字の配置制限を守って窓へ置く|目標条件を満たして最も高得点を狙う","夫婦|友達|見た目重視","サグラダ 日本語版 Engames","couple|friends|strategy"),
 g("hellapagos","ヘルパゴス",3,12,20,20,10,"2245523232553","無人島で協力するはずが、資源不足で裏切りも始まる大人数サバイバル。","水・食料・木材を集める行動を選ぶ|全員が生き残れるよう資源といかだを準備する|足りなければ相談と投票で生存者を決める","大人数|友達|会話","ヘルパゴス すごろくや ボードゲーム","friends|large_group|party"),
+g("nana-card-game","ナナカードゲーム",2,5,15,15,6,"1333315454235","自分とみんなの手札の端を見ながら同じ数字3枚を探す、記憶と推理のカードゲーム。","数字カードを配り残りを中央に伏せる|誰かの手札の最小・最大か中央の札を1枚公開する|同じ数字3枚をそろえて組を集める","家族|小学生|友達|短時間","ナナカードゲーム Mob+ 日本語版","family|children|beginner|short"),
+g("lama","ラマ",2,6,20,20,8,"1243415343345","出す・引く・降りるを選び、失点を小さく抑える駆け引きが楽しいカードゲーム。","数字かラマのカードを配って山札をめくる|同じ数字か次の数字のカードを出す・引く・降りるを選ぶ|残った手札の失点を数え、合計の少なさを競う","家族|友達|短時間","ラマ L.A.M.A. メビウスゲームズ カードゲーム","family|friends|beginner|short"),
+g("ark-nova","アーク・ノヴァ 新たなる方舟",1,4,90,150,14,"5522211311111","動物園の建設と保全活動を計画し、動物カードと施設を組み合わせる本格戦略ゲーム。","アクションカードを使って施設・動物・保全活動を進める|動物園の収入や評判を伸ばしながら計画を組み立てる|ゲーム終了時に魅力度と保全点によって勝敗を決める","大人|1人|じっくり|長時間","アーク・ノヴァ 新たなる方舟 日本語版 テンデイズゲームズ","strategy|long"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
 # Keep this explicit so subjective editorial ratings cannot turn a competitive
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
+VERIFIED_SPECS_SOURCES = {
+    "nana-card-game": "https://suppe.sugorokuya.jp/items/220738",
+    "lama": "https://mobiusgames.shop-pro.jp/?pid=145076594",
+    "ark-nova": "https://tendaysgames.shop-pro.jp/?pid=166436141",
+}
 for game in GAMES:
+    if game["game_id"] in VERIFIED_SPECS_SOURCES:
+        game["specs_source"] = VERIFIED_SPECS_SOURCES[game["game_id"]]
     if game['game_id'] == 'codenames-duet':
         # Publisher description specifies 2+, not a maximum of two.
         game['players_max'] = None
