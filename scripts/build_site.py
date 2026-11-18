@@ -70,7 +70,7 @@ def load_rakuten(g):
         image=x.get("image_url","")
         if image.startswith("https://thumbnail.image.rakuten.co.jp/"):
             image=image.replace("_ex=128x128","_ex=320x320")
-        return x["url"],image,"楽天で見る"
+        return x["url"],image,("楽天で予約状況を確認" if x.get("preorder") else "楽天で見る")
     q=urllib.parse.quote(g.get("rakuten_query") or g["title"])
     return "https://search.rakuten.co.jp/search/mall/"+q+"/","","楽天で探す"
 
@@ -182,7 +182,9 @@ def game_page(g):
     axes=[("難しさ","difficulty"),("戦略性","strategy"),("運要素","luck"),("会話量","conversation"),("盛り上がり","excitement"),("協力度","cooperation"),("初心者向け","beginner")]
     axis="".join(f'<div class="axis"><span>{n}</span><span class="dots" aria-label="5段階中{g[k]}">{"●"*g[k]}{"○"*(5-g[k])}</span></div>' for n,k in axes)
     hero_art=f'<img src="{e(img)}" alt="{e(g["title"])}の商品画像" decoding="async">' if img else PLACEHOLDER
-    availability='楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'
+    availability=('楽天の商品ページに予約表示があります。受付状況・発送予定・キャンセル条件は販売店でご確認ください。'
+                  if RAKUTEN.get(g["game_id"],{}).get("url") and RAKUTEN[g["game_id"]].get("preorder")
+                  else ('楽天の商品ページを取得済み' if img else '商品は未確定です。楽天検索でご確認ください。'))
     scenes=' ／ '.join(f'<a href="{u("scenes/"+z["scene_id"]+"/")}">{e(z["title"])}</a>' for z in SCENES if scene_score(g,z)>=80)
     source_note = (f'<p class="small">人数・所要時間・対象年齢の確認元：'
                    f'<a href="{e(g["specs_source"])}" target="_blank" rel="noopener noreferrer">'

@@ -27,6 +27,7 @@ jobs:
           node --check assets/media.js
           node --check scripts/check_catalog_expansion_pages.cjs
           node --check scripts/check_solo_discovery.cjs
+          node --check scripts/check_rakuten_preorder.cjs
       - name: Validate diagnosis, game pages and SEO files
         env:
           SITE_URL: https://stusaurus.github.io/kyo-bodo-jp/
@@ -49,6 +50,7 @@ jobs:
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_today_choices.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_catalog_expansion_pages.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_solo_discovery.cjs
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_rakuten_preorder.cjs
       - name: Save unpublished scene evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,4 +61,5 @@ jobs:
             audit-results/today-choice/
             audit-results/catalog-expansion/
             audit-results/solo-discovery/
+            audit-results/rakuten-preorder/
           retention-days: 14
