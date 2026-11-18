@@ -29,8 +29,10 @@ def test_existing_affiliate_vs_search_only_events_are_unchanged():
     for game_id in ("the-game", "lama", "take-it-easy"):
         game = m.BY_ID[game_id]
         page = m.game_page(game)
-        assert 'data-track="rakuten_search_click"' in page or 'data-affiliate="rakuten"' in page
-        assert 'data-affiliate="rakuten"' not in page or 'data-track="rakuten_search_click"' not in page
+        # Related cards have their own offers: verify only this game's product CTA.
+        cta = page.split('class="btn rakuten large"', 1)[1].split("</a>", 1)[0]
+        assert 'data-track="rakuten_search_click"' in cta or 'data-affiliate="rakuten"' in cta
+        assert not ('data-affiliate="rakuten"' in cta and 'data-track="rakuten_search_click"' in cta)
 
 
 def test_campaign_tracking_does_not_collect_query_or_referrer():
