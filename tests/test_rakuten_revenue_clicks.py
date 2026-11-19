@@ -40,6 +40,47 @@ def test_static_purchase_and_search_links_are_distinct(monkeypatch):
     assert "楽天で見る" in detail
 
 
+
+@pytest.mark.parametrize("gid", [
+    "take-it-easy", "mandala", "forbidden-island", "ice-cool",
+    "resistance-avalon", "cascadia", "terraforming-mars", "sagrada",
+])
+def test_unverified_game_search_is_disclosed_without_false_ad_label(monkeypatch, gid):
+    # No inventing affiliate URLs for the eight names without a safe Rakuten match.
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    detail = site.game_page(site.BY_ID[gid])
+    panel = detail.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+    assert 'data-track="rakuten_search_click"' in panel
+    assert 'data-affiliate="rakuten"' not in panel
+    assert 'rel="noopener"' in panel
+    assert 'rel="sponsored noopener"' not in panel
+    assert "楽天で探す" in panel
+    assert "楽天市場の通常検索へ移動します" in panel
+    assert "掲載作品と一致する販売商品を確認できていません" in panel
+    assert "別作品・拡張版・中古品" in panel
+    assert "作品名・版・商品の状態・対象年齢" in panel
+    assert "PR：" not in panel
+    # Other cards may link to genuine offers. The site-wide disclosure remains.
+    assert "当サイトはアフィリエイト広告を利用する場合があります" in detail
+
+
+def test_verified_offer_disclosure_and_preorder_hold_without_product_image(monkeypatch):
+    game = site.BY_ID["quarto"]
+    monkeypatch.setattr(site, "RAKUTEN", {game["game_id"]: {
+        "url": "https://hb.afl.rakuten.co.jp/hgc/example/",
+        "item_url": "https://item.rakuten.co.jp/shop/example/",
+        "image_url": "", "preorder": False
+    }})
+    detail = site.game_page(game)
+    panel = detail.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+    assert 'data-affiliate="rakuten"' in panel
+    assert 'rel="sponsored noopener"' in panel
+    assert "楽天の商品ページを取得済み" in panel
+    assert "PR：購入前に販売ページで版・対象年齢・在庫を確認してください" in panel
+    assert "検索結果には別作品・拡張版・中古品" not in panel
+    assert "掲載作品と一致する販売商品を確認できていません" not in panel
+
+
 def test_diagnosis_and_today_render_distinct_tracking_attributes():
     diagnosis = (ROOT / "assets/diagnosis.js").read_text(encoding="utf-8")
     today = (ROOT / "assets/today.js").read_text(encoding="utf-8")
