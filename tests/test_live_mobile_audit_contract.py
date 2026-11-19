@@ -12,7 +12,7 @@ WORKFLOW = ROOT / ".github/workflows/seo-live-mobile-audit.yml"
 
 EXPECTED_PATHS = {
     "scenes/two-player/", "scenes/couple/", "scenes/children/", "scenes/short/", "scenes/solo/",
-    "guides/two-player-cooperative/", "games/ito/", "games/mandala/",
+    "guides/two-player-cooperative/", "guides/gift-board-games/", "games/ito/", "games/mandala/",
     "games/quarto/", "games/nana-toridori/", "games/incan-gold-rediscovered/",
     "games/ciao-ciao/", "games/nmbr9/", "games/houseki-ippai/",
 }
@@ -34,7 +34,7 @@ def test_existing_public_audit_covers_new_acquisition_and_purchase_pages():
     match = re.search(r'^\s*SEO_PATHS: "([^"]+)"\s*$', text, flags=re.M)
     assert match
     paths = match.group(1).split(",")
-    assert len(paths) == len(set(paths)) == 14
+    assert len(paths) == len(set(paths)) == 15
     assert set(paths) == EXPECTED_PATHS
     assert "const paths=['',...process.env.SEO_PATHS.split(',')];" in text
     assert "for(const width of [320,390,1440])" in text
@@ -68,6 +68,12 @@ def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification(
     assert "data.coupleDecisionHeading" in script
     assert "data.coupleChoiceLinks.length!==expected.length" in script
     assert "scenes/couple/" in script
+    assert "guides/gift-board-games/" in script
+    assert "data.giftGroupCount!==3" in script
+    assert "data.giftDetailLinks.length!==expected.length" in script
+    assert "'dobble','nine-tiles','bandido'" in script
+    assert "'harmonies','splendor-duel','the-crew-deep-sea'" in script
+    assert "gift guide product choices or internal details are inconsistent" in script
     assert "new URL('games/'+expected[i]+'/',base).pathname" in script
     assert "'ito','codenames-duet','patchwork'" in script
     assert "data.soloCards!==14" in script
