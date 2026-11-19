@@ -58,7 +58,8 @@ jobs:
                         soloCards:document.querySelectorAll('.game-card').length,
                         cooperativeRows:document.querySelectorAll('[data-cooperative-game]').length,
                         childNine:!!document.querySelector('#children-age option[value="9"]'),
-                        giftDetailLinks:[...document.querySelectorAll('.gift-age a[data-track="game_detail_click"][data-source="gift_guide"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
+                        giftDetailLinks:[...document.querySelectorAll('.gift-age .gift-cards a[data-track="game_detail_click"][data-source="gift_guide"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
+                        giftTableLinks:[...document.querySelectorAll('.gift-age .gift-table a[data-gift-detail][data-track="game_detail_click"][data-source="gift_guide"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         giftGroupCount:document.querySelectorAll('.gift-age').length,
                         coupleChoiceLinks:[...document.querySelectorAll('.couple-choice-card a[data-source="couple_choice"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         coupleDecisionHeading:!!document.querySelector('#couple-choose-title'),
@@ -74,8 +75,9 @@ jobs:
                     if(p==='scenes/children/'&&!data.childNine)issues.push('missing age-nine filter option');
                     if(p==='guides/gift-board-games/'){
                       const expected=['dobble','nine-tiles','bandido','zombie-kidz','kingdomino','the-game','harmonies','splendor-duel','the-crew-deep-sea'];
-                      if(data.giftGroupCount!==3||data.giftDetailLinks.length!==expected.length||
-                         data.giftDetailLinks.some((x,i)=>x.id!==expected[i]||x.href!==new URL('games/'+expected[i]+'/',base).pathname))
+                      if(data.giftGroupCount!==3||data.giftDetailLinks.length!==expected.length||data.giftTableLinks.length!==expected.length||
+                         data.giftDetailLinks.some((x,i)=>x.id!==expected[i]||x.href!==new URL('games/'+expected[i]+'/',base).pathname)||
+                         data.giftTableLinks.some((x,i)=>x.id!==expected[i]||x.href!==new URL('games/'+expected[i]+'/',base).pathname))
                         issues.push('gift guide product choices or internal details are inconsistent');
                     }
                     if(p==='scenes/couple/'){
