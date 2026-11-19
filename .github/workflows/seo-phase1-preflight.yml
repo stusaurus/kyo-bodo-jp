@@ -32,6 +32,7 @@ jobs:
           node --check scripts/check_children_age_comparison.cjs
           node --check scripts/check_short_time_finder.cjs
           node --check scripts/check_two_player_cooperative_guide.cjs
+          node --check scripts/check_couple_decision_guide.cjs
           node --check scripts/check_note_referral_funnel.cjs
           node --check scripts/check_catalog_expansion_pages.cjs
           node --check scripts/check_catalog_title_search.cjs
@@ -68,6 +69,7 @@ jobs:
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_children_age_comparison.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_short_time_finder.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_two_player_cooperative_guide.cjs
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_couple_decision_guide.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_note_referral_funnel.cjs
       - name: Save unpublished scene evidence
         if: always()
@@ -86,5 +88,6 @@ jobs:
             audit-results/children-age-comparison/
             audit-results/short-time-finder/
             audit-results/two-player-cooperative/
+            audit-results/couple-guide/
             audit-results/note-referral-funnel/
           retention-days: 14
