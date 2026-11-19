@@ -71,6 +71,10 @@ def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification(
     assert "guides/gift-board-games/" in script
     assert "data.giftGroupCount!==3" in script
     assert "data.giftDetailLinks.length!==expected.length" in script
+    assert "data.giftTableLinks.length!==expected.length" in script
+    assert '.gift-age .gift-cards a[data-track=' in script
+    assert '.gift-age .gift-table a[data-gift-detail][data-track=' in script
+    assert "data.giftTableLinks.some((x,i)=>x.id!==expected[i]" in script
     assert "'dobble','nine-tiles','bandido'" in script
     assert "'harmonies','splendor-duel','the-crew-deep-sea'" in script
     assert "gift guide product choices or internal details are inconsistent" in script
