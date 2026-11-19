@@ -22,7 +22,7 @@ jobs:
       - name: Audit public desktop and mobile pages
         env:
           SEO_BASE: https://stusaurus.github.io/kyo-bodo-jp/
-          SEO_PATHS: "scenes/two-player/,scenes/children/,games/ito/"
+          SEO_PATHS: "scenes/two-player/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,games/ito/,games/mandala/,games/quarto/"
         run: |
           node <<'AUDIT_NODE'
             const {chromium}=require('/tmp/seo-audit/node_modules/playwright');
@@ -33,8 +33,15 @@ jobs:
               fs.mkdirSync('seo-mobile-evidence',{recursive:true});
               const browser=await chromium.launch();
               const results=[];
+              let blockedAnalyticsRequests=0;
               for(const width of [320,390,1440]){
                 const context=await browser.newContext({viewport:{width,height:900},isMobile:width<500,hasTouch:width<500,locale:'ja-JP'});
+                // Never transmit synthetic audit pageviews or affiliate events into production GA4.
+                // Set interception BEFORE page creation and navigation, including redirects/beacons.
+                await context.route(/(?:googletagmanager\.com|google-analytics\.com|analytics\.google\.com|stats\.g\.doubleclick\.net)/i,route=>{
+                  blockedAnalyticsRequests++;
+                  return route.abort();
+                });
                 for(const p of paths){
                   const page=await context.newPage();
                   const url=base+p, issues=[],warnings=[];
@@ -44,11 +51,31 @@ jobs:
                     const data=await page.evaluate(()=>{
                       const meta=(q,a='content')=>document.querySelector(q)?.getAttribute(a)||'';
                       const schemas=[...document.querySelectorAll('script[type="application/ld+json"]')];
-                      return {title:document.title,description:meta('meta[name="description"]'),canonical:meta('link[rel="canonical"]','href'),robots:meta('meta[name="robots"]'),viewport:meta('meta[name="viewport"]'),h1:document.querySelectorAll('h1').length,documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth,invalidSchemas:schemas.filter(x=>{try{JSON.parse(x.textContent);return false}catch{return true}}).length};
+                      const offer=document.querySelector('.product-panel a.btn.rakuten.large');
+                      const panel=document.querySelector('.product-panel');
+                      return {title:document.title,description:meta('meta[name="description"]'),canonical:meta('link[rel="canonical"]','href'),robots:meta('meta[name="robots"]'),viewport:meta('meta[name="viewport"]'),h1:document.querySelectorAll('h1').length,documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth,invalidSchemas:schemas.filter(x=>{try{JSON.parse(x.textContent);return false}catch{return true}}).length,
+                        shortCount:document.querySelectorAll('[data-short-game]').length,
+                        soloCards:document.querySelectorAll('.game-card').length,
+                        cooperativeRows:document.querySelectorAll('[data-cooperative-game]').length,
+                        childNine:!!document.querySelector('#children-age option[value="9"]'),
+                        gaConfigured:!!window.KYO_BODO_CONFIG?.gaMeasurementId,
+                        offer:offer&&panel?{href:offer.href,affiliate:offer.dataset.affiliate||'',track:offer.dataset.track||'',rel:offer.rel,text:panel.innerText}:null};
                     });
                     if(response.status()!==200)issues.push('HTTP '+response.status());
                     if(!data.title||!data.description||data.canonical!==url||data.h1!==1||!data.viewport.includes('width=device-width')||data.invalidSchemas||/noindex/i.test(data.robots))issues.push('SEO metadata or canonical inconsistent');
                     if(data.documentWidth>data.viewportWidth+2)warnings.push('horizontal overflow '+data.documentWidth+' > '+data.viewportWidth);
+                    if(p==='scenes/short/'&&data.shortCount!==29)issues.push('20-minute comparison does not show 29 games');
+                    if(p==='scenes/solo/'&&data.soloCards!==13)issues.push('solo comparison does not show 13 games');
+                    if(p==='guides/two-player-cooperative/'&&data.cooperativeRows!==15)issues.push('two-player cooperative guide does not show 15 games');
+                    if(p==='scenes/children/'&&!data.childNine)issues.push('missing age-nine filter option');
+                    if(p.startsWith('games/')){
+                      if(!data.offer)issues.push('missing purchase/search panel');
+                      else if(data.offer.affiliate==='rakuten'){
+                        if(!data.offer.rel.includes('sponsored')||!data.offer.href.startsWith('https://hb.afl.rakuten.co.jp/')||!data.offer.text.includes('PR：'))issues.push('verified affiliate disclosure mismatch');
+                      }else if(data.offer.track==='rakuten_search_click'){
+                        if(data.offer.rel.includes('sponsored')||!data.offer.href.startsWith('https://search.rakuten.co.jp/')||!data.offer.text.includes('通常検索へ移動します')||data.offer.text.includes('PR：'))issues.push('ordinary search disclosure mismatch');
+                      }else issues.push('unclassified Rakuten outbound link');
+                    }
                     if(width<500)await page.screenshot({path:'seo-mobile-evidence/'+width+'-'+(p.replace(/\//g,'-')||'home')+'.png',animations:'disabled'});
                     results.push({width,url,status:response.status(),...data,issues,warnings});
                     console.log(JSON.stringify({width,path:p||'/',status:response.status(),issues,warnings}));
@@ -59,8 +86,8 @@ jobs:
               }
               await browser.close();
               const fatal=results.filter(x=>x.issues.length);
-              fs.writeFileSync('seo-mobile-evidence/report.json',JSON.stringify({results,fatal},null,2));
-              console.log('SEO_MOBILE_SUMMARY '+JSON.stringify({checked:results.length,failed:fatal.length,overflow:results.filter(x=>x.warnings.length).length}));
+              fs.writeFileSync('seo-mobile-evidence/report.json',JSON.stringify({results,fatal,blockedAnalyticsRequests},null,2));
+              console.log('SEO_MOBILE_SUMMARY '+JSON.stringify({checked:results.length,failed:fatal.length,overflow:results.filter(x=>x.warnings.length).length,blockedAnalyticsRequests}));
               if(fatal.length)process.exitCode=1;
             })().catch(e=>{console.error(e);process.exitCode=1});
             
