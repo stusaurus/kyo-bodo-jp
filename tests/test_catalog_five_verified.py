@@ -5,6 +5,7 @@ Gameplay blurbs are descriptions of rules, not firsthand testing, popularity or 
 """
 from data.catalog import GAMES, supports_players
 from scripts import build_site as site
+from scripts.fetch_rakuten import match_item
 
 ADDED = {
     "nana-toridori": (2, 6, 10, 20, 6,
@@ -86,3 +87,32 @@ def test_new_game_pages_link_from_catalog_and_avoid_unverified_reviews():
     # The source-supported 2025 edition is separate from an older Incan Gold box.
     assert site.BY_ID["incan-gold-rediscovered"]["title"] == "インカの黄金 再発掘"
     assert "再発掘" in site.BY_ID["incan-gold-rediscovered"]["rakuten_query"]
+
+
+def test_five_product_identities_never_accept_named_non_game_goods_or_older_edition():
+    cases = [
+        ("nana-toridori", "ナナトリドリ アークライト カードゲーム", True),
+        ("nana-toridori", "ナナトリドリ キーホルダー", False),
+        ("incan-gold-rediscovered", "インカの黄金 再発掘 日本語版 アークライト", True),
+        ("incan-gold-rediscovered", "インカの黄金 新版 完全日本語版", False),
+        ("incan-gold-rediscovered", "インカの黄金 再発掘 英語版 ボードゲーム", False),
+        ("ciao-ciao", "チャオチャオ メビウス ボードゲーム", True),
+        ("ciao-ciao", "チャオチャオ 食器セット", False),
+        ("nmbr9", "ナンバーナイン NMBR9 日本語版 メビウスゲームズ", True),
+        ("nmbr9", "NMBR9 Abacus ボードゲーム", True),
+        ("nmbr9", "ナンバーナイン 数字シール", False),
+        ("houseki-ippai", "宝石がいっぱい！ アークライト カードゲーム", True),
+        ("houseki-ippai", "宝石がいっぱい！ おもちゃ ネックレス", False),
+    ]
+    for gid, listing, should_accept in cases:
+        approved, reason, _ = match_item(site.BY_ID[gid], {"itemName": listing})
+        assert approved is should_accept, (gid, listing, reason)
+
+
+def test_every_new_game_prevents_accessory_only_advertising():
+    for gid in ADDED:
+        game = site.BY_ID[gid]
+        for bad in ("カードスリーブ", "中古", "拡張セット", "英語版"):
+            title = f"{game['title']} {bad} ボードゲーム"
+            matched, _, _ = match_item(game, {"itemName": title})
+            assert not matched, (gid, bad)
