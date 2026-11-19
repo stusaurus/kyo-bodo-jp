@@ -92,7 +92,9 @@
     var found=saved.filter(function(id){return Object.prototype.hasOwnProperty.call(byId,id)});
     savedRoot.hidden=!found.length;
     savedRoot.innerHTML=!found.length?'':('<div class="today-saved-head"><h3>あとで比べる '+found.length+'本</h3><p>この端末内だけに保存。ゲームの紹介から購入先を確認できます。</p></div><div class="today-saved-links">'+
-      found.map(function(id){return '<span class="today-saved-item"><a href="'+escapeText(B+'games/'+encodeURIComponent(id)+'/')+'">'+escapeText(byId[id].title)+'</a><button type="button" data-today-remove="'+escapeText(id)+'" aria-label="'+escapeText(byId[id].title)+'を保存から外す">×</button></span>'}).join("")+'</div>');
+      found.map(function(id){return '<span class="today-saved-item"><a href="'+escapeText(B+'games/'+encodeURIComponent(id)+'/')+'">'+escapeText(byId[id].title)+'</a><button type="button" data-today-remove="'+escapeText(id)+'" aria-label="'+escapeText(byId[id].title)+'を保存から外す">×</button></span>'}).join("")+'</div>'+(
+        found.length>=2?'<div class="today-saved-compare-actions"><a class="btn secondary today-saved-compare" href="'+escapeText(B+'games/#savedCompare')+'">保存した作品を2本比較する →</a><p class="small">最後に保存した2本を自動選択します。比較画面で別の作品にも変更できます。</p></div>':''
+      ));
   }
   function render() {
     var selected=selectGames(games,mode,now);

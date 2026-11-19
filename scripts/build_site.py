@@ -76,7 +76,18 @@ if(noteEntry&&Date.now()-noteEntry.at<30*60*1000){
   data.entry_campaign=noteEntry.campaign;
   data.entry_content=noteEntry.content;
 }
-try{var ctx=JSON.parse(sessionStorage.getItem("kyo_bodo_journey")||"{}");if(data.conversion_source)ctx.conversion_source=data.conversion_source;if(name==="diagnosis_complete"){ctx.journey="diagnosis";ctx.players=data.players;ctx.mood=data.mood;ctx.desired_time=data.desired_time;}if(name==="scene_view"){ctx.journey="scene";ctx.scene_id=data.scene_id;}if(data.game_id)ctx.game_id=data.game_id;sessionStorage.setItem("kyo_bodo_journey",JSON.stringify(ctx));Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})}catch(_){}gtag("event",name,data)};
+try{var ctx=JSON.parse(sessionStorage.getItem("kyo_bodo_journey")||"{}");if(data.conversion_source)ctx.conversion_source=data.conversion_source;if(name==="diagnosis_complete"){ctx.journey="diagnosis";ctx.players=data.players;ctx.mood=data.mood;ctx.desired_time=data.desired_time;}if(name==="scene_view"){ctx.journey="scene";ctx.scene_id=data.scene_id;}if(data.game_id)ctx.game_id=data.game_id;sessionStorage.setItem("kyo_bodo_journey",JSON.stringify(ctx));Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})}catch(_){}
+if(name==="catalog_compare_use"){
+  // Journey context may contain previously viewed game IDs. Keep only safe,
+  // explicitly permitted fields for an anonymous two-title comparison.
+  data={compared_count:data.compared_count===2?2:0,page_path:location.pathname,operator_test:op?"1":"0"};
+  if(noteEntry&&Date.now()-noteEntry.at<30*60*1000){
+    data.entry_channel="note_campaign";
+    data.entry_campaign=noteEntry.campaign;
+    data.entry_content=noteEntry.content;
+  }
+}
+gtag("event",name,data)};
 // Report a UTM-tagged note landing once per tab/session, not every reload.
 // This is campaign attribution, not proof of a verified human or purchase.
 if(noteLandingNew)window.kyoTrack("note_campaign_landing",{landing_path:location.pathname});

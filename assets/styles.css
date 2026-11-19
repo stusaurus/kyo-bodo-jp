@@ -376,6 +376,11 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 .today-saved-head h3{font-size:18px;margin:0}
 .today-saved-head p{font-size:11px;color:var(--muted);margin:0}
 .today-saved-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.today-saved-compare-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-top:16px}
+.today-saved-compare-actions .btn{min-height:44px;display:inline-flex;align-items:center}
+.today-saved-compare-actions p{margin:0;line-height:1.5;max-width:420px}
+#catalogCompare{scroll-margin-top:96px}
+.catalog-compare-loaded{margin:14px 0 8px;font-weight:650}
 .today-saved-item{display:inline-flex;align-items:center;border:1px solid #d7cbbb;border-radius:8px;background:#fffaf3;max-width:100%}
 .today-saved-item a{display:inline-flex;align-items:center;padding:8px 9px 8px 13px;min-height:44px;font-weight:700;font-size:12px;overflow-wrap:anywhere}
 .today-saved-item button{min-height:44px;min-width:44px;border:0;border-left:1px solid #e4dace;border-radius:0 8px 8px 0;background:transparent;font-size:18px;color:var(--muted);cursor:pointer}
