@@ -62,6 +62,8 @@ function start(){
         assert.equal(tracked[0][field],undefined,'do not send comparison content to GA4');
       }
       await page.screenshot({path:path.join(out,'two-games-'+width+'.png'),animations:'disabled'});
+      // Capture the complete comparison, not just its heading above the fold.
+      await page.locator('#catalogCompare').screenshot({path:path.join(out,'comparison-panel-'+width+'.png'),animations:'disabled'});
       await second.selectOption('nana-toridori');
       assert.equal(await cards.count(),0,'cannot compare a game to itself');
       assert((await results.innerText()).includes('別の作品を選んでください'));
