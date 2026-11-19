@@ -102,6 +102,30 @@
       first.addEventListener('change',render);
       second.addEventListener('change',render);
       render();
+      // Only the explicit saved-shelf link triggers this read. Never put game
+      // identifiers in the URL, or change the saved list from this page.
+      if(window.location.hash==='#savedCompare'){
+        var ids=[];
+        try{
+          var stored=JSON.parse(window.localStorage.getItem('kyo_bodo_saved_games_v1')||'[]');
+          if(Array.isArray(stored)){
+            ids=Array.from(new Set(stored.filter(function(id){
+              return typeof id==='string'&&games.has(id);
+            })));
+          }
+        }catch(_){}
+        if(ids.length>=2){
+          var chosen=ids.slice(-2);
+          first.value=chosen[0];
+          second.value=chosen[1];
+          var note=node('p','small catalog-compare-loaded','保存した最後の2作品を選びました。別の作品にも変更できます。');
+          result.before(note);
+          render();
+        }else{
+          message('端末内の保存作品が2本未満です。比較したい2作品を選んでください。');
+        }
+        root.scrollIntoView({block:'start'});
+      }
     })
     .catch(function(){
       root.hidden=false;
