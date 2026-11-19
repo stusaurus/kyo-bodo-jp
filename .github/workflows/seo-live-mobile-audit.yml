@@ -64,8 +64,8 @@ jobs:
                     if(response.status()!==200)issues.push('HTTP '+response.status());
                     if(!data.title||!data.description||data.canonical!==url||data.h1!==1||!data.viewport.includes('width=device-width')||data.invalidSchemas||/noindex/i.test(data.robots))issues.push('SEO metadata or canonical inconsistent');
                     if(data.documentWidth>data.viewportWidth+2)warnings.push('horizontal overflow '+data.documentWidth+' > '+data.viewportWidth);
-                    if(p==='scenes/short/'&&data.shortCount!==29)issues.push('20-minute comparison does not show 29 games');
-                    if(p==='scenes/solo/'&&data.soloCards!==13)issues.push('solo comparison does not show 13 games');
+                    if(p==='scenes/short/'&&data.shortCount!==32)issues.push('20-minute comparison does not show 29 games');
+                    if(p==='scenes/solo/'&&data.soloCards!==14)issues.push('solo comparison does not show 13 games');
                     if(p==='guides/two-player-cooperative/'&&data.cooperativeRows!==15)issues.push('two-player cooperative guide does not show 15 games');
                     if(p==='scenes/children/'&&!data.childNine)issues.push('missing age-nine filter option');
                     if(p.startsWith('games/')){
