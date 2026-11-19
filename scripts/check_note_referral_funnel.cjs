@@ -130,6 +130,78 @@ async function context(browser,width){
       assert.equal(guideLanding.data.landing_path,guidePath);
       await guideCtx.close();
 
+      // Second, specifically authorized campaign: a seasonal note article
+      // about the existing gift guide. It must not inherit the old campaign.
+      const giftCampaign='gift_guide_20261119';
+      const giftPath=base+'guides/gift-board-games/';
+      const giftQuery='utm_source=note&utm_medium=referral&utm_campaign='+giftCampaign+'&utm_content=gift_guide';
+      const giftCtx=await context(browser,width),gift=await giftCtx.newPage();
+      await gift.goto(origin+giftPath+'?'+giftQuery+'&test=1',{waitUntil:'domcontentloaded'});
+      await gift.waitForFunction(()=>typeof window.kyoTrack==='function');
+      let giftEvents=await events(gift);
+      const giftLanding=giftEvents.find(e=>e.name==='note_campaign_landing');
+      assert(giftLanding,'gift campaign landing missing');
+      assert.equal(giftLanding.data.entry_campaign,giftCampaign);
+      assert.equal(giftLanding.data.entry_channel,'note_campaign');
+      assert.equal(giftLanding.data.entry_content,'gift_guide');
+      assert.equal(giftLanding.data.operator_test,'1');
+      assert.equal(giftLanding.data.landing_path,giftPath);
+      assert.equal(giftLanding.data.referrer,undefined);
+      assert.equal(giftLanding.data.full_url,undefined);
+      assert.equal(giftLanding.data.utm_term,undefined);
+      const giftTableLink=gift.locator('.gift-age a[data-gift-detail="dobble"]');
+      assert.equal(await giftTableLink.getAttribute('data-track'),'game_detail_click');
+      await safeClick(gift,giftTableLink);
+      let giftTableEvents=await events(gift);
+      let giftTableDetail=giftTableEvents.filter(e=>e.name==='game_detail_click');
+      assert.equal(giftTableDetail.length,1,'table click must emit exactly one detail event');
+      assert.equal(giftTableDetail[0].data.entry_campaign,giftCampaign);
+      assert.equal(giftTableDetail[0].data.conversion_source,'gift_guide');
+            const giftChoice=gift.locator('.gift-age a[data-track="game_detail_click"][data-source="gift_guide"]').first();
+      assert(await giftChoice.count()>0,'gift guide detail links unavailable');
+      await safeClick(gift,giftChoice);
+      giftEvents=await events(gift);
+      assert.equal(giftEvents.filter(e=>e.name==='game_detail_click').length,2,
+        'table and card should each emit once');
+      const giftDetail=giftEvents.find(e=>e.name==='game_detail_click');
+      assert(giftDetail,'gift detail click missing');
+      assert.equal(giftDetail.data.entry_campaign,giftCampaign);
+      assert.equal(giftDetail.data.entry_content,'gift_guide');
+      assert.equal(giftDetail.data.operator_test,'1');
+      // On the next same-tab page, distinguish a verified affiliate outbound
+      // from an ordinary search; never fabricate a conversion.
+      await gift.goto(origin+base+'games/dobble/?test=1',{waitUntil:'domcontentloaded'});
+      await gift.waitForFunction(()=>typeof window.kyoTrack==='function');
+      const giftOutbound=gift.locator('.product-panel a.btn.rakuten.large');
+      assert.equal(await giftOutbound.count(),1);
+      const giftAffiliate=await giftOutbound.getAttribute('data-affiliate')==='rakuten';
+      await safeClick(gift,giftOutbound);
+      giftEvents=await events(gift);
+      const giftOutboundName=giftAffiliate?'affiliate_click':'rakuten_search_click';
+      const giftOutboundEvent=giftEvents.find(e=>e.name===giftOutboundName);
+      assert(giftOutboundEvent,'gift funnel outbound missing');
+      assert.equal(giftOutboundEvent.data.entry_campaign,giftCampaign);
+      assert.equal(giftOutboundEvent.data.entry_content,'gift_guide');
+      assert.equal(giftOutboundEvent.data.operator_test,'1');
+      assert.equal(giftEvents.filter(e=>e.name==='affiliate_click').length,giftAffiliate?1:0);
+      await gift.goto(origin+giftPath+'?'+giftQuery+'&test=1',{waitUntil:'domcontentloaded'});
+      await gift.waitForFunction(()=>typeof window.kyoTrack==='function');
+      assert.equal((await events(gift)).filter(e=>e.name==='note_campaign_landing').length,0,
+        'gift campaign reload duplicated landing');
+      await giftCtx.close();
+
+      // Any missing content tag or non-gift destination must be ignored.
+      const fakeGiftCtx=await context(browser,width),fakeGift=await fakeGiftCtx.newPage();
+      await fakeGift.goto(origin+giftPath+'?utm_source=note&utm_medium=referral&utm_campaign='+giftCampaign+'&test=1',{waitUntil:'domcontentloaded'});
+      await fakeGift.waitForFunction(()=>typeof window.kyoTrack==='function');
+      assert.equal((await events(fakeGift)).filter(e=>e.name==='note_campaign_landing').length,0,
+        'missing gift tag must not be counted');
+      await fakeGift.goto(origin+base+'scenes/two-player/?'+giftQuery+'&test=1',{waitUntil:'domcontentloaded'});
+      await fakeGift.waitForFunction(()=>typeof window.kyoTrack==='function');
+      assert.equal((await events(fakeGift)).filter(e=>e.name==='note_campaign_landing').length,0,
+        'wrong landing destination must not be counted');
+      await fakeGiftCtx.close();
+
       const spoofCtx=await context(browser,width),spoof=await spoofCtx.newPage();
       await spoof.goto(origin+base+'scenes/two-player/?utm_source=note&utm_medium=referral&utm_campaign=anything_else&test=1',
         {waitUntil:'domcontentloaded'});
@@ -138,7 +210,7 @@ async function context(browser,width){
         'unrecognized campaigns must not be incorrectly counted');
       await spoofCtx.close();
       console.log(JSON.stringify({width,noteLanding:1,internalDetail:true,outbound:isAffiliate?'affiliate':'search-only',
-        operatorTest:'1',directFalseAttribution:0,reloadDuplicate:0,unrecognizedCampaign:0,errors:0}));
+        operatorTest:'1',giftCampaign:true,giftDetail:true,giftOutbound:true,giftSpoof:0,directFalseAttribution:0,reloadDuplicate:0,unrecognizedCampaign:0,errors:0}));
     }
   }finally{
     await browser.close();

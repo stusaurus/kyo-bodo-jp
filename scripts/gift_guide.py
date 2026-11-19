@@ -59,7 +59,7 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
         # Include a compact factual table so gifts can be compared before clicking.
         table_rows = "".join(
             "<tr><th scope=\"row\"><a data-gift-detail=\"" + e(g["game_id"]) +
-            "\" href=\"" + u("games/" + g["game_id"] + "/") + "\">" + e(g["title"]) +
+            "\" href=\"" + u("games/" + g["game_id"] + "/") + "\" data-track=\"game_detail_click\" data-game-id=\"" + e(g["game_id"]) + "\" data-source=\"gift_guide\">" + e(g["title"]) +
             "</a></th><td>" + e(player_label(g)) +
             "</td><td>" + format_play_time(g) +
             "</td><td>" + str(g["age"]) + "歳〜</td><td>" +

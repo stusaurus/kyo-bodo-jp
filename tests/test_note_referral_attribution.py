@@ -6,6 +6,12 @@ def test_note_campaign_is_allowlisted_and_session_scoped():
     js = m.ANALYTICS
     assert 'note_campaign_landing' in js
     assert 'two_player_trial_20261118' in js
+    assert 'gift_guide_20261119' in js
+    assert 'giftMatch=incoming===giftCampaign' in js
+    assert 'p.get("utm_content")==="gift_guide"' in js
+    assert 'location.pathname==="/kyo-bodo-jp/guides/gift-board-games/"' in js
+    assert 'noteEntry.campaign!==incoming' in js
+    assert 'giftMatch?"gift_guide"' in js
     assert 'p.get("utm_source")==="note"' in js
     assert 'p.get("utm_medium")==="referral"' in js
     assert 'p.get("utm_content")==="coop_guide"' in js

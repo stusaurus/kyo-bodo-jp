@@ -38,6 +38,8 @@ def test_gift_guide_has_factual_comparison_and_internal_purchase_safe_links():
     html = page()
     assert html.count('class="section gift-age"') == 3
     assert html.count('data-gift-detail="') == 9
+    assert html.count('data-gift-detail="') == 9
+    assert html.count('data-track="game_detail_click"') >= 18
     assert html.count('data-source="gift_guide"') >= 9
     assert 'role="region"' in html
     assert html.count("表は横にスクロールして、対象年齢・遊び方の一手まで確認できます。") == 3
@@ -50,6 +52,7 @@ def test_gift_guide_has_factual_comparison_and_internal_purchase_safe_links():
         assert f'id="gift-age-{age}"' in html
         for g in games:
             assert f'data-gift-detail="{g["game_id"]}" href="{m.u("games/" + g["game_id"] + "/")}"' in html
+            assert f'data-game-id="{g["game_id"]}" data-source="gift_guide"' in html
             assert m.e(g["title"]) in html
             assert m.format_play_time(g) in html
             assert f'{g["age"]}歳〜' in html
