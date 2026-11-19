@@ -22,7 +22,7 @@ jobs:
       - name: Audit public desktop and mobile pages
         env:
           SEO_BASE: https://stusaurus.github.io/kyo-bodo-jp/
-          SEO_PATHS: "scenes/two-player/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,games/ito/,games/mandala/,games/quarto/"
+          SEO_PATHS: "scenes/two-player/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/"
         run: |
           node <<'AUDIT_NODE'
             const {chromium}=require('/tmp/seo-audit/node_modules/playwright');
