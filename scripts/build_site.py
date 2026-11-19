@@ -333,9 +333,11 @@ def scene_selection_guide(s, ranked):
         f'<a class="text-link" href="{u("scenes/" + x["scene_id"] + "/")}">{e(x["title"])}から探す →</a> '
         for x in SCENES if x['scene_id'] in related and x['scene_id'] != s['scene_id']
     )
+    heading = ("夫婦・カップルで遊ぶときの選び方"
+               if s["scene_id"] == "couple" else s["title"] + "ときの選び方")
     return f'''<section class="section scene-selection-guide">
 <div class="eyebrow">HOW TO CHOOSE</div>
-<h2>{e(s['title'])}ときの選び方</h2>
+<h2>{e(heading)}</h2>
 <p>{e(tip)}</p>
 {choices}
 <p class="small">人数・時間・対象年齢は掲載ゲームデータの参考値です。実際の版・ルールは販売店やメーカーで確認してください。</p>
