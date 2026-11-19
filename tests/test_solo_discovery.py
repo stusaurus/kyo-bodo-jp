@@ -33,7 +33,11 @@ def test_solo_scene_and_filter_have_real_links_and_correct_count():
     listing = games_index()
     assert 'data-filter="solo"' in listing
     assert listing.count('data-solo="1"') == len(eligible)
-    assert "c.dataset.solo" in listing
+    assert 'assets/catalog-search.js' in listing
+    from pathlib import Path
+    from scripts import build_site
+    js=(Path(build_site.ROOT)/"assets/catalog-search.js").read_text(encoding="utf-8")
+    assert "c.dataset.solo" in js
 
 
 def test_solo_discovery_has_direct_home_entry_without_replacing_other_choices():
