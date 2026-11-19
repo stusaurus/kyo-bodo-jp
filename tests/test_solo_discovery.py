@@ -39,7 +39,7 @@ def test_solo_scene_and_filter_have_real_links_and_correct_count():
 def test_solo_discovery_has_direct_home_entry_without_replacing_other_choices():
     eligible = [g for g in GAMES if supports_players(g, 1)]
     landing = home()
-    assert len(eligible) == 13
+    assert len(eligible) == 14
     # Home now points to the real solo comparison without a two-click detour.
     assert landing.count('href="/kyo-bodo-jp/scenes/solo/"') == 1
     assert f"1人対応の全{len(eligible)}本を遊び方・時間から見比べる" in landing

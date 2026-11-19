@@ -1,4 +1,4 @@
-/* Real Chromium QA for three newly added game details at mobile and desktop widths. */
+/* Real Chromium QA for eight source-backed game detail pages at mobile and desktop widths. */
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -15,11 +15,21 @@ const fixtures = [
   {id:'lama', title:'ラマ',
    source:'https://mobiusgames.shop-pro.jp/?pid=145076594', players:'2〜6人', time:'20分', age:'8歳〜'},
   {id:'ark-nova', title:'アーク・ノヴァ 新たなる方舟',
-   source:'https://tendaysgames.shop-pro.jp/?pid=166436141', players:'1〜4人', time:'90〜150分', age:'14歳〜'}
+   source:'https://tendaysgames.shop-pro.jp/?pid=166436141', players:'1〜4人', time:'90〜150分', age:'14歳〜'},
+  {id:'nana-toridori', title:'ナナトリドリ',
+   source:'https://arclightgames.jp/product/767toridori/', players:'2〜6人', time:'10〜20分', age:'6歳〜'},
+  {id:'incan-gold-rediscovered', title:'インカの黄金 再発掘',
+   source:'https://arclightgames.jp/product/298whp/', players:'3〜8人', time:'20〜40分', age:'8歳〜'},
+  {id:'ciao-ciao', title:'チャオチャオ',
+   source:'https://mobiusgames.shop-pro.jp/?pid=144935571', players:'2〜4人', time:'20〜25分', age:'8歳〜'},
+  {id:'nmbr9', title:'ナンバーナイン',
+   source:'https://mobiusgames.shop-pro.jp/?pid=145075144', players:'1〜4人', time:'20分', age:'8歳〜'},
+  {id:'houseki-ippai', title:'宝石がいっぱい！',
+   source:'https://arclightgames.jp/product/576houseki/', players:'2〜6人', time:'5分', age:'4歳〜'}
 ];
 
 const catalog = JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
-assert.equal(catalog.length,83,'generated catalog must include exactly 83 games');
+assert.equal(catalog.length,88,'generated catalog must include exactly 83 games');
 for (const game of fixtures) {
   assert(catalog.some(row=>row.game_id===game.id),'generated catalog missing '+game.id);
 }

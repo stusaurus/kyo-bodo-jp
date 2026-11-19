@@ -20,7 +20,7 @@ FACTS = {
 
 
 def test_two_player_specs_use_version_appropriate_primary_sources():
-    assert len(site.GAMES) == 83
+    assert len(site.GAMES) == 88
     for gid, (pmin, pmax, tmin, tmax, age, source) in FACTS.items():
         g = site.BY_ID[gid]
         assert (g["players_min"], g["players_max"],

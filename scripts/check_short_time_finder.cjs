@@ -51,7 +51,7 @@ async function visibleIds(page){
   const server=await createServer();
   const browser=await chromium.launch();
   try{
-    assert.equal(eligible.length,29,'catalog changed; reevaluate full short-time cohort');
+    assert.equal(eligible.length,32,'catalog changed; reevaluate full short-time cohort');
     for(const width of [320,390,1440]){
       const ctx=await browser.newContext({
         viewport:{width,height:840},isMobile:width<500,hasTouch:width<500
@@ -64,7 +64,7 @@ async function visibleIds(page){
                                      {waitUntil:'domcontentloaded'});
       assert.equal(response.status(),200);
       await page.locator('#short-time-form').waitFor({state:'visible'});
-      assert.equal(await page.locator('#short-time-results li').count(),29);
+      assert.equal(await page.locator('#short-time-results li').count(),32);
       assert((await page.title()).includes('20分以内・短時間'));
       assert((await page.locator('h1').textContent()).includes('短時間'));
       const scenarios=[

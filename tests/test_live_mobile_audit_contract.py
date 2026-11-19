@@ -13,7 +13,8 @@ WORKFLOW = ROOT / ".github/workflows/seo-live-mobile-audit.yml"
 EXPECTED_PATHS = {
     "scenes/two-player/", "scenes/children/", "scenes/short/", "scenes/solo/",
     "guides/two-player-cooperative/", "games/ito/", "games/mandala/",
-    "games/quarto/",
+    "games/quarto/", "games/nana-toridori/", "games/incan-gold-rediscovered/",
+    "games/ciao-ciao/", "games/nmbr9/", "games/houseki-ippai/",
 }
 
 
@@ -33,7 +34,7 @@ def test_existing_public_audit_covers_new_acquisition_and_purchase_pages():
     match = re.search(r'^\s*SEO_PATHS: "([^"]+)"\s*$', text, flags=re.M)
     assert match
     paths = match.group(1).split(",")
-    assert len(paths) == len(set(paths)) == 8
+    assert len(paths) == len(set(paths)) == 13
     assert set(paths) == EXPECTED_PATHS
     assert "const paths=['',...process.env.SEO_PATHS.split(',')];" in text
     assert "for(const width of [320,390,1440])" in text
@@ -61,8 +62,8 @@ def test_live_audit_blocks_ga4_transport_before_any_navigation():
 
 def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification():
     script = audit_js()
-    assert "data.shortCount!==29" in script
-    assert "data.soloCards!==13" in script
+    assert "data.shortCount!==32" in script
+    assert "data.soloCards!==14" in script
     assert "data.cooperativeRows!==15" in script
     assert "!data.childNine" in script
     assert "data.offer.affiliate==='rakuten'" in script

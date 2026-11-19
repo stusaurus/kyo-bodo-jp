@@ -60,6 +60,12 @@ CONTEXT_RULES={
     "quiz-iisen":["ボードゲーム","アークライト"],
     "cascadia":["ボードゲーム","日本語版","ケンビル"],
     "sagrada":["ボードゲーム","日本語版","engames"],
+    # Newly added products: the title alone is insufficient to approve a Rakuten ad.
+    "nana-toridori":["アークライト","カードゲーム","ボードゲーム"],
+    "incan-gold-rediscovered":["アークライト","ボードゲーム"],
+    "ciao-ciao":["メビウス","ボードゲーム","dreihasen"],
+    "nmbr9":["メビウス","ボードゲーム","タイルゲーム","abacus"],
+    "houseki-ippai":["アークライト","カードゲーム","ボードゲーム"],
 }
 
 # Prevent sibling/base variants from being used for another registered game.
@@ -114,6 +120,7 @@ ALIASES={
     "ticket-ride-europe":["チケットトゥライドヨーロッパ","tickettorideeurope"],
     "timebomb-q":["タイムボムq"],
     "werewolf-dx":["人狼dx","会話型心理ゲーム人狼dx"],
+    "nmbr9":["ナンバーナイン","nmbr9"],
 }
 
 def norm(s):
