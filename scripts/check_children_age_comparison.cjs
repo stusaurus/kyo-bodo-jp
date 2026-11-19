@@ -57,10 +57,14 @@ async function visibleIds(page){
       await filter.waitFor({state:'visible'});
       assert.equal(await page.locator('#children-choice-results li').count(),eligible.length);
       assert((await page.locator('h1').innerText()).includes('小学生と遊ぶ'));
-      assert((await page.title()).includes('6歳・8歳・人数・時間で比較'));
+      assert((await page.title()).includes('6〜12歳・人数・時間で比較'));
+      assert.deepEqual(await page.locator('#children-age option').evaluateAll(nodes=>nodes.map(n=>n.value)),
+        ['6','7','8','9','10','11','12']);
       const sets=[
         {age:6,players:2,time:'20',label:'default'},
         {age:8,players:4,time:'20',label:'age8-4p-short'},
+        {age:9,players:4,time:'20',label:'age9-4p-short'},
+        {age:9,players:2,time:'20',label:'age9-2p-short'},
         {age:10,players:5,time:'30',label:'age10-5p-30'},
         {age:12,players:6,time:'any',label:'age12-6p-any'}
       ];
@@ -73,6 +77,13 @@ async function visibleIds(page){
         const ids=await visibleIds(page);
         const expected=idsFor(config.age,config.players,config.time);
         assert.deepEqual(ids,expected,config.label+' wrong candidates at '+width);
+        if(config.label==='age9-4p-short'){
+          assert(ids.includes('scout')&&ids.includes('insider-game'), '9y 4p should contain both age-nine games');
+          assert(ids.length===idsFor(8,4,'20').length+2,'9y must add only the two published age-nine games');
+        }
+        if(config.label==='age9-2p-short'){
+          assert(ids.includes('scout')&&!ids.includes('insider-game'), '9y 2p should exclude Insider requiring at least four');
+        }
         assert.equal((await page.locator('#children-choice-count').innerText()).trim(),expected.length+'本');
         assert.equal(await page.locator('#children-choice-empty').isVisible(),expected.length===0);
         assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),
@@ -80,7 +91,7 @@ async function visibleIds(page){
         assert.equal(errors.length,0,errors.join('\n'));
         const labels=await page.locator('#children-choice-results li:not([hidden]) a').allTextContents();
         assert(labels.every(x=>x.includes('対象')&&x.includes('すること：')),'missing comparison metadata');
-        if(i===0||i===1||i===3){
+        if(i===0||config.label==='age9-4p-short'||config.label==='age12-6p-any'){
           await page.screenshot({path:path.join(out,config.label+'-'+width+'.png'),
                                  fullPage:true,animations:'disabled'});
         }

@@ -479,9 +479,14 @@ def children_age_filter():
             f'<small>すること：{e(g["how_to_play"][1])}</small>'
             '</a></li>'
         )
+    nine_year_olds = [g for g in eligible if g["age"] == 9]
+    nine_examples = "、".join(
+        f'<a href="{u("games/" + g["game_id"] + "/")}">{e(g["title"])}</a>'
+        for g in nine_year_olds
+    )
     ages = "".join(
         f'<option value="{n}"' + (' selected' if n == 6 else '') + f'>{n}歳</option>'
-        for n in (6, 8, 10, 12)
+        for n in range(6, 13)
     )
     players = "".join(
         f'<option value="{n}"' + (' selected' if n == 2 else '') + f'>{n}人</option>'
@@ -493,10 +498,13 @@ def children_age_filter():
     )
     return f'''<section class="section children-choice" id="children-age-compare" aria-labelledby="children-choice-heading">
 <div class="eyebrow">CHOOSE WITH CONFIDENCE</div>
-<h2 id="children-choice-heading">子どもの年齢・人数・時間から候補を絞る</h2>
-<p>最年少の子どもの年齢を目安に、参加する人数と遊べる時間を指定できます。
-表示するのは<strong>掲載データの対象年齢以下・人数対応・所要時間上限以内</strong>をすべて満たす作品です。
+<h2 id="children-choice-heading">6〜12歳の子どもの年齢・人数・時間から候補を絞る</h2>
+<p>最年少の子どもの年齢を6〜12歳の1歳刻みで選べます。9歳なら「9歳」を指定すると、対象年齢が9歳以下の掲載作品を探せます。
+参加する人数と遊べる時間も指定できます。表示するのは<strong>掲載データの対象年齢以下・人数対応・所要時間上限以内</strong>をすべて満たす作品です。
 人気順や実際に遊んだ評価ではありません。</p>
+<p class="small">たとえば「9歳から」の作品には{nine_examples}があります。両作品を含め、
+実際に一緒に遊ぶ人数や制限時間で候補が変わります。表示しているのは製品の対象年齢で、
+小学校の学年や9歳の子に必ず合うという保証ではありません。</p>
 <form id="children-choice-form" aria-label="親子向けボードゲームの絞り込み" hidden>
 <label for="children-age">最年少の子どもの年齢<select id="children-age" name="age">{ages}</select></label>
 <label for="children-players">実際に遊ぶ人数（大人も含む）<select id="children-players" name="players">{players}</select></label>
@@ -604,7 +612,7 @@ def scene_page(s):
     seo={
         "two-player":("2人用ボードゲームおすすめ比較｜2人専用と2人対応の違い", "2人でできるボードゲームを2人専用と複数人数対応に分けて紹介。カップル・友人・夫婦で、遊べる時間・対戦か協力か・対象年齢を確認。人気順位ではありません。"),
         "family":("家族で遊べるボードゲームおすすめ", "家族で遊べるボードゲームを紹介。小学生を含む家族でも選びやすいよう、人数・対象年齢・プレイ時間を確認できます。"),
-        "children":("小学生と遊ぶボードゲーム｜6歳・8歳・人数・時間で比較", "小学生と遊ぶボードゲームを、最年少の年齢（6・8・10・12歳）、大人を含む参加人数（2〜6人）、プレイ時間上限で絞れます。対象年齢と遊び方を確認して選べます。"),
+        "children":("小学生と遊ぶボードゲーム｜6〜12歳・人数・時間で比較", "小学生と遊ぶボードゲームを、6〜12歳の1歳刻み（9歳を含む）、大人を含む2〜6人、プレイ時間上限から絞れます。対象年齢・遊び方を確認して選べます。"),
         "short":("20分以内・短時間で遊べるボードゲームおすすめ", "掲載時間が20分以内のボードゲームを紹介。平日夜やすきま時間に遊ぶ1本を、人数・対象年齢と一緒に選べます。"),
         "solo":("1人で遊べるボードゲーム比較｜ソロプレイ対応作品", "1人でも遊べる掲載作品を人数の登録情報から選出。短時間・じっくり系の遊び方や対象年齢を比較。ソロ用ルール・版は購入前に確認してください。"),
     }
