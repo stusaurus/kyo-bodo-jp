@@ -133,8 +133,7 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
         "itemListElement": [
             {"@type": "ListItem", "position": i+1,
              "url": canon("games/" + g["game_id"] + "/"), "name": g["title"]}
-            for i, (_, games) in enumerate(selections)
-            for g in games
+            for i, g in enumerate(g for _, games in selections for g in games)
         ],
     }, ensure_ascii=False)
     return shell(
