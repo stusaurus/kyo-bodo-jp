@@ -48,12 +48,15 @@ function server(){
       assert.equal(await page.locator('.gift-age').count(),3);
       assert.equal(await page.locator('.gift-age .game-card').count(),9);
       assert.equal(await page.locator('a[data-gift-detail]').count(),9);
-      const links=await page.locator('.gift-age a[data-track="game_detail_click"][data-source="gift_guide"]').evaluateAll(xs=>
+      const links=await page.locator('.gift-age .gift-cards a[data-track="game_detail_click"][data-source="gift_guide"]').evaluateAll(xs=>
         xs.map(x=>({id:x.dataset.gameId,href:x.getAttribute('href')})));
       assert.deepEqual(links.map(x=>x.id),allIds);
+      const tableLinks=await page.locator('.gift-age .gift-table a[data-gift-detail][data-track="game_detail_click"][data-source="gift_guide"]').evaluateAll(xs=>
+        xs.map(x=>({id:x.dataset.gameId,href:x.getAttribute('href')})));
+      assert.deepEqual(tableLinks,links,'table links must mirror the nine card links');
       for(const group of groups){
         const section=page.locator('#age-'+group.age);
-        const ids=await section.locator('a[data-track="game_detail_click"][data-source="gift_guide"]').evaluateAll(xs=>xs.map(x=>x.dataset.gameId));
+        const ids=await section.locator('.gift-cards a[data-track="game_detail_click"][data-source="gift_guide"]').evaluateAll(xs=>xs.map(x=>x.dataset.gameId));
         assert.deepEqual(ids,group.ids);
         const text=await section.innerText();
         for(const id of group.ids){
