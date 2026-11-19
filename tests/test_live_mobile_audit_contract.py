@@ -61,8 +61,8 @@ def test_live_audit_blocks_ga4_transport_before_any_navigation():
 
 def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification():
     script = audit_js()
-    assert "data.shortCount!==29" in script
-    assert "data.soloCards!==13" in script
+    assert "data.shortCount!==32" in script
+    assert "data.soloCards!==14" in script
     assert "data.cooperativeRows!==15" in script
     assert "!data.childNine" in script
     assert "data.offer.affiliate==='rakuten'" in script
