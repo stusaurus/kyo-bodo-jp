@@ -8,13 +8,13 @@ EXPECTED = [g for g in site.GAMES if g["play_time_max"] <= 20]
 
 def test_full_short_catalog_not_just_twelve_examples():
     assert len(site.GAMES) == 83
-    assert len(EXPECTED) == 28
+    assert len(EXPECTED) == 29
     html = site.short_time_finder()
     ids = re.findall(r'data-short-game="([^"]+)"', html)
     assert ids == [g["game_id"] for g in EXPECTED]
-    assert len(set(ids)) == 28
+    assert len(set(ids)) == 29
     assert "全83作品" in html
-    assert "全28本" in html
+    assert "全29本" in html
     assert "人気順・実際の試遊評価ではありません" in html
 
 
@@ -46,9 +46,9 @@ def test_short_scene_renders_existing_comparison_and_new_complete_finder():
     assert 'id="short-time-empty"' in html
     assert 'id="short-time-reset"' in html
     assert 'short-filter.js' in html
-    assert html.count('data-short-game="') == 28
+    assert html.count('data-short-game="') == 29
     assert 'scene-quick-comparison' in html
-    assert html.count('data-short-minutes=') == 28
+    assert html.count('data-short-minutes=') == 29
     assert 'data-track="game_detail_click"' in html
     assert 'rel="canonical" href="' + site.canon("scenes/short/") + '"' in html
     assert '20分以内・短時間で遊べるボードゲームおすすめ' in html
