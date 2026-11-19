@@ -420,6 +420,17 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 /* Real two-player rule differences: factual links, no popularity ranking. */
 .scene-growth-link{margin:18px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
 .scene-growth-link a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* Couple-specific choices: the same factual card language as existing 2P guides. */
+.couple-choice>p{max-width:78ch;line-height:1.8}
+.couple-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
+.couple-choice-card{display:flex;flex-direction:column;min-width:0;padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.couple-choice-card h3{font-size:18px;line-height:1.45;margin:0 0 12px;overflow-wrap:anywhere}
+.couple-choice-card p{font-size:13px;line-height:1.7;margin:0 0 12px;overflow-wrap:anywhere}
+.couple-choice-card .couple-choice-facts{font-weight:700}
+.couple-choice-card .btn{margin-top:auto;max-width:100%;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:760px){.couple-choice-grid{grid-template-columns:minmax(0,1fr);gap:12px}.couple-choice-card{padding:16px}}
+
 .two-player-contrast{padding-top:18px;padding-bottom:18px}
 .two-player-contrast>p{max-width:72ch;line-height:1.7}
 .two-player-contrast-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
