@@ -64,8 +64,10 @@ function serve(){
       assert.deepEqual(persisted,ids,'comparison must not change existing saved shelf');
       const comparisonEvents=await page.evaluate(()=>(window.dataLayer||[]).filter(x=>x&&x[0]==='event'&&x[1]==='catalog_compare_use').map(x=>x[2]));
       assert.equal(comparisonEvents.length,1);
-      assert.deepEqual(Object.keys(comparisonEvents[0]).sort(),['compared_count']);
       assert.equal(comparisonEvents[0].compared_count,2);
+      for(const key of ['game_id','game_ids','players','age','search_term','query']){
+        assert.equal(comparisonEvents[0][key],undefined,'saved selection should not leak via comparison analytics');
+      }
       const links=page.locator('#catalogCompareResult a[data-track="game_detail_click"]');
       assert.equal(await links.count(),2);
       for(const link of await links.all()){
