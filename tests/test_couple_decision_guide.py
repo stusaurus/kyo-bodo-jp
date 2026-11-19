@@ -20,6 +20,9 @@ def test_couple_guide_has_three_real_two_player_choices():
     assert 'id="couple-choose-title"' in html
     assert 'aria-labelledby="couple-choose-title"' in html
     assert "カップル・夫婦で、今日はどう遊ぶ？" in html
+    assert html.count('class="couple-choice-game-name"') == 3
+    assert html.count("詳細・購入先を確認 →") == 3
+    assert "コードネーム：デュエットの詳細を見る" not in html
     assert "人気順・実際の試遊評価ではありません" in html
     assert "購入する版の情報を確認" in html
     for gid in ("ito", "codenames-duet", "patchwork"):
