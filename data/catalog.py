@@ -111,6 +111,11 @@ g("hellapagos","ヘルパゴス",3,12,20,20,10,"2245523232553","無人島で協�
 g("nana-card-game","ナナカードゲーム",2,5,15,15,6,"1333315454235","自分とみんなの手札の端を見ながら同じ数字3枚を探す、記憶と推理のカードゲーム。","数字カードを配り残りを中央に伏せる|誰かの手札の最小・最大か中央の札を1枚公開する|同じ数字3枚をそろえて組を集める","家族|小学生|友達|短時間","ナナカードゲーム Mob+ 日本語版","family|children|beginner|short"),
 g("lama","ラマ",2,6,20,20,8,"1243415343345","出す・引く・降りるを選び、失点を小さく抑える駆け引きが楽しいカードゲーム。","数字かラマのカードを配って山札をめくる|同じ数字か次の数字のカードを出す・引く・降りるを選ぶ|残った手札の失点を数え、合計の少なさを競う","家族|友達|短時間","ラマ L.A.M.A. メビウスゲームズ カードゲーム","family|friends|beginner|short"),
 g("ark-nova","アーク・ノヴァ 新たなる方舟",1,4,90,150,14,"5522211311111","動物園の建設と保全活動を計画し、動物カードと施設を組み合わせる本格戦略ゲーム。","アクションカードを使って施設・動物・保全活動を進める|動物園の収入や評判を伸ばしながら計画を組み立てる|ゲーム終了時に魅力度と保全点によって勝敗を決める","大人|1人|じっくり|長時間","アーク・ノヴァ 新たなる方舟 日本語版 テンデイズゲームズ","strategy|long"),
+g("nana-toridori","ナナトリドリ",2,6,10,20,6,"2222414454455","手札を並び替えずに同じ数字をそろえる、鳥たちの数字カードゲーム。","数字カードを配り手札の順番を維持する|隣り合う同じ数字をまとめて出して場のカードを回収する|手札を早くなくし最後の1人にならないようにする","家族|友達|2人|短時間","ナナトリドリ アークライト 日本語版","family|friends|children|short|beginner"),
+g("incan-gold-rediscovered","インカの黄金 再発掘",3,8,20,40,8,"2234514354542","宝を持ち帰るか先へ進むか、全員が同時に決断する探検のチキンレース。","遺跡の宝物や危険カードを公開する|危険を承知で進むか手持ちの宝を持ち帰るか決める|探索を重ねて持ち帰った財宝の多さを競う","友達|大人数|家族","インカの黄金 再発掘 日本語版 アークライト","friends|family|large_group|party"),
+g("ciao-ciao","チャオチャオ",2,4,20,25,8,"1234514444342","サイコロの目を秘密にして宣言し、うそを見抜くブラフゲーム。","筒の中でサイコロを振って出目を秘密にする|進む数を宣言し、ほかの人は本当かどうか疑う|見破られたうそのコマが落とされるなかでゴールを目指す","友達|家族|2人|駆け引き","チャオチャオ メビウスゲームズ ボードゲーム","friends|family|couple|strategy"),
+g("nmbr9","ナンバーナイン",1,4,20,20,8,"3311114443315","同じ数字タイルを使い、上の段ほど得点が高くなる配置パズル。","数字カードをめくり全員が同じ数字タイルを受け取る|タイル同士がつながるように重ねて高い段を作る|全20枚を置き終えたら高さと数字による得点を比べる","1人|家族|パズル|短時間","ナンバーナイン NMBR9 日本語版 メビウスゲームズ","solo|family|children|strategy|short"),
+g("houseki-ippai","宝石がいっぱい！",2,6,5,5,4,"1113415555555","カードをめくって宝石を発見する、5分の記憶と運のゲーム。","裏向きの採掘カードを広げる|順番にめくり見つかった宝石などを受け取る|宝石が11個見つかったら得点を比べる","親子|幼児|家族|短時間","宝石がいっぱい アークライト カードゲーム","family|children|beginner|short|party"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
@@ -130,6 +135,12 @@ VERIFIED_SPECS_SOURCES = {
     "ito": "https://arclightgames.jp/product/ito/",
     "zombie-kidz": "https://suppe.sugorokuya.jp/items/190088",
     "the-mind": "https://suppe.sugorokuya.jp/items/180261",
+    # Five new editions checked against Japanese publishers/authorized stores on 2026-11-19.
+    "nana-toridori": "https://arclightgames.jp/product/767toridori/",
+    "incan-gold-rediscovered": "https://arclightgames.jp/product/298whp/",
+    "ciao-ciao": "https://mobiusgames.shop-pro.jp/?pid=144935571",
+    "nmbr9": "https://mobiusgames.shop-pro.jp/?pid=145075144",
+    "houseki-ippai": "https://arclightgames.jp/product/576houseki/",
     # Two-player products checked against exact Japanese distributor/retailer pages on 2026-11-19.
     "quarto": "https://suppe.sugorokuya.jp/items/80138",
     "patchwork": "https://hobbyjapan.games/patchwork/",
