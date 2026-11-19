@@ -36,7 +36,15 @@ def test_each_new_source_is_visible_in_game_detail_with_safe_outgoing_link():
         assert "人数・所要時間・対象年齢の確認元" in html
         assert f'href="{source}"' in html
         assert 'target="_blank" rel="noopener noreferrer"' in html
-        assert "PR：購入前に販売ページで" in html
+        panel = html.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+        # Manufacturer specifications and a verified affiliate listing are separate evidence.
+        if m.RAKUTEN.get(gid, {}).get("url"):
+            assert 'data-affiliate="rakuten"' in panel
+            assert "PR：購入前に販売ページで" in panel
+        else:
+            assert 'data-track="rakuten_search_click"' in panel
+            assert "楽天市場の通常検索へ移動します" in panel
+            assert "PR：" not in panel
     # Existing three certified sources remain intact.
     for gid in ("nana-card-game", "lama", "ark-nova"):
         assert m.BY_ID[gid].get("specs_source", "").startswith("https://")

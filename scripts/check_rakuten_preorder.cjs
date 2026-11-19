@@ -8,13 +8,16 @@ const assert=require('node:assert/strict');
 const out=path.resolve('audit-results/rakuten-preorder');
 fs.mkdirSync(out,{recursive:true});
 const fixture=path.join(out,'the-game-reservation-preview.html');
+const fallback=path.join(out,'mandala-unverified-search-preview.html');
 const url='https://hb.afl.rakuten.co.jp/hgc/qa-synthetic-the-game';
 const python=[
   'from pathlib import Path',
   'from scripts import build_site as s',
   'game=s.BY_ID["the-game"]',
   's.RAKUTEN["the-game"]={"url":"'+url+'","image_url":"","preorder":True}',
-  'Path("'+fixture.replace(/\\/g,'/')+'").write_text(s.game_page(game),encoding="utf-8")'
+  'Path("'+fixture.replace(/\\/g,'/')+'").write_text(s.game_page(game),encoding="utf-8")',
+  's.RAKUTEN["mandala"]={}',
+  'Path("'+fallback.replace(/\\/g,'/')+'").write_text(s.game_page(s.BY_ID["mandala"]),encoding="utf-8")'
 ].join('; ');
 execFileSync('python',['-c',python],{stdio:'inherit'});
 const root=path.resolve('site');
@@ -27,9 +30,9 @@ function serve(){
         if(!u.pathname.startsWith(base)){res.writeHead(404).end();return}
         rel=decodeURIComponent(u.pathname.slice(base.length));
       }catch(_){res.writeHead(400).end();return}
-      if(rel==='games/the-game/'){
+      if(rel==='games/the-game/'||rel==='games/mandala/'){
         res.setHeader('Content-Type','text/html; charset=utf-8');
-        fs.createReadStream(fixture).pipe(res);
+        fs.createReadStream(rel==='games/the-game/'?fixture:fallback).pipe(res);
         return;
       }
       let file=path.resolve(root,rel);
@@ -73,7 +76,25 @@ function serve(){
       assert(dimensions.buttonWidth<=dimensions.panelWidth+2,'preorder CTA out of panel at '+width);
       assert.equal(errors.length,0,errors.join('; '));
       await page.screenshot({path:path.join(out,'the-game-'+width+'.png'),fullPage:true,animations:'disabled'});
-      console.log(JSON.stringify({width,title:'the-game',cta:'preorder',outbound:'verified-synthetic',errors:0,overflow:0}));
+      const fallbackResponse=await page.goto('http://127.0.0.1:8793'+base+'games/mandala/?test=1',{waitUntil:'domcontentloaded'});
+      assert.equal(fallbackResponse.status(),200);
+      assert.equal((await page.locator('.game-detail-hero h1').innerText()).trim(),'マンダラ');
+      const searchPanel=page.locator('.product-panel');
+      const searchCTA=searchPanel.locator('a.btn.rakuten.large');
+      assert((await searchCTA.innerText()).includes('楽天で探す'));
+      assert.equal(await searchCTA.getAttribute('data-affiliate'),null);
+      assert.equal(await searchCTA.getAttribute('data-track'),'rakuten_search_click');
+      assert.equal(await searchCTA.getAttribute('rel'),'noopener');
+      assert((await searchCTA.getAttribute('href')).startsWith('https://search.rakuten.co.jp/search/mall/'));
+      const panelText=await searchPanel.innerText();
+      assert(panelText.includes('掲載作品と一致する販売商品を確認できていません'));
+      assert(panelText.includes('通常検索へ移動します'));
+      assert(panelText.includes('別作品・拡張版・中古品'));
+      assert(!panelText.includes('PR：'), 'unverified search must not be represented as a sponsored offer');
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),'fallback panel overflow '+width);
+      assert.equal(errors.length,0,errors.join('; '));
+      await page.screenshot({path:path.join(out,'mandala-unverified-'+width+'.png'),fullPage:true,animations:'disabled'});
+      console.log(JSON.stringify({width,title:'the-game + mandala',cta:'preorder + search',outbound:'verified + unverified synthetic',errors:0,overflow:0}));
       await ctx.close();
     }
   }finally{
