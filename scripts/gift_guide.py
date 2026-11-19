@@ -74,6 +74,7 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
             f'<p class="small">{age}歳の人に贈る場合、以下はすべて掲載版の対象年齢下限が{age}歳以下の作品です。'
             '年齢だけでは遊びやすさを保証できません。</p>'
             '<div class="grid popular-grid gift-cards">' + game_cards + '</div>'
+            '<p class="small gift-table-help">表は横にスクロールして、対象年齢・遊び方の一手まで確認できます。</p>'
             '<div class="scene-table-scroll gift-table-scroll" role="region" tabindex="0" '
             f'aria-label="{age}歳以上で検討する3作品の比較表。横にスクロールできます">'
             '<table class="scene-data-table gift-table"><caption>掲載データに基づく3作品の比較。人気順・価格順ではありません。</caption>'
