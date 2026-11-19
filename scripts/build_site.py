@@ -631,12 +631,13 @@ def couple_choice_guide():
             '<article class="couple-choice-card">'
             f'<h3>{e(title)}</h3>'
             f'<p>{e(explanation)}</p>'
+            f'<p class="couple-choice-game-name">{e(game["title"])}</p>'
             '<p class="couple-choice-facts">'
             f'{e(player_label(game))} ／ {format_play_time(game)} ／ 対象{game["age"]}歳〜</p>'
             f'<p class="small">遊び方の一手：{e(game["how_to_play"][1])}</p>'
             f'<a class="btn secondary" data-track="game_detail_click" '
             f'data-game-id="{e(gid)}" data-source="couple_choice" '
-            f'href="{u("games/" + gid + "/")}">{e(game["title"])}の詳細を見る →</a>'
+            f'href="{u("games/" + gid + "/")}">詳細・購入先を確認 →</a>'
             '</article>'
         )
     return (
