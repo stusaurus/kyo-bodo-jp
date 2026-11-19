@@ -119,6 +119,31 @@ nav a:hover, .text-link:hover { color: var(--orange-dark); }
 .catalog-search input:focus-visible { outline:2px solid var(--orange); outline-offset:2px; }
 .catalog-search button { background:transparent; color:var(--orange-dark); border:1px solid var(--line); padding:9px 13px; min-height:44px; border-radius:9px; font:inherit; font-weight:700; cursor:pointer; }
 .catalog-search button[hidden], #catalogEmpty[hidden] { display:none; }
+.catalog-compare { margin:24px 0 32px; padding:24px; border:1px solid var(--line); border-radius:16px; background:#fffdf8; }
+.catalog-compare[hidden] { display:none; }
+.catalog-compare-intro h2 { font-size:clamp(20px,2.5vw,26px); line-height:1.4; margin:8px 0; }
+.catalog-compare-intro p { font-size:13px; color:var(--muted); margin:0 0 20px; }
+.catalog-compare-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.catalog-compare-controls label { display:flex; flex-direction:column; gap:8px; font-size:13px; font-weight:750; min-width:0; }
+.catalog-compare-controls select { width:100%; min-height:48px; padding:10px; font:inherit; font-size:16px; border:1px solid var(--line); border-radius:9px; background:white; color:var(--ink); }
+.catalog-compare-controls select:focus-visible { outline:2px solid var(--orange); outline-offset:2px; }
+#catalogCompareResult { margin-top:18px; }
+.catalog-compare-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:stretch; }
+.catalog-compare-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:12px; background:#fff; display:flex; flex-direction:column; }
+.catalog-compare-card h3 { font-size:18px; line-height:1.5; margin:0 0 14px; overflow-wrap:anywhere; }
+.catalog-compare-facts { margin:0 0 14px; }
+.catalog-compare-fact { border-top:1px solid var(--line); padding:9px 0; }
+.catalog-compare-fact dt { color:var(--muted); font-size:12px; }
+.catalog-compare-fact dd { font-size:14px; font-weight:750; margin:4px 0 0; }
+.catalog-compare-card h4 { font-size:13px; margin:5px 0 8px; }
+.catalog-compare-rules { margin:0 0 20px; padding-left:18px; font-size:12px; line-height:1.7; }
+.catalog-compare-card .btn { margin-top:auto; align-self:flex-start; }
+.catalog-compare-footnote { margin:16px 0 0; line-height:1.7; }
+@media (max-width:680px) {
+  .catalog-compare { padding:16px 12px; }
+  .catalog-compare-controls,.catalog-compare-grid { grid-template-columns:minmax(0,1fr); gap:12px; }
+  .catalog-compare-card { padding:14px; }
+}
 .filter-bar { display: flex; gap: 26px; flex-wrap: wrap; padding: 0 0 28px; margin-bottom: 30px; border-bottom: 1px solid var(--line); }
 .filter-btn { background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 0; min-height: 44px; padding: 7px 0; color: var(--muted); font-size: 13px; font-weight: 700; }
 .filter-btn.active { border-bottom-color: var(--orange); color: var(--orange-dark); }
