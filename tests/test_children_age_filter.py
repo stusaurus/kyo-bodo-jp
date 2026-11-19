@@ -71,7 +71,7 @@ def test_fallback_is_6_years_2_people_20_minutes_and_does_not_claim_ranking():
 def test_all_age_counts_are_consistent_with_source_catalog():
     expected_counts = {
         age: sum(1 for g in eligible() if g["age"] <= age)
-        for age in (6, 8, 10, 12)
+        for age in range(6, 13)
     }
     # Minimum known coverage from the 83-game baseline; expansions are allowed.
     assert expected_counts[6] >= 14
@@ -79,12 +79,34 @@ def test_all_age_counts_are_consistent_with_source_catalog():
     assert expected_counts[6] < expected_counts[8] <= expected_counts[10] <= expected_counts[12]
 
 
+
+def test_nine_year_age_option_is_available_without_assuming_grade_or_reviews():
+    html = m.children_age_filter()
+    options = re.findall(r'<option value="(\d+)"(?: selected)?>\d+歳</option>', html)
+    assert options == [str(n) for n in range(6, 13)]
+    assert html.count('<option value="9">9歳</option>') == 1
+    age9 = [g for g in eligible() if g["age"] == 9]
+    assert [g["game_id"] for g in age9] == ["scout", "insider-game"]
+    for g in age9:
+        assert f'href="{m.u("games/" + g["game_id"] + "/")}"' in html
+        assert g["title"] in html
+    # A four-player 20-minute selection at nine includes both newly eligible
+    # games that an eight-year-old's age selection correctly excludes.
+    def selected(age):
+        return [g["game_id"] for g in eligible()
+                if g["age"] <= age
+                and m.supports_players(g, 4)
+                and g["play_time_max"] <= 20]
+    assert set(selected(9)) - set(selected(8)) == {"scout", "insider-game"}
+    assert "小学校の学年や9歳の子に必ず合うという保証ではありません" in html
+    assert "最年少の子どもの年齢を6〜12歳の1歳刻み" in html
+
 def test_only_children_scene_changes_and_schema_remains_true():
     child = next(s for s in m.SCENES if s["scene_id"] == "children")
     html = m.scene_page(child)
     assert html.count('id="children-age-compare"') == 1
-    assert "子どもの年齢・人数・時間から候補を絞る" in html
-    assert "6歳・8歳・人数・時間で比較" in html
+    assert "6〜12歳の子どもの年齢・人数・時間から候補を絞る" in html
+    assert "6〜12歳・人数・時間で比較" in html
     assert "assets/children-filter.js" in html
     assert '<link rel="canonical" href="' + m.canon("scenes/children/") + '"' in html
     # Initial ItemList remains the published 12 representatives, not an invented ranking.
