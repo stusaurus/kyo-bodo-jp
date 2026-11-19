@@ -29,7 +29,10 @@ def test_comparison_js_never_persists_or_transmits_selection():
     assert "catalog_compare_use" in js
     assert "compared_count:2" in js
     assert "window.kyoTrack('catalog_compare_use',{compared_count:2})" in js
-    assert "localStorage" not in js
+    # The existing explicit saved shelf may be read, but selections are never newly persisted.
+    assert "window.localStorage.getItem('kyo_bodo_saved_games_v1')" in js
+    assert "localStorage.setItem" not in js
+    assert "localStorage.removeItem" not in js
     assert "sessionStorage" not in js
     assert "sendBeacon" not in js
     assert "new Map()" in js
