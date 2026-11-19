@@ -488,3 +488,38 @@ footer p { color: #c6d0d8; font-size: 10px; max-width: 680px; line-height: 2; ma
 .two-coop-related{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:18px}
 .two-coop-related a:focus-visible,.two-coop-method-card a:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 @media(max-width:680px){.two-coop-method-grid{grid-template-columns:minmax(0,1fr)}.two-coop-method-card{padding:16px}.two-coop-time-group{margin:18px 0 24px}}
+
+
+/* Editorial, year-round board-game gift buyer guide */
+.gift-hero{padding-bottom:30px}
+.gift-hero>p{max-width:77ch;line-height:1.8}
+.gift-jumps{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 0}
+.gift-jumps a{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:700;text-decoration:none}
+.gift-jumps a:hover,.gift-jumps a:focus-visible{border-color:var(--blue);outline-offset:3px}
+.gift-checklist-grid{list-style:none;padding:0;margin:18px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:gift-check}
+.gift-checklist-grid li{min-width:0;padding:18px 20px;background:var(--paper);border:1px solid var(--line);border-radius:16px;counter-increment:gift-check}
+.gift-checklist-grid strong{display:block;font-size:17px;margin-bottom:8px;line-height:1.5}
+.gift-checklist-grid strong:before{content:"0" counter(gift-check) " / ";color:var(--blue);font-size:13px;letter-spacing:.02em}
+.gift-checklist-grid span{display:block;font-size:14px;line-height:1.75}
+.gift-age{scroll-margin-top:84px}
+.gift-age>p{max-width:82ch;line-height:1.8}
+.gift-age .gift-cards{margin:22px 0}
+.gift-table-scroll{margin-top:16px}
+.gift-table caption{font-size:13px;text-align:left;padding:12px 0}
+.gift-table th,.gift-table td{min-width:95px}
+.gift-table th:first-child,.gift-table td:first-child{min-width:144px}
+.gift-table tbody th:first-child a{white-space:nowrap}
+.gift-table-help{font-size:13px;line-height:1.75;margin-top:10px}
+.gift-table th:last-child,.gift-table td:last-child{min-width:180px}
+.gift-after{margin-bottom:24px}
+.gift-after>p{max-width:78ch;line-height:1.8}
+.gift-after h3{margin-top:26px}
+.gift-after .btn{white-space:normal;text-align:center}
+@media(max-width:760px){
+  .gift-hero{padding-bottom:24px}
+  .gift-jumps{display:grid;grid-template-columns:minmax(0,1fr)}
+  .gift-jumps a{justify-content:center}
+  .gift-checklist-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .gift-checklist-grid li{padding:15px}
+  .gift-age .gift-cards{margin:16px 0}
+}
