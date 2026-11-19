@@ -40,6 +40,7 @@ def test_gift_guide_has_factual_comparison_and_internal_purchase_safe_links():
     assert html.count('data-gift-detail="') == 9
     assert html.count('data-source="gift_guide"') >= 9
     assert 'role="region"' in html
+    assert html.count("表は横にスクロールして、対象年齢・遊び方の一手まで確認できます。") == 3
     assert "人気ランキング・実際に遊んだ体験談・売れ筋順位ではありません" in html
     assert "価格・送料・在庫・到着予定日" in html
     assert "アフィリエイト広告が含まれる場合があります" in html
