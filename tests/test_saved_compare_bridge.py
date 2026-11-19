@@ -41,3 +41,15 @@ def test_existing_catalog_and_home_remain_crawlable_without_js():
     assert 'id="catalogCompareSecond"' in catalog
     assert catalog.count('class="catalog-card game-list-card"')==88
     assert 'assets/catalog-compare.js' in catalog
+
+
+def test_compare_event_cannot_inherit_previous_journey_game_id():
+    # The central event wrapper enriches other events with journey context.
+    # Anonymous compare events must be allowlisted AFTER this enrichment.
+    js=site.ANALYTICS
+    assert 'Object.keys(ctx).forEach(function(k){if(data[k]===undefined)data[k]=ctx[k]})' in js
+    assert 'if(name==="catalog_compare_use")' in js
+    assert 'data={compared_count:data.compared_count===2?2:0,page_path:location.pathname,operator_test:op?"1":"0"}' in js
+    assert js.index('Object.keys(ctx).forEach(')<js.index('if(name==="catalog_compare_use")')<js.index('gtag("event",name,data)')
+    assert 'data.entry_campaign=noteEntry.campaign' in js
+    assert 'data.entry_content=noteEntry.content' in js
