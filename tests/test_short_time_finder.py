@@ -49,7 +49,7 @@ def test_short_scene_renders_existing_comparison_and_new_complete_finder():
     assert html.count('data-short-game="') == 28
     assert 'scene-quick-comparison' in html
     assert html.count('data-short-minutes=') == 28
-    assert 'target="_blank" rel="sponsored noopener"' in html or 'data-affiliate="rakuten"' in html
+    assert 'data-track="game_detail_click"' in html
     assert 'rel="canonical" href="' + site.canon("scenes/short/") + '"' in html
     assert '20分以内・短時間で遊べるボードゲームおすすめ' in html
 
