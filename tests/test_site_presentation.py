@@ -39,7 +39,8 @@ def test_games_index_has_mobile_friendly_filters():
     assert 'data-filter="family"' in page
     assert 'data-filter="short"' in page
     assert 'data-filter="beginner"' in page
-    assert "game_filter_use" in page
+    assert 'assets/catalog-search.js' in page
+    assert "game_filter_use" in (ROOT/"assets/catalog-search.js").read_text(encoding="utf-8")
 
 def test_fit_tags_are_derived_for_every_game():
     for g in m.GAMES:
