@@ -1,7 +1,7 @@
 """Solo discovery must include every catalog title supporting one player."""
 import json
 from data.catalog import GAMES, supports_players
-from scripts.build_site import SCENES, scene_representatives, scene_score, scene_page, games_index
+from scripts.build_site import SCENES, scene_representatives, scene_score, scene_page, games_index, home, scenes_index
 
 def test_solo_scene_is_unique_and_factual():
     solo = [s for s in SCENES if s["scene_id"] == "solo"]
@@ -34,3 +34,21 @@ def test_solo_scene_and_filter_have_real_links_and_correct_count():
     assert 'data-filter="solo"' in listing
     assert listing.count('data-solo="1"') == len(eligible)
     assert "c.dataset.solo" in listing
+
+
+def test_solo_discovery_has_direct_home_entry_without_replacing_other_choices():
+    eligible = [g for g in GAMES if supports_players(g, 1)]
+    landing = home()
+    assert len(eligible) == 13
+    # Home now points to the real solo comparison without a two-click detour.
+    assert landing.count('href="/kyo-bodo-jp/scenes/solo/"') == 1
+    assert f"1人対応の全{len(eligible)}本を遊び方・時間から見比べる" in landing
+    assert "ソロ用ルールは購入する版で確認してください" in landing
+    assert "/kyo-bodo-jp/guides/two-player-cooperative/" in landing
+    assert "/kyo-bodo-jp/scenes/two-player/" in landing
+    assert "/kyo-bodo-jp/scenes/short/" in landing
+    assert "/kyo-bodo-jp/scenes/children/" in landing
+    assert "2人で遊ぶ予定なら" in landing
+    # Existing scene directory and its solo link continue to be available.
+    assert 'href="/kyo-bodo-jp/scenes/solo/"' in scenes_index()
+    assert "人気No.1" not in landing
