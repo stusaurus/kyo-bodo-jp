@@ -149,10 +149,20 @@ async function context(browser,width){
       assert.equal(giftLanding.data.referrer,undefined);
       assert.equal(giftLanding.data.full_url,undefined);
       assert.equal(giftLanding.data.utm_term,undefined);
-      const giftChoice=gift.locator('.gift-age a[data-track="game_detail_click"][data-source="gift_guide"]').first();
+      const giftTableLink=gift.locator('.gift-age a[data-gift-detail="dobble"]');
+      assert.equal(await giftTableLink.getAttribute('data-track'),'game_detail_click');
+      await safeClick(gift,giftTableLink);
+      let giftTableEvents=await events(gift);
+      let giftTableDetail=giftTableEvents.filter(e=>e.name==='game_detail_click');
+      assert.equal(giftTableDetail.length,1,'table click must emit exactly one detail event');
+      assert.equal(giftTableDetail[0].data.entry_campaign,giftCampaign);
+      assert.equal(giftTableDetail[0].data.conversion_source,'gift_guide');
+            const giftChoice=gift.locator('.gift-age a[data-track="game_detail_click"][data-source="gift_guide"]').first();
       assert(await giftChoice.count()>0,'gift guide detail links unavailable');
       await safeClick(gift,giftChoice);
       giftEvents=await events(gift);
+      assert.equal(giftEvents.filter(e=>e.name==='game_detail_click').length,2,
+        'table and card should each emit once');
       const giftDetail=giftEvents.find(e=>e.name==='game_detail_click');
       assert(giftDetail,'gift detail click missing');
       assert.equal(giftDetail.data.entry_campaign,giftCampaign);
