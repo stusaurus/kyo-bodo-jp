@@ -130,6 +130,8 @@ ALIASES={
     "timebomb-q":["タイムボムq"],
     "werewolf-dx":["人狼dx","会話型心理ゲーム人狼dx"],
     "nmbr9":["ナンバーナイン","nmbr9"],
+    # Japanese packaging also uses クゥワークル; generic English Qwirkle must still meet context/variant checks.
+    "qwirkle":["クワークル","クゥワークル","qwirkle"],
 }
 
 def norm(s):
@@ -285,6 +287,18 @@ def query_variants(g):
             "3558380134831",
             "パッチワーク 2025年新版 日本語版",
         ]+variants
+    if g["game_id"]=="qwirkle":
+        # Official Japanese retail names alternate クワークル and クゥワークル.
+        variants=["クゥワークル 日本語版", "クゥワークル QWIRKLE 日本語版",
+                  "クワークル 日本版"]+variants
+    if g["game_id"]=="cascadia":
+        # Seek the original KenBill base box, not Junior/Rolling/expansions.
+        variants=["カスカディア 日本語版 ケンビル",
+                  "カスカディア ケンビル ボードゲーム"]+variants
+    if g["game_id"]=="nmbr9":
+        # Avoid the unrelated fashion brand named NUMBER (N)INE.
+        variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
+                  "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
         "splendor-duel":"3558380101895",
         "catan-junior":"4543471004000",
@@ -301,6 +315,7 @@ def query_variants(g):
         "forbidden-island":"4542325311141",
         "mandala":"4981932024578",
         "quiz-iisen":"4542325120033",
+        "nmbr9":"4580215110306",
     }
     if g["game_id"] in jan_queries:
         variants=[jan_queries[g["game_id"]]]+variants
