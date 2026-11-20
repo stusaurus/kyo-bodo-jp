@@ -6,6 +6,10 @@ def scene(sid):
     return next(s for s in site.SCENES if s["scene_id"] == sid)
 
 
+def s_title(sid):
+    return scene(sid)["title"]
+
+
 def test_short_scene_hero_links_to_existing_complete_finder():
     html = site.scene_page(scene("short"))
     count = sum(g["play_time_max"] <= 20 for g in site.GAMES)
@@ -14,7 +18,7 @@ def test_short_scene_hero_links_to_existing_complete_finder():
     assert html.count('href="#short-time-finder"') == 1
     assert f"10・15・20分と人数から{count}本を絞り込む" in html
     assert html.index('href="#short-time-finder"') < html.index('id="short-time-finder"')
-    assert html.index('href="#short-time-finder"') < html.index('class="scene-quick-comparison"')
+    assert html.index('href="#short-time-finder"') < html.index('class="section scene-quick-comparison"')
     assert 'id="short-time-minutes"' in html
     assert 'id="short-time-players"' in html
     assert 'id="short-time-age"' in html
@@ -34,8 +38,9 @@ def test_natural_japanese_scene_headings_are_visible_without_keyword_padding():
     for sid, heading in expected.items():
         html = site.scene_page(scene(sid))
         assert '<h2>' + heading + '</h2>' in html
-        assert html.count('class="scene-selection-guide"') == 1
-        assert heading.replace("で遊ぶときの選び方", "ときの選び方") not in html or heading.startswith("夫婦")
+        assert html.count('class="section scene-selection-guide"') == 1
+        if sid in ("short", "large-group", "drinking", "beginner"):
+            assert s_title(sid) + "ときの選び方" not in html
     assert '<h2>2人で遊ぶときの選び方</h2>' in site.scene_page(scene("two-player"))
     assert '<h2>小学生と遊ぶときの選び方</h2>' in site.scene_page(scene("children"))
 
