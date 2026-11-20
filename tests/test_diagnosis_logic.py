@@ -40,3 +40,22 @@ def test_relaxed_results_keep_players_and_cooperation_hard_and_fill_common_short
     '''
     result=subprocess.run(['node','-e',program],capture_output=True,text=True)
     assert result.returncode==0,result.stderr
+
+
+def test_competitive_group_results_exclude_cooperative_games_even_when_time_relaxed():
+    js=(ROOT/'assets/diagnosis.js').read_text()
+    logic=js[js.index('function score('):js.index('\nfunction rak(')]
+    program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
+    for (let n=2;n<=14;n++) for (let t of [15,30,60,120]) {
+      a={players:String(n),time:String(t),mood:'compete',who:'family',difficulty:'1',balance:'half'};
+      for (let g of games) if ((score(g)>-100 || relaxedScore(g)>-100) && g.cooperative)
+        throw Error('cooperative game in competitive results: '+g.game_id);
+    }
+    a={players:'4',time:'30',mood:'compete',who:'family',difficulty:'1',balance:'half'};
+    let ranked=games.map(g=>[g,score(g)]).filter(x=>x[1]>-100).sort((x,y)=>y[1]-x[1]).slice(0,5);
+    if(ranked.length!==5 || ranked.some(x=>x[0].cooperative))throw Error('reproduced family scenario');
+    a={players:'1',time:'60',mood:'compete',who:'solo',difficulty:'1',balance:'half'};
+    if (!games.some(g=>g.cooperative && score(g)>-100))throw Error('solo personal-record mode must remain available');
+    '''
+    result=subprocess.run(['node','-e',program],capture_output=True,text=True)
+    assert result.returncode==0,result.stderr

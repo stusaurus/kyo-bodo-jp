@@ -41,6 +41,7 @@ jobs:
           node --check scripts/check_catalog_two_game_compare.cjs
           node --check scripts/check_saved_compare_bridge.cjs
           node --check scripts/check_solo_discovery.cjs
+          node --check scripts/check_purchase_journeys.cjs
           node --check scripts/check_rakuten_preorder.cjs
       - name: Validate diagnosis, game pages and SEO files
         env:
@@ -67,6 +68,7 @@ jobs:
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_catalog_two_game_compare.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_saved_compare_bridge.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_solo_discovery.cjs
+          NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_purchase_journeys.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_rakuten_preorder.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_children_age_comparison.cjs
           NODE_PATH=/tmp/scene-qa/node_modules node scripts/check_short_time_finder.cjs
@@ -88,6 +90,7 @@ jobs:
             audit-results/catalog-compare/
             audit-results/saved-compare/
             audit-results/solo-discovery/
+            audit-results/purchase-journeys/
             audit-results/rakuten-preorder/
             audit-results/children-age-comparison/
             audit-results/short-time-finder/
