@@ -97,6 +97,20 @@ const server=new Promise(resolve=>{
       assert.equal(errors.length,0,errors.join('\n'));
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),'diagnosis overflow '+width);
       await page.screenshot({path:path.join(output,'diagnosis-'+width+'.png'),fullPage:true,animations:'disabled'});
+      // A group asking for competition must not receive cooperative games.
+      await page.goto('http://127.0.0.1:8792'+base+'diagnosis/?test=1',{waitUntil:'domcontentloaded'});
+      for(const choice of ['family','4','compete','30','1','half'])
+        await page.locator('.answer[data-v="'+choice+'"]').click();
+      await page.locator('.result-card h3').first().waitFor();
+      const groupTitles=await page.locator('.result-card h3').allTextContents();
+      assert.equal(groupTitles.length,5,'competitive family scenario should have five candidates');
+      for(const title of groupTitles){
+        const game=byTitle.get(title);
+        assert(game && !game.cooperative && game.players_min<=4 && game.players_max>=4 && game.play_time_max<=30,'incompatible result: '+title);
+      }
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),'group diagnosis overflow '+width);
+      assert.equal(errors.length,0,errors.join('\n'));
+      await page.screenshot({path:path.join(output,'competitive-family-'+width+'.png'),fullPage:true,animations:'disabled'});
       console.log(JSON.stringify({width,solo:eligible.length,scene:actual.length,catalog:catalogCount,diagnosis:recommendations.length,errors:0,overflow:0}));
       await ctx.close();
     }
