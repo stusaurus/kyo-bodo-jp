@@ -118,6 +118,19 @@ UNRESOLVED_SEARCH_QUERIES={
 }
 
 
+def public_game_data():
+    """Use the same safe unverified-edition hints in static and JS purchase flows.
+
+    The source catalog and API matching rules remain unchanged. Client pages
+    still prefer an actually verified Rakuten product from data/rakuten.json.
+    """
+    return [
+        {**g, "rakuten_query": UNRESOLVED_SEARCH_QUERIES[g["game_id"]]}
+        if g["game_id"] in UNRESOLVED_SEARCH_QUERIES else g
+        for g in GAMES
+    ]
+
+
 def load_rakuten(g):
     x=RAKUTEN.get(g["game_id"],{})
     if x.get("url"):
@@ -895,7 +908,7 @@ def main():
     shutil.copy2(ROOT/"assets/catalog-compare.js", SITE/"assets/catalog-compare.js")
     if HERO_ASSET.exists(): shutil.copy2(HERO_ASSET,SITE/"assets"/HERO_ASSET.name)
     if SCENE_ASSET.exists(): shutil.copy2(SCENE_ASSET,SITE/"assets"/SCENE_ASSET.name)
-    write("data/games.json",json.dumps(GAMES,ensure_ascii=False,separators=(",",":")))
+    write("data/games.json",json.dumps(public_game_data(),ensure_ascii=False,separators=(",",":")))
     write("data/rakuten.json",json.dumps(RAKUTEN,ensure_ascii=False,separators=(",",":")))
     write("index.html",home());write("diagnosis/index.html",diagnosis());write("games/index.html",games_index());write("scenes/index.html",scenes_index())
     for g in GAMES: write("games/"+g["game_id"]+"/index.html",game_page(g))
