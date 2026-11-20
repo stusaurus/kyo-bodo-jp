@@ -79,6 +79,18 @@ function server(){
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+3),false,'overflow '+width);
       assert.deepEqual(errors,[],errors.join('; '));
       await page.locator('.gift-age').first().screenshot({path:path.join(out,'age-six-'+width+'.png'),animations:'disabled'});
+      // Actual journey: gift guide -> chosen gift -> return to the comparison.
+      await page.locator('.gift-table a[data-gift-detail="dobble"]').first().click();
+      assert.equal(new URL(page.url()).pathname,base+'games/dobble/');
+      const back=page.locator('.product-panel a[data-source="game_detail_gift"]');
+      assert.equal(await back.count(),1,'gift-detail return link missing');
+      assert.equal(await back.getAttribute('href'),guidePath);
+      assert.equal(await back.getAttribute('data-track'),'guide_entry');
+      assert.equal(await back.getAttribute('data-affiliate'),null);
+      await back.click();
+      assert.equal(new URL(page.url()).pathname,guidePath,'return does not lead to guide');
+      assert.equal(await page.locator('.gift-age').count(),3);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+3),false,'gift return overflow '+width);
       for(const entry of ['', 'scenes/children/', 'scenes/family/']){
         await page.goto('http://127.0.0.1:'+port+base+entry,{waitUntil:'domcontentloaded'});
         assert(await page.locator('a[href="'+guidePath+'"]').count()>0,'no discovery link: '+entry);

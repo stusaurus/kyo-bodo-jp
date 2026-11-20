@@ -95,3 +95,50 @@ def test_invalid_edition_specs_fail_closed_before_publication():
     by_id["nine-tiles"]["age"] = 12
     with pytest.raises(ValueError, match="Ineligible gift choice"):
         gift_groups(by_id, m.supports_players)
+
+
+def test_nine_gift_detail_pages_return_to_existing_age_based_comparison():
+    target = m.u("guides/gift-board-games/")
+    gift_ids = {gid for group in GIFT_GROUPS for gid in group["ids"]}
+    assert len(gift_ids) == 9
+    for gid in gift_ids:
+        html = m.game_page(m.BY_ID[gid])
+        panel = html.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+        assert panel.count('data-source="game_detail_gift"') == 1, gid
+        assert panel.count('href="' + target + '"') == 1, gid
+        assert 'data-track="guide_entry"' in panel, gid
+        assert '年齢・人数から9作品を比較する' in panel, gid
+        assert '人気ランキング' not in panel, gid
+        # The return link is ordinary site navigation, not a verified product.
+        gift_link = panel.split('data-source="game_detail_gift"', 1)[1]
+        gift_link = gift_link.split("</a>", 1)[0]
+        assert 'data-affiliate=' not in gift_link, gid
+        assert 'target="_blank"' not in gift_link, gid
+    assert all(gid in m.BY_ID for gid in gift_ids)
+
+
+def test_non_gift_game_detail_pages_have_no_unrelated_gift_call_to_action():
+    gift_ids = {gid for group in GIFT_GROUPS for gid in group["ids"]}
+    non_gift = [g for g in m.GAMES if g["game_id"] not in gift_ids]
+    assert len(non_gift) == len(m.GAMES) - 9
+    for game in non_gift:
+        html = m.game_page(game)
+        assert 'data-source="game_detail_gift"' not in html, game["game_id"]
+        assert 'class="small gift-recompare"' not in html, game["game_id"]
+
+
+def test_gift_detail_recomparison_does_not_change_offer_identity(monkeypatch):
+    game = m.BY_ID["dobble"]
+    product_url = "https://hb.afl.rakuten.co.jp/hgc/test-gift/"
+    monkeypatch.setattr(m, "RAKUTEN", {"dobble": {
+        "url": product_url,
+        "item_url": "https://item.rakuten.co.jp/shop/real/",
+        "image_url": "", "preorder": False,
+    }})
+    html = m.game_page(game)
+    panel = html.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+    assert 'href="' + product_url + '"' in panel
+    assert panel.count('data-affiliate="rakuten"') == 1
+    assert 'rel="sponsored noopener"' in panel
+    assert panel.count('data-source="game_detail_gift"') == 1
+    assert 'href="' + m.u("guides/gift-board-games/") + '"' in panel
