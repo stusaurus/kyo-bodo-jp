@@ -108,6 +108,16 @@ DIAGNOSIS=(ROOT/"assets/diagnosis.js").read_text(encoding="utf-8")
 
 TODAY=(ROOT/"assets/today.js").read_text(encoding="utf-8")
 
+# These are search hints, not verified item offers or guaranteed live inventory.
+# Keep generic catalog queries for other games, and preserve the independent
+# search-click event for every unresolved product.
+UNRESOLVED_SEARCH_QUERIES={
+    "qwirkle": "クゥワークル 日本語版",
+    "cascadia": "カスカディア 日本語版 ケンビル",
+    "nmbr9": "ナンバーナイン NMBR9 ボードゲーム",
+}
+
+
 def load_rakuten(g):
     x=RAKUTEN.get(g["game_id"],{})
     if x.get("url"):
@@ -115,7 +125,8 @@ def load_rakuten(g):
         if image.startswith("https://thumbnail.image.rakuten.co.jp/"):
             image=image.replace("_ex=128x128","_ex=320x320")
         return x["url"],image,("楽天で予約状況を確認" if x.get("preorder") else "楽天で見る")
-    q=urllib.parse.quote(g.get("rakuten_query") or g["title"])
+    query=UNRESOLVED_SEARCH_QUERIES.get(g["game_id"]) or g.get("rakuten_query") or g["title"]
+    q=urllib.parse.quote(query)
     return "https://search.rakuten.co.jp/search/mall/"+q+"/","","楽天で探す"
 
 
