@@ -88,6 +88,13 @@ def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification(
     assert "data.offer.text.includes('通常検索へ移動します')" in script
     assert "data.offer.text.includes('PR：')" in script
     assert "issues.push('unclassified Rakuten outbound link')" in script
+    assert "missing mobile product shortcut" in script
+    assert "mobile shortcut differs from safe product panel" in script
+    assert "mobile verified offer missing PR disclosure" in script
+    assert "mobile search not clearly classified" in script
+    assert "h.track!==o.track" in script
+    assert "h.rel!==o.rel" in script
+    assert "(show&&h.height<44)" in script
     assert "data.canonical!==url" in script
     assert "if(fatal.length)process.exitCode=1" in script
 
