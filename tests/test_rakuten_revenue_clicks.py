@@ -185,3 +185,62 @@ def test_unrelated_unverified_search_query_is_not_rewritten(monkeypatch):
     url, _, label = site.load_rakuten(game)
     assert url == "https://search.rakuten.co.jp/search/mall/" + quote(game["rakuten_query"]) + "/"
     assert label == "楽天で探す"
+
+
+@pytest.mark.parametrize("gid,expected", [
+    ("qwirkle", "クゥワークル 日本語版"),
+    ("cascadia", "カスカディア 日本語版 ケンビル"),
+    ("nmbr9", "ナンバーナイン NMBR9 ボードゲーム"),
+])
+def test_public_js_purchase_paths_use_the_same_edition_specific_search_as_details(monkeypatch, gid, expected):
+    from urllib.parse import quote
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    by_id = {g["game_id"]: g for g in site.public_game_data()}
+    assert len(by_id) == len(site.GAMES) == 88
+    assert by_id[gid]["rakuten_query"] == expected
+    static_url, _, _ = site.load_rakuten(site.BY_ID[gid])
+    dynamic_url = "https://search.rakuten.co.jp/search/mall/" + quote(by_id[gid]["rakuten_query"]) + "/"
+    assert dynamic_url == static_url
+    assert not dynamic_url.startswith("https://hb.afl.rakuten.co.jp/")
+    assert site.BY_ID[gid]["rakuten_query"] != expected or gid == "nmbr9"
+
+
+def test_public_json_preserves_every_game_fact_and_verified_link_priority(monkeypatch):
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    exposed = site.public_game_data()
+    assert len(exposed) == len(site.GAMES)
+    assert [g["game_id"] for g in exposed] == [g["game_id"] for g in site.GAMES]
+    overrides = site.UNRESOLVED_SEARCH_QUERIES
+    assert set(overrides) == {"qwirkle", "cascadia", "nmbr9"}
+    for original, client in zip(site.GAMES, exposed):
+        assert {k: v for k, v in original.items() if k != "rakuten_query"} == {
+            k: v for k, v in client.items() if k != "rakuten_query"
+        }
+        assert client["rakuten_query"] == overrides.get(original["game_id"], original["rakuten_query"])
+    # No mutation of the original input used by the Rakuten API match guard.
+    assert site.GAMES == list(site.BY_ID.values())
+
+    # Both independent JavaScript clients consume this public JSON field while
+    # retaining verified-product precedence and separating normal search tracking.
+    today = (ROOT / "assets/today.js").read_text(encoding="utf-8")
+    diagnosis = (ROOT / "assets/diagnosis.js").read_text(encoding="utf-8")
+    for js in (today, diagnosis):
+        assert 'data/games.json' in js
+        assert 'data/rakuten.json' in js
+        assert "encodeURIComponent(g.rakuten_query||g.title)" in js
+        assert 'data-affiliate="rakuten"' in js
+        assert 'data-track="rakuten_search_click"' in js
+    assert "x.url||" in diagnosis
+    assert "l.url?'data-affiliate" in today
+
+
+def test_emitted_public_json_is_safe_and_does_not_expose_fake_offers(monkeypatch):
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    site.main()
+    exported = json.loads((site.SITE / "data" / "games.json").read_text(encoding="utf-8"))
+    assert exported == site.public_game_data()
+    assert len(exported) == 88
+    for gid, phrase in site.UNRESOLVED_SEARCH_QUERIES.items():
+        actual = next(g for g in exported if g["game_id"] == gid)
+        assert actual["rakuten_query"] == phrase
+    assert json.loads((site.SITE / "data" / "rakuten.json").read_text(encoding="utf-8")) == {}
