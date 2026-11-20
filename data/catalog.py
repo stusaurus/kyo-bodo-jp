@@ -30,8 +30,8 @@ def player_label(game):
 GAMES=[
 g("catan","カタン",3,4,60,90,10,"3434413143121","資源交換のひと言から毎回ドラマが生まれる定番戦略ゲーム。","資源を受け取る|資源を交換して道や街を建てる|先に規定点へ到達した人が勝ち","友達とじっくり|家族の休日|戦略ゲーム","カタン スタンダード ボードゲーム","friends|family|strategy"),
 g("carcassonne","カルカソンヌ",2,5,35,45,7,"2422314454222","タイルを置くだけなのに先読みが止まらない。","地形タイルを1枚引く|絵がつながるように置く|完成した地形から得点する","夫婦で30分|家族|配置ゲーム","カルカソンヌ 日本語版 ボードゲーム","couple|family|strategy"),
-g("splendor","宝石の煌き",2,4,30,45,10,"2412314443112","軽いルールでしっかり考えられる宝石集め。","宝石トークンを取る|宝石でカードを買う|誰かが15点に達したラウンドの終了時、最も得点が高い人が勝ち","夫婦|友達|初心者戦略","宝石の煌き 日本語版 ボードゲーム","couple|friends|strategy"),
-g("dobble","ドブル",2,8,10,15,6,"1123513554555","見つけた瞬間に声が出る反射神経ゲーム。","カードを2枚見る|共通するマークを探す|先に見つけて宣言する","小学生|短時間|大人数","ドブル 日本語版 ボードゲーム","children|family|large_group|beginner"),
+g("splendor","宝石の煌き",2,4,30,30,10,"2412314443112","軽いルールでしっかり考えられる宝石集め。","宝石トークンを取る|宝石でカードを買う|誰かが15点に達したラウンドの終了時、最も得点が高い人が勝ち","夫婦|友達|初心者戦略","宝石の煌き 日本語版 ボードゲーム","couple|friends|strategy"),
+g("dobble","ドブル",2,8,15,15,6,"1123513554555","見つけた瞬間に声が出る反射神経ゲーム。","カードを2枚見る|共通するマークを探す|先に見つけて宣言する","小学生|短時間|大人数","ドブル 日本語版 ボードゲーム","children|family|large_group|beginner"),
 g("ito","ito",2,10,30,30,8,"1125545444554","価値観のズレがそのまま笑いになる会話ゲーム。","秘密の数字を受け取る|お題に沿って数字の大きさを言葉で表す|相談して数字順に並べる","初対面|友達|大人数","ito アークライト ボードゲーム","friends|family|large_group|beginner"),
 g("ito-rainbow","ito レインボー",2,14,5,15,8,"1125545444555","大人数ほど価値観のズレが面白い短時間版。","数字カードを受け取る|お題で数字感を表現する|みんなで順番を予想する","大人数|初対面|短時間","ito レインボー ボードゲーム","friends|large_group|beginner"),
 g("nanjamonja","ナンジャモンジャ",2,6,10,20,4,"1124513554455","変な名前を付けた瞬間からもう面白い。","新しいキャラに名前を付ける|同じキャラが出たら名前を呼ぶ|早く正しく呼んだ人がカードを取る","子ども|家族|笑いたい","ナンジャモンジャ ボードゲーム","children|family|friends|beginner"),
@@ -58,7 +58,7 @@ g("fake-artist","エセ芸術家ニューヨークへ行く",5,10,20,30,8,"11255
 g("cockroach-poker","ごきぶりポーカー",2,6,20,30,8,"1324543444543","嘘をつくか見抜くかだけで笑えるブラフゲーム。","カードを伏せて誰かへ渡す|内容を宣言する|受け手は本当か嘘かを判断する","友達|飲み会|ブラフ","ごきぶりポーカー 日本語版","friends|party"),
 g("geistesblitz","おばけキャッチ",2,8,15,20,8,"1123514554554","条件に合うコマを最速でつかむ反射神経ゲーム。","カードをめくる|条件に合うコマを判断する|一番早く正しいコマを取る","家族|子ども|短時間","おばけキャッチ 日本語版","family|children|short"),
 g("quarto","クアルト",2,2,15,15,6,"2511115531114","相手が渡した駒を置く2人専用の美しい頭脳戦。","相手に置かせる駒を選ぶ|渡された駒を盤面へ置く|共通特徴4個を一直線に並べたら勝ち","夫婦|2人|頭を使う","クアルト ボードゲーム","couple|strategy"),
-g("gobblet-gobblers","ゴブレットゴブラーズ",2,2,5,10,5,"2311215551115","かぶせて動かせる○×ゲーム。","自分のコマを置く|大きいコマで小さいコマをかぶせる|3つ一直線で勝ち","親子|2人|短時間","ゴブレットゴブラーズ","couple|children|family|short"),
+g("gobblet-gobblers","ゴブレットゴブラーズ",2,2,5,5,5,"2311215551115","かぶせて動かせる○×ゲーム。","自分のコマを置く|大きいコマで小さいコマをかぶせる|3つ一直線で勝ち","親子|2人|短時間","ゴブレットゴブラーズ","couple|children|family|short"),
 g("patchwork","パッチワーク",2,2,30,30,8,"3511215531112","布タイルを買って自分だけの盤面を作る2人戦。","ボタンで布タイルを買う|自分の盤面へ配置する|空きマスを減らし得点を競う","夫婦|2人|じっくり","パッチワーク 日本語版 ボードゲーム","couple|strategy"),
 g("jaipur","ジャイプル",2,2,30,30,12,"3432314531113","商品を集めて売るテンポのよい2人専用商売ゲーム。","市場から商品かラクダを取る|同種商品をまとめて売る|より多く得点してラウンドを取る","夫婦|2人|駆け引き","ジャイプル ボードゲーム 日本語版","couple|strategy"),
 g("lost-cities","ロストシティ",2,2,30,30,10,"3432314531113","出すか捨てるかの悩みが濃い2人カードゲーム。","5色のカードを持つ|色ごとに数字を昇順で出す|遠征列の合計で得点を競う","夫婦|2人|カード","ロストシティ ボードゲーム","couple|strategy"),
@@ -123,6 +123,13 @@ g("houseki-ippai","宝石がいっぱい！",2,6,5,5,4,"1113415555555","カー�
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    # Primary Japanese-edition distributor/manufacturer facts checked 2026-11-21:
+    # Dobble 2023 edition ~15min; Splendor 2024 edition ~30min;
+    # Gobblet Gobblers Japanese edition 5min; Lost Cities: Original 2025 30min.
+    "dobble": "https://hobbyjapan.games/dobble/",
+    "splendor": "https://hobbyjapan.games/splendor/",
+    "gobblet-gobblers": "https://sugorokuya.jp/p/gobblet-gobblers",
+    "lost-cities": "https://www.groupsne.co.jp/products/bg/lostcities/original.html",
     "nana-card-game": "https://suppe.sugorokuya.jp/items/220738",
     "lama": "https://mobiusgames.shop-pro.jp/?pid=145076594",
     "ark-nova": "https://tendaysgames.shop-pro.jp/?pid=166436141",
