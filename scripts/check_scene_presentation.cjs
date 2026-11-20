@@ -220,8 +220,22 @@ function serve(root,port){return new Promise(resolve=>{
    const baselineByGame=new Map(before.cards.map(c=>[c.game,c]));
    for(const card of after.cards){
      if(baselineByGame.has(card.game)){
-       assert.deepEqual(card,baselineByGame.get(card.game),
-         'Existing displayed offer title, image, affiliate URL or ID changed');
+       const original=baselineByGame.get(card.game);
+       // Allow exactly these observed incompatible variants to disappear from
+       // the affiliate stream; a normal Rakuten search must replace them.
+       const rejectedVariants=new Set(['dobble','codenames','blokus','qwirkle','haa-game']);
+       if(rejectedVariants.has(card.game) && original.affiliate==='rakuten' &&
+          card.search==='rakuten_search_click'){
+         assert.equal(card.game,original.game);
+         assert.equal(card.title,original.title);
+         assert.equal(card.affiliate,'');
+         assert.equal(card.rel,'noopener');
+         assert(card.href.startsWith('https://search.rakuten.co.jp/search/mall/'));
+         assert.equal(card.image,null,'Wrong-edition product image must not remain');
+       }else{
+         assert.deepEqual(card,original,
+           'Unexpected offer/title/image/attribution change outside explicit safety fix');
+       }
      }
    }
    assert.equal(after.schema['@context'],before.schema['@context']);
