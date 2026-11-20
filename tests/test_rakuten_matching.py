@@ -308,3 +308,50 @@ def test_product_image_missing_fallback_has_valid_accessible_image_role(monkeypa
         assert '<div class="game-hero-art">' + image_role in html
     dynamic = (ROOT / "assets" / "media.js").read_text(encoding="utf-8")
     assert "stage.setAttribute('role','img')" in dynamic
+
+
+def test_verified_qwirkle_japanese_spellings_accept_base_but_not_spinoffs():
+    # Japanese retail listings use both spellings; neither is an English/import exception.
+    g = game("qwirkle")
+    for name in (
+        "クゥワークル QWIRKLE 日本語版",
+        "クワークル 日本版 ボードゲーム タイル",
+        "クゥワークル日本語版 MindWare",
+    ):
+        assert m.match_item(g, item(name))[0], name
+    for name in (
+        "クゥワークル キューブ 日本語版 ボードゲーム",
+        "Qwirkle Cubes ボードゲーム",
+        "クゥワークル・トラベル 日本語版 ボードゲーム",
+        "クワークルラミー 日本語版 ボードゲーム",
+        "Qwirkle Rummy 日本語版 ボードゲーム",
+        "クゥワークル 並行輸入 ボードゲーム",
+        "Qwirkle 海外版",
+    ):
+        assert not m.match_item(g, item(name))[0], name
+
+
+def test_verified_remaining_base_game_queries_and_jan_identifiers():
+    q = m.query_variants(game("qwirkle"))
+    c = m.query_variants(game("cascadia"))
+    n = m.query_variants(game("nmbr9"))
+    assert q[0] == "4573366172019"
+    assert "クゥワークル 日本語版" in q
+    assert c[0] == "4573346505370"
+    assert "カスカディア 日本語版 ケンビル" in c
+    assert n[0] == "4580215110306"
+    assert "ナンバーナイン NMBR9 日本語版 ボードゲーム" in n
+    for entries in (q, c, n):
+        assert len(entries) == len(set(entries))
+
+
+def test_hard_to_find_queries_never_approve_a_junior_or_fashion_product():
+    assert not m.match_item(
+        game("cascadia"), item("カスカディア・ジュニア 日本語版 ケンビル ボードゲーム")
+    )[0]
+    assert not m.match_item(
+        game("nmbr9"), item("ナンバーナイン NUMBER (N)INE Tシャツ")
+    )[0]
+    assert m.match_item(
+        game("nmbr9"), item("ナンバーナイン 日本語版 ボードゲーム NMBR9 メビウス")
+    )[0]
