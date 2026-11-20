@@ -355,3 +355,58 @@ def test_hard_to_find_queries_never_approve_a_junior_or_fashion_product():
     assert m.match_item(
         game("nmbr9"), item("ナンバーナイン 日本語版 ボードゲーム NMBR9 メビウス")
     )[0]
+
+
+def test_actual_20261121_haa_game_selectable_listing_is_rejected():
+    """Real Rakuten artifact #14677196161: a selector for 1/2/3/4 is not base stock."""
+    g = game("haa-game")
+    names = (
+        "【クーポン利用で最大7％OFF】はぁって言うゲーム 、2，3，4 の4種類からお選び下さい 幻冬舎(Gentosha) カードゲーム パーティーゲーム",
+        "はぁって言うゲーム 1・2・3・4 の4種類から選べる カードゲーム",
+        "はぁって言うゲーム 2、3、4 各種から選択 カードゲーム",
+        "はぁって言うゲーム2 幻冬舎 カードゲーム",
+        "はぁって言うゲーム3 幻冬舎 カードゲーム",
+        "はぁって言うゲーム4 幻冬舎 カードゲーム",
+    )
+    for name in names:
+        accepted, reason, _ = m.match_item(g, item(name))
+        assert not accepted, (name, reason)
+        assert reason.startswith("blocked:"), (name, reason)
+
+
+def test_haa_game_safe_single_product_still_matches_without_variant_menu():
+    g = game("haa-game")
+    for name in (
+        "【ネコポス送料無料】はぁって言うゲーム",
+        "はぁって言うゲーム 幻冬舎 カードゲーム 単品",
+        "はぁって言うゲーム 2〜8人用 幻冬舎",
+    ):
+        accepted, reason, _ = m.match_item(g, item(name))
+        assert accepted, (name, reason)
+
+
+def test_rakuten_api_selector_is_not_chosen_over_single_base_product(monkeypatch):
+    g = game("haa-game")
+    variant = item("はぁって言うゲーム 、2，3，4 の4種類からお選び下さい 幻冬舎 カードゲーム")
+    variant["itemCode"] = "shop:selector"
+    variant["reviewCount"] = 1000
+    single = item("はぁって言うゲーム 幻冬舎 カードゲーム 単品")
+    single["itemCode"] = "shop:single-original"
+    monkeypatch.setattr(m, "fetch_with_retry", lambda keyword: [variant, single])
+    selected, rejected = m.one(g)
+    assert selected is not None
+    assert selected["item_code"] == "shop:single-original"
+    assert selected["item_name"] == single["itemName"]
+    assert any(row["item_name"] == variant["itemName"] and
+               row["reason"].startswith("blocked:") for row in rejected)
+
+
+def test_variant_only_api_result_fails_closed_without_fake_purchase_url(monkeypatch):
+    g = game("haa-game")
+    variant = item("はぁって言うゲーム 2，3，4 の4種類からお選び下さい")
+    monkeypatch.setattr(m, "fetch_with_retry", lambda keyword: [variant])
+    monkeypatch.setattr(m.time, "sleep", lambda seconds: None)
+    selected, rejected = m.one(g)
+    assert selected is None
+    assert rejected
+    assert all(row["reason"].startswith("blocked:") for row in rejected)

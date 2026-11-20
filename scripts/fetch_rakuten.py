@@ -82,7 +82,14 @@ PER_GAME_BLOCK={
     "blokus":["トライゴン","trigon","デュオ","duo","シャッフル","shuffle"],
     "haa-game":["2種セット","２種セット","二種セット","2個セット",
                 "２個セット","2本セット","２本セット","&はぁって言うゲーム",
-                "andはぁって言うゲーム"],
+                "andはぁって言うゲーム",
+                # The 2026-11-21 live API selected a single Rakuten item with
+                # 'はぁって言うゲーム 、2，3，4 の4種類からお選び下さい'.
+                # A variant selector cannot prove the original box is purchased.
+                "種類からお選び","種類から選べ","種類から選択","4種類",
+                "2,3,4","2、3、4","2・3・4","2/3/4",
+                "はぁって言うゲーム2","はぁって言うゲーム3",
+                "はぁって言うゲーム4"],
     "codenames":["デュエット","duet","xxl","ディズニー","disney",
                  "マーベル","marvel","ピクチャーズ","pictures"],
     "quarto":["ミニ","mini"],
