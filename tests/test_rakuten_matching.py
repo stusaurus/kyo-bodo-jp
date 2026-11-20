@@ -294,3 +294,16 @@ def test_ice_cool_variant_and_unrelated_cooling_products_both_blocked():
                  "アイスクール ICE COOL2 ボードゲーム"):
         assert not m.match_item(g, item(name))[0], name
     assert m.match_item(g, item("アイスクール 日本語版 ホビージャパン ボードゲーム"))[0]
+
+
+def test_product_image_missing_fallback_has_valid_accessible_image_role():
+    """Removing a mistaken Rakuten thumbnail must not lower accessibility."""
+    from scripts import build_site as site
+    assert '<div class="game-placeholder" role="img" aria-label="商品画像は未取得">' in site.PLACEHOLDER
+    for gid in ("dobble", "codenames", "blokus", "qwirkle", "haa-game"):
+        html = site.game_page(site.BY_ID[gid])
+        # A clean-cache build always displays an accessible image placeholder.
+        # CI's temporary live offer cache determines which pages use this path.
+        assert "game-hero-art" in html
+    dynamic = (ROOT / "assets" / "media.js").read_text(encoding="utf-8")
+    assert "stage.setAttribute('role','img')" in dynamic
