@@ -84,6 +84,51 @@ function server(root,port){
       console.log(JSON.stringify({width,defaults:3,two:twoIds.length,family:familyIds.length,short:shortIds.length,memory:'explicit+reversible'}));
       await context.close();
     }
+
+    // Real conversion surfaces must use the edition-specific fallback from
+    // generated public data, not only the static detail pages.
+    const safeSearches={
+      qwirkle:'クゥワークル 日本語版',
+      cascadia:'カスカディア 日本語版 ケンビル',
+      nmbr9:'ナンバーナイン NMBR9 ボードゲーム'
+    };
+    for(const [gid,phrase] of Object.entries(safeSearches)){
+      const g=byId.get(gid);
+      assert(g,'catalog game missing: '+gid);
+      const expected='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(phrase)+'/';
+      const ctx=await browser.newContext({viewport:{width:390,height:850},isMobile:true,hasTouch:true});
+      await ctx.route(/google-analytics\.com|googletagmanager\.com|analytics\.google\.com/,route=>route.abort());
+      await ctx.route('**/data/games.json',route=>route.fulfill({
+        status:200,contentType:'application/json',body:JSON.stringify([g])
+      }));
+      await ctx.route('**/data/rakuten.json',route=>route.fulfill({
+        status:200,contentType:'application/json',body:'{}'
+      }));
+      const page=await ctx.newPage(),errors=[];
+      page.on('pageerror',e=>errors.push(e.message));
+      await page.goto('http://127.0.0.1:8788/kyo-bodo-jp/?test=1',{waitUntil:'domcontentloaded'});
+      const todaySearch=page.locator('.today-pick a[data-track="rakuten_search_click"]');
+      await todaySearch.waitFor({state:'visible'});
+      assert.equal(await todaySearch.count(),1,gid+' should be one search-only card');
+      assert.equal(await todaySearch.getAttribute('href'),expected,'today edition mismatch '+gid);
+      assert.equal(await todaySearch.getAttribute('data-affiliate'),null);
+      assert.equal(await todaySearch.getAttribute('rel'),'noopener');
+      await page.goto('http://127.0.0.1:8788/kyo-bodo-jp/diagnosis/?test=1',{waitUntil:'domcontentloaded'});
+      for(const answer of ['family','2','think','120','3','skill']){
+        await page.locator('.answer[data-v="'+answer+'"]').click();
+      }
+      const diagnosisSearch=page.locator('.result-card a[data-track="rakuten_search_click"]');
+      await diagnosisSearch.waitFor({state:'visible'});
+      assert.equal(await diagnosisSearch.count(),1,gid+' should appear in safe diagnosis results');
+      assert.equal(await diagnosisSearch.getAttribute('href'),expected,'diagnosis edition mismatch '+gid);
+      assert.equal(await diagnosisSearch.getAttribute('data-affiliate'),null);
+      assert.equal(await diagnosisSearch.getAttribute('rel'),'noopener');
+      assert.equal(errors.length,0,errors.join('; '));
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3));
+      console.log(JSON.stringify({game:gid,todaySearch:expected,diagnosisSearch:expected,
+        directAffiliate:false,errors:0,overflow:0}));
+      await ctx.close();
+    }
   } finally {
     await browser.close();
     await new Promise(resolve=>app.close(resolve));
