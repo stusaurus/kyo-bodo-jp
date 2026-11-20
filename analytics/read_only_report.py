@@ -200,11 +200,21 @@ def fetch_ga4(session, today):
     def exact(field, value):
         return {"filter": {"fieldName": field, "stringFilter": {
             "matchType": "EXACT", "value": value}}}
-    def scoped_filters():
-        return {"andGroup": {"expressions": [
+    def scoped_filters(only_target_events=False):
+        expressions = [
             exact("sessionManualCampaignName", CAMPAIGN),
             exact("sessionManualSourceMedium", "note / referral"),
-            exact("hostName", "stusaurus.github.io")]}}
+            exact("hostName", "stusaurus.github.io"),
+        ]
+        if only_target_events:
+            # Real GA4 sessions also contain page_view, session_start, etc.
+            # Restrict the event query at the API; do not accidentally reject
+            # legitimate visits as unexpected eventName rows.
+            expressions.append({"filter": {
+                "fieldName": "eventName",
+                "inListFilter": {"values": list(EVENTS), "caseSensitive": True},
+            }})
+        return {"andGroup": {"expressions": expressions}}
     def query(body):
         return safe_json(session.post(GA_API + "/" + property_resource +
                                       ":runReport", json=body, timeout=45), "GA4_QUERY")
@@ -215,7 +225,7 @@ def fetch_ga4(session, today):
     raw = query({"dateRanges": date_range,
                  "dimensions": [{"name": name} for name in dimensions],
                  "metrics": [{"name": "eventCount"}],
-                 "dimensionFilter": scoped_filters(), "limit": 10000})
+                 "dimensionFilter": scoped_filters(only_target_events=True), "limit": 10000})
     visits = query({"dateRanges": date_range,
                     "dimensions": [{"name": "sessionManualCampaignName"},
                                    {"name": "sessionManualSourceMedium"}],
