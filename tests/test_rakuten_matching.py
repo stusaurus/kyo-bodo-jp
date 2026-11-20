@@ -203,3 +203,108 @@ def test_third_audit_variant_false_positives_are_rejected():
     for game_id,name in cases:
         ok,reason,_=m.match_item(game(game_id),item(name))
         assert not ok,(game_id,name,reason)
+
+
+def test_20261120_actual_rakuten_audit_variant_false_positives_rejected():
+    """Names were obtained from a real GitHub Actions Rakuten audit artifact.
+
+    Do not count a franchise or bundle listing as the base product simply
+    because the itemName contains the catalog title.
+    """
+    rejected = (
+        ("dobble", "ホビージャパン ドブル: アナと雪の女王2 日本語版 (2-5人用 10分 4才以上向け) ボードゲーム 送料無料"),
+        ("codenames", "ホビージャパン コードネーム: ディズニーエディション 日本語版 (2-8人用 15分 8才以上向け) ボードゲーム"),
+        ("blokus", "マテルゲーム ブロックス トライゴン R1985(1個)【マテルゲーム(Mattel Game)】[ボードゲーム]"),
+        ("qwirkle", "マインドウェア MindWare クワークル キューブ Qwirkle Cubes ボードゲーム 知育 玩具"),
+        ("haa-game", "【お買い得な2種セット】【ネコポス送料無料】はぁって言うゲーム＆はぁって言うゲーム 2"),
+    )
+    for gid, name in rejected:
+        ok, reason, _ = m.match_item(game(gid), item(name))
+        assert not ok, (gid, name, reason)
+        assert reason.startswith("blocked:"), (gid, name, reason)
+
+
+def test_base_editions_still_qualify_without_special_variant():
+    accepted = (
+        ("dobble", "ホビージャパン ドブル 2023年新版 日本語版 2-8人 ボードゲーム"),
+        ("codenames", "コードネーム 2025年新版 日本語版 ボードゲーム"),
+        ("blokus", "マテルゲーム ブロックス スタンダード BJV44 ボードゲーム"),
+        ("qwirkle", "MindWare クワークル Qwirkle タイル ボードゲーム"),
+        ("haa-game", "はぁって言うゲーム 幻冬舎 カードゲーム 単品"),
+    )
+    for gid, name in accepted:
+        ok, reason, _ = m.match_item(game(gid), item(name))
+        assert ok, (gid, name, reason)
+
+
+def test_other_obvious_spinoffs_remain_unverified():
+    names = (
+        ("dobble", "ドブル キッズ カードゲーム"),
+        ("dobble", "ドブル ポケモン 日本語版 ボードゲーム"),
+        ("codenames", "コードネーム ピクチャーズ 日本語版 ボードゲーム"),
+        ("blokus", "ブロックス デュオ ボードゲーム"),
+        ("qwirkle", "Qwirkle Cubes クワークル キューブス ボードゲーム"),
+    )
+    for gid, name in names:
+        assert not m.match_item(game(gid), item(name))[0], (gid, name)
+
+
+def test_unverified_variant_is_not_retained_at_site_build_boundary(monkeypatch):
+    """Even a stale API cache item must fail safe before displaying purchase links."""
+    from scripts import build_site as site
+    wrong = {
+        "item_name": "ホビージャパン ドブル: アナと雪の女王2 日本語版 (2-5人用 10分 4才以上向け) ボードゲーム",
+        "item_url": "https://item.rakuten.co.jp/verifiedshop/wrong-edition/",
+        "url": "https://hb.afl.rakuten.co.jp/hgc/wrong-edition/",
+    }
+    # The module import path runs the same publishing-boundary revalidation,
+    # and before it is reloaded the rule is independently testable.
+    ok, _, _ = m.match_item(game("dobble"), {"itemName": wrong["item_name"]})
+    assert not ok
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    html = site.game_page(site.BY_ID["dobble"])
+    assert 'data-source="game_detail_hero"' in html
+    assert "楽天で探す" in html
+    assert 'data-affiliate="rakuten" data-game-id="dobble"' not in html
+
+
+def test_product_identity_rule_dictionaries_have_no_duplicate_keys():
+    """Python silently overwrites duplicate dict keys: never lose exclusion rules."""
+    import ast
+    tree = ast.parse((ROOT / "scripts" / "fetch_rakuten.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+            continue
+        name = node.targets[0].id
+        if name not in ("CONTEXT_RULES", "PER_GAME_BLOCK", "ALIASES"):
+            continue
+        assert isinstance(node.value, ast.Dict)
+        keys = [ast.literal_eval(k) for k in node.value.keys]
+        assert len(keys) == len(set(keys)), (
+            name, sorted(k for k in set(keys) if keys.count(k) > 1)
+        )
+
+
+def test_ice_cool_variant_and_unrelated_cooling_products_both_blocked():
+    g = game("ice-cool")
+    for name in ("アイスクール2 日本語版 ボードゲーム",
+                 "アイスクールリング 冷感 ネッククーラー",
+                 "アイスクール ICE COOL2 ボードゲーム"):
+        assert not m.match_item(g, item(name))[0], name
+    assert m.match_item(g, item("アイスクール 日本語版 ホビージャパン ボードゲーム"))[0]
+
+
+def test_product_image_missing_fallback_has_valid_accessible_image_role(monkeypatch):
+    """Removing a mistaken Rakuten thumbnail must not lower accessibility."""
+    from scripts import build_site as site
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    image_role = '<div class="game-placeholder" role="img" aria-label="商品画像は未取得">'
+    assert image_role in site.PLACEHOLDER
+    for gid in ("dobble", "codenames", "blokus", "qwirkle", "haa-game"):
+        html = site.game_page(site.BY_ID[gid])
+        assert image_role in html
+        assert '<div class="game-hero-art">' + image_role in html
+    dynamic = (ROOT / "assets" / "media.js").read_text(encoding="utf-8")
+    assert "stage.setAttribute('role','img')" in dynamic
