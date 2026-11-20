@@ -360,8 +360,17 @@ def scene_selection_guide(s, ranked):
         f'<a class="text-link" href="{u("scenes/" + x["scene_id"] + "/")}">{e(x["title"])}から探す →</a> '
         for x in SCENES if x['scene_id'] in related and x['scene_id'] != s['scene_id']
     )
-    heading = ("夫婦・カップルで遊ぶときの選び方"
-               if s["scene_id"] == "couple" else s["title"] + "ときの選び方")
+    natural_headings = {
+        # These titles describe a situation rather than a grammatical verb
+        # phrase; appending 「とき」 directly yields unnatural Japanese.
+        "couple": "夫婦・カップルで遊ぶときの選び方",
+        "short": "短時間で遊ぶときの選び方",
+        "large-group": "大人数で遊ぶときの選び方",
+        "drinking": "飲み会で遊ぶときの選び方",
+        "cooperative": "協力ゲームを選ぶときの考え方",
+        "beginner": "初心者と遊ぶときの選び方",
+    }
+    heading = natural_headings.get(s["scene_id"], s["title"] + "ときの選び方")
     return f'''<section class="section scene-selection-guide">
 <div class="eyebrow">HOW TO CHOOSE</div>
 <h2>{e(heading)}</h2>
@@ -697,6 +706,14 @@ def scene_page(s):
                   'シーン条件と編集評価による適合度順。同点はカタログ掲載順です。')
     scene_i=SCENE_ART[s["scene_id"]]
     choice_link = '<div><a class="text-link" href="#two-player-choices">2人向け・協力の候補から選ぶ →</a></div>' if s["scene_id"] == "two-player" else ""
+    if s["scene_id"] == "short":
+        # The full 10/15/20-minute finder already exists below the
+        # comparison table; let search visitors reach it from the hero.
+        count = sum(g["play_time_max"] <= 20 for g in GAMES)
+        choice_link = (
+            '<div><a class="text-link" href="#short-time-finder">'
+            f'10・15・20分と人数から{count}本を絞り込む →</a></div>'
+        )
     if s["scene_id"] == "two-player":
         choice_link += ('<nav aria-label="2人の条件を引き継いで診断">'
                        f'<a class="text-link" data-track="diagnosis_entry" href="{u("diagnosis/?src=two_player_short&preset=two-short")}">2人・15分以内で診断する →</a><br>'
