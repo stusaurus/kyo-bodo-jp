@@ -285,3 +285,12 @@ def test_product_identity_rule_dictionaries_have_no_duplicate_keys():
         assert len(keys) == len(set(keys)), (
             name, sorted(k for k in set(keys) if keys.count(k) > 1)
         )
+
+
+def test_ice_cool_variant_and_unrelated_cooling_products_both_blocked():
+    g = game("ice-cool")
+    for name in ("アイスクール2 日本語版 ボードゲーム",
+                 "アイスクールリング 冷感 ネッククーラー",
+                 "アイスクール ICE COOL2 ボードゲーム"):
+        assert not m.match_item(g, item(name))[0], name
+    assert m.match_item(g, item("アイスクール 日本語版 ホビージャパン ボードゲーム"))[0]
