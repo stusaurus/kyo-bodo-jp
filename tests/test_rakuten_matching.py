@@ -266,3 +266,22 @@ def test_unverified_variant_is_not_retained_at_site_build_boundary(monkeypatch):
     assert 'data-source="game_detail_hero"' in html
     assert "楽天で探す" in html
     assert 'data-affiliate="rakuten" data-game-id="dobble"' not in html
+
+
+def test_product_identity_rule_dictionaries_have_no_duplicate_keys():
+    """Python silently overwrites duplicate dict keys: never lose exclusion rules."""
+    import ast
+    tree = ast.parse((ROOT / "scripts" / "fetch_rakuten.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+            continue
+        name = node.targets[0].id
+        if name not in ("CONTEXT_RULES", "PER_GAME_BLOCK", "ALIASES"):
+            continue
+        assert isinstance(node.value, ast.Dict)
+        keys = [ast.literal_eval(k) for k in node.value.keys]
+        assert len(keys) == len(set(keys)), (
+            name, sorted(k for k in set(keys) if keys.count(k) > 1)
+        )
