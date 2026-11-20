@@ -55,9 +55,14 @@ function serve(root,port){return new Promise(resolve=>{
      title:document.title,description:document.querySelector('meta[name="description"]').content,
      canonical:document.querySelector('link[rel="canonical"]').href,h1:document.querySelector('h1').textContent,
      schema:JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent),
-     cards:[...document.querySelectorAll('.game-card')].map((el,i)=>({title:el.querySelector('h3').textContent,
-      game:el.querySelector('[data-affiliate]').dataset.gameId,href:el.querySelector('[data-affiliate]').href,
-      image:originalImages[i]})),
+     cards:[...document.querySelectorAll('.game-card')].map((el,i)=>{
+      const outgoing=el.querySelector('[data-affiliate="rakuten"], [data-track="rakuten_search_click"]');
+      if(!outgoing)throw new Error('Missing classified Rakuten outbound');
+      return {title:el.querySelector('h3').textContent,
+       game:outgoing.dataset.gameId,href:outgoing.href,
+       affiliate:outgoing.dataset.affiliate||'',search:outgoing.dataset.track||'',
+       rel:outgoing.rel,image:originalImages[i]};
+     }),
      width:innerWidth,documentWidth:document.documentElement.scrollWidth,
      note:document.querySelector('.scene-result-head span').textContent,
      table:document.querySelector('.scene-table-scroll').scrollWidth>document.querySelector('.scene-table-scroll').clientWidth,
@@ -140,9 +145,19 @@ function serve(root,port){return new Promise(resolve=>{
      await page.screenshot({path:path.join(out,`choices-${width}.png`),fullPage:true,animations:'disabled'});
      await page.locator('#two-player-choices a[data-game-id="sky-team"]').first().click();
      assert((await page.locator('h1').textContent()).includes('スカイチーム'));
-     const purchase=page.locator('.product-panel [data-affiliate]');
-     assert.equal(await purchase.getAttribute('rel'),'sponsored noopener');
-     assert((await purchase.getAttribute('href')).startsWith('https://'));
+     const purchase=page.locator('.product-panel a.btn.rakuten.large');
+     const affiliate=await purchase.getAttribute('data-affiliate');
+     const tracking=await purchase.getAttribute('data-track');
+     const rel=await purchase.getAttribute('rel');
+     const href=await purchase.getAttribute('href');
+     if(affiliate==='rakuten'){
+      assert.equal(rel,'sponsored noopener');
+      assert(href.startsWith('https://hb.afl.rakuten.co.jp/'));
+     }else{
+      assert.equal(tracking,'rakuten_search_click');
+      assert.equal(rel,'noopener');
+      assert(href.startsWith('https://search.rakuten.co.jp/'));
+     }
      assert.equal(errors.length,0,errors.join(','));
     }
     if(index){
@@ -184,7 +199,7 @@ function serve(root,port){return new Promise(resolve=>{
         const detail=await page.evaluate(source=>{
           const doc=new DOMParser().parseFromString(source,'text/html');
           return {title:doc.querySelector('.game-hero-copy h1')?.textContent,
-                  href:doc.querySelector('.product-panel [data-affiliate]')?.getAttribute('href'),
+                  href:doc.querySelector('.product-panel a[data-affiliate="rakuten"], .product-panel a[data-track="rakuten_search_click"]')?.getAttribute('href'),
                   image:doc.querySelector('.game-hero-art img')?.getAttribute('src')||null};
         },await response.text());
         assert.deepEqual({title:card.title,href:card.href,image:card.image},detail,
