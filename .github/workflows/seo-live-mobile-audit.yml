@@ -53,6 +53,8 @@ jobs:
                       const schemas=[...document.querySelectorAll('script[type="application/ld+json"]')];
                       const offer=document.querySelector('.product-panel a.btn.rakuten.large');
                       const panel=document.querySelector('.product-panel');
+                      const heroOffer=document.querySelector('.game-hero-purchase a.game-hero-purchase-link');
+                      const heroPurchase=document.querySelector('.game-hero-purchase');
                       return {title:document.title,description:meta('meta[name="description"]'),canonical:meta('link[rel="canonical"]','href'),robots:meta('meta[name="robots"]'),viewport:meta('meta[name="viewport"]'),h1:document.querySelectorAll('h1').length,documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth,invalidSchemas:schemas.filter(x=>{try{JSON.parse(x.textContent);return false}catch{return true}}).length,
                         shortCount:document.querySelectorAll('[data-short-game]').length,
                         soloCards:document.querySelectorAll('.game-card').length,
@@ -64,7 +66,8 @@ jobs:
                         coupleChoiceLinks:[...document.querySelectorAll('.couple-choice-card a[data-source="couple_choice"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         coupleDecisionHeading:!!document.querySelector('#couple-choose-title'),
                         gaConfigured:!!window.KYO_BODO_CONFIG?.gaMeasurementId,
-                        offer:offer&&panel?{href:offer.href,affiliate:offer.dataset.affiliate||'',track:offer.dataset.track||'',rel:offer.rel,text:panel.innerText}:null};
+                        offer:offer&&panel?{href:offer.href,affiliate:offer.dataset.affiliate||'',track:offer.dataset.track||'',rel:offer.rel,text:panel.innerText}:null,
+                        heroOffer:heroOffer&&heroPurchase?{href:heroOffer.href,affiliate:heroOffer.dataset.affiliate||'',track:heroOffer.dataset.track||'',rel:heroOffer.rel,source:heroOffer.dataset.source,visible:getComputedStyle(heroPurchase).display!=='none',height:heroOffer.getBoundingClientRect().height,text:heroPurchase.innerText}:null};
                     });
                     if(response.status()!==200)issues.push('HTTP '+response.status());
                     if(!data.title||!data.description||data.canonical!==url||data.h1!==1||!data.viewport.includes('width=device-width')||data.invalidSchemas||/noindex/i.test(data.robots))issues.push('SEO metadata or canonical inconsistent');
@@ -94,6 +97,20 @@ jobs:
                       }else if(data.offer.track==='rakuten_search_click'){
                         if(data.offer.rel.includes('sponsored')||!data.offer.href.startsWith('https://search.rakuten.co.jp/')||!data.offer.text.includes('通常検索へ移動します')||data.offer.text.includes('PR：'))issues.push('ordinary search disclosure mismatch');
                       }else issues.push('unclassified Rakuten outbound link');
+                      // Reject unsafe or hidden mobile shortcuts; no external link click.
+                      if(!data.heroOffer||!data.offer)issues.push('missing mobile product shortcut');
+                      else{
+                        const h=data.heroOffer,o=data.offer,show=width<=760;
+                        if(h.source!=='game_detail_hero'||h.href!==o.href||h.affiliate!==o.affiliate||
+                           h.track!==o.track||h.rel!==o.rel||h.visible!==show||
+                           (show&&h.height<44))
+                          issues.push('mobile shortcut differs from safe product panel');
+                        if(o.affiliate==='rakuten'&&!h.text.includes('PR：'))
+                          issues.push('mobile verified offer missing PR disclosure');
+                        if(o.track==='rakuten_search_click'&&
+                           (!h.text.includes('検索結果には別作品')||h.text.includes('PR：')))
+                          issues.push('mobile search not clearly classified');
+                      }
                     }
                     if(width<500)await page.screenshot({path:'seo-mobile-evidence/'+width+'-'+(p.replace(/\//g,'-')||'home')+'.png',animations:'disabled'});
                     results.push({width,url,status:response.status(),...data,issues,warnings});
