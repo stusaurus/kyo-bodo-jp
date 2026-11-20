@@ -123,6 +123,62 @@ class FreeOfficialMeasurementTests(TestCase):
         self.assertTrue(all(x["raw_event_count"] is None for x in
                             r["event_counts"].values()))
 
+    def test_ga4_fetch_filters_only_target_events_but_counts_all_sessions(self):
+        """Mock the official REST API: pageviews must not pollute tracked events."""
+        class Response:
+            status_code = 200
+            def __init__(self, data):
+                self.data = data
+            def json(self):
+                return self.data
+
+        class Session:
+            def __init__(self):
+                self.requests = []
+            def get(self, url, **kwargs):
+                assert url.endswith("/properties/556462193/metadata")
+                return Response({"dimensions": [{"apiName": x} for x in (
+                    "date", "eventName", "sessionManualCampaignName",
+                    "sessionManualSourceMedium", "pagePath", "hostName"
+                )]})
+            def post(self, url, json, **kwargs):
+                assert url.endswith("properties/556462193:runReport")
+                self.requests.append(json)
+                expressions = json["dimensionFilter"]["andGroup"]["expressions"]
+                filters = {x["filter"]["fieldName"]: x["filter"] for x in expressions}
+                assert filters["sessionManualCampaignName"]["stringFilter"]["value"] == m.CAMPAIGN
+                assert filters["sessionManualSourceMedium"]["stringFilter"]["value"] == "note / referral"
+                assert filters["hostName"]["stringFilter"]["value"] == "stusaurus.github.io"
+                if "eventCount" in [x["name"] for x in json["metrics"]]:
+                    # Many real sessions also include page_view and session_start.
+                    # Require a server-side filter before simulating only the allowed event row.
+                    assert set(filters["eventName"]["inListFilter"]["values"]) == set(m.EVENTS)
+                    assert filters["eventName"]["inListFilter"]["caseSensitive"]
+                    return Response({"rowCount": 1, "rows": [row([
+                        "20261120", "note_campaign_landing", m.CAMPAIGN,
+                        "note / referral", "/kyo-bodo-jp/guides/gift-board-games/"
+                    ], [2])]})
+                assert "eventName" not in filters, (
+                    "The session count must include sessions without custom clicks")
+                return Response({"rowCount": 1, "rows": [
+                    row([m.CAMPAIGN, "note / referral"], [3, 2])
+                ]})
+        session = Session()
+        result = m.fetch_ga4(session, dt.date(2026, 11, 23))
+        self.assertEqual(result["status"], "OBSERVED_ROWS")
+        self.assertEqual(result["event_counts"]["note_campaign_landing"]["raw_event_count"], 2)
+        self.assertIsNone(result["event_counts"]["game_detail_click"]["raw_event_count"])
+        self.assertEqual(result["visits"]["sessions_including_tests"], 3)
+        self.assertEqual(len(session.requests), 2)
+
+    def test_unknown_pageview_row_still_fails_closed_if_api_ignores_filter(self):
+        pageview = row(["20261120", "page_view", m.CAMPAIGN,
+                        "note / referral", "/kyo-bodo-jp/guides/gift-board-games/"], [8])
+        result = m.parse_ga4({"rows": [pageview]}, {"rows": []}, False,
+                             (dt.date(2026, 11, 20), dt.date(2026, 11, 21)))
+        self.assertEqual(result["status"], "QUALITY_RESTRICTED")
+        self.assertIsNone(result["metrics"])
+
     def test_gsc_requires_exact_own_property_not_parent(self):
         class Fake:
             status_code = 200
