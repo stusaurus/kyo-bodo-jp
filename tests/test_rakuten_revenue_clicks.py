@@ -132,3 +132,56 @@ assert.equal(logged[1][2].conversion_source,"game_detail");
         capture_output=True, text=True, check=False, timeout=10,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("gid,expected", [
+    ("qwirkle", "クゥワークル 日本語版"),
+    ("cascadia", "カスカディア 日本語版 ケンビル"),
+    ("nmbr9", "ナンバーナイン NMBR9 ボードゲーム"),
+])
+def test_search_only_fallback_is_base_edition_specific_without_fake_affiliate(monkeypatch, gid, expected):
+    from urllib.parse import quote
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    game = site.BY_ID[gid]
+    url, image, label = site.load_rakuten(game)
+    assert url == "https://search.rakuten.co.jp/search/mall/" + quote(expected) + "/"
+    assert not image
+    assert label == "楽天で探す"
+    detail = site.game_page(game)
+    # Mobile top-of-page and normal panel must expose the identical safe search.
+    assert detail.count('href="' + url + '"') >= 2
+    panel = detail.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+    assert 'data-track="rakuten_search_click"' in panel
+    assert 'data-affiliate="rakuten"' not in panel
+    assert 'rel="noopener"' in panel
+    assert 'rel="sponsored noopener"' not in panel
+    assert "掲載作品と一致する販売商品を確認できていません" in panel
+    assert "検索結果には別作品・拡張版・中古品" in panel
+
+
+def test_safe_search_hints_never_override_verified_rakuten_product(monkeypatch):
+    game = site.BY_ID["qwirkle"]
+    safe = "https://hb.afl.rakuten.co.jp/hgc/future-genuine-base/"
+    monkeypatch.setattr(site, "RAKUTEN", {"qwirkle": {
+        "url": safe,
+        "item_url": "https://item.rakuten.co.jp/verifiedshop/base/",
+        "image_url": "", "preorder": False,
+    }})
+    result_url, _, text = site.load_rakuten(game)
+    assert result_url == safe
+    assert text == "楽天で見る"
+    assert site.outgoing_tracking(game) == ('data-affiliate="rakuten"', 'sponsored noopener')
+    html = site.game_page(game)
+    panel = html.split('<div class="product-panel">', 1)[1].split("</aside>", 1)[0]
+    assert 'href="' + safe + '"' in panel
+    assert 'data-affiliate="rakuten"' in panel
+    assert "クゥワークル" not in panel
+
+
+def test_unrelated_unverified_search_query_is_not_rewritten(monkeypatch):
+    from urllib.parse import quote
+    monkeypatch.setattr(site, "RAKUTEN", {})
+    game = site.BY_ID["the-game"]
+    url, _, label = site.load_rakuten(game)
+    assert url == "https://search.rakuten.co.jp/search/mall/" + quote(game["rakuten_query"]) + "/"
+    assert label == "楽天で探す"
