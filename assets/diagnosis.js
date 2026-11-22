@@ -15,11 +15,15 @@ var preset=new URLSearchParams(location.search).get('preset');
 var presetLabel='';
 if(preset==='two-short'){a.players='2';a.time='15';presetLabel='2人・15分以内';}
 if(preset==='two-coop'){a.players='2';a.mood='coop';presetLabel='2人・協力';}
-if(presetLabel){document.querySelector('.diagnosis-subtitle').textContent='2人の条件を引き継ぎ、残り4問で選べます。';qs=qs.filter(function(q){return !Object.prototype.hasOwnProperty.call(a,q[0])});}
+if(presetLabel){document.querySelector('.diagnosis-subtitle').textContent='2人の条件を引き継ぎ、残りの質問で選べます。';qs=qs.filter(function(q){return !Object.prototype.hasOwnProperty.call(a,q[0])});}
+var baseQs=qs.slice();
+// Only family/children require this additional question; never transmit age to analytics.
+var ageQuestion=["min_age","いちばん若い人は何歳？",[["4","4歳"],["5","5歳"],["6","6歳"],["7","7歳"],["8","8歳"],["9","9歳"],["10","10歳"],["11","11歳"],["12","12歳"],["13","13歳"],["14","14歳"],["15","15歳以上"],["skip","大人だけ・年齢指定なし"]]];
 var questionSub=["遊ぶ人の顔を思い浮かべて。","みんなで一緒に遊べる1本を。","今日ほしいのはどんな時間？","今ある時間に無理なく収まるものを。","ルール説明も、気軽に？じっくり？","最後は、好きな遊び方を。"];
 function label(key,val){var q=questionDefinitions.filter(function(x){return x[0]===key})[0],z=q&&q[2].filter(function(x){return x[0]===val})[0];return z?z[1]:val}
+function ageFits(g){return !a.min_age||a.min_age==='skip'||g.age<=Number(a.min_age)}
 function score(g){
-var n=Number(a.players||4);if(!(supportsPlayers(g,n)))return -9999;if(g.play_time_max>Number(a.time||30))return -9999;if(a.mood==="coop"&&!g.cooperative)return -9999;if(a.mood==="compete"&&a.who!=="solo"&&g.cooperative)return -9999;var s=60,w=a.who;
+var n=Number(a.players||4);if(!(supportsPlayers(g,n))||!ageFits(g))return -9999;if(g.play_time_max>Number(a.time||30))return -9999;if(a.mood==="coop"&&!g.cooperative)return -9999;if(a.mood==="compete"&&a.who!=="solo"&&g.cooperative)return -9999;var s=60,w=a.who;
 if(w==="couple")s+=g.couple*7;else if(w==="family")s+=g.family*7;else if(w==="friends")s+=(g.conversation+g.party+g.excitement)*3;else if(w==="children")s+=g.children*7;else if(w==="large")s+=(g.large_group+g.party)*5;else if(w==="first")s+=(g.beginner+g.conversation+g.party)*4;
 var m=a.mood;if(m==="laugh")s+=(g.excitement+g.party+g.conversation)*4;else if(m==="compete")s+=(g.strategy+g.excitement)*5;else if(m==="think")s+=g.strategy*8;else if(m==="coop")s+=g.cooperation*9;else if(m==="relax")s+=g.beginner*5+(6-g.difficulty)*4;else if(m==="chat")s+=g.conversation*8;
 var t=Number(a.time||30);if(t<=15)s+=Math.max(0,20-Math.max(0,g.play_time_min-15)*2);else if(t<=30)s+=Math.max(0,18-Math.abs(g.play_time_max-30)/3);else if(t<=60)s+=Math.max(0,16-Math.abs(g.play_time_max-60)/5);else s+=g.play_time_max>=45?18:5;
@@ -27,7 +31,7 @@ var d=Number(a.difficulty||3);s+=Math.max(0,18-Math.abs(g.difficulty-d)*6);
 if(a.balance==="luck")s+=g.luck*5+(6-g.strategy)*2;else if(a.balance==="skill")s+=g.strategy*6+(6-g.luck)*2;else s+=12-Math.abs(g.strategy-g.luck)*3;return s}
 function supportsPlayers(g,n){return g.players_min<=n&&(g.players_max!==null?n<=g.players_max:g.players_open_ended===true&&!!g.players_source)}
 function relaxedScore(g){
-var n=Number(a.players||4);if(!(supportsPlayers(g,n)))return -9999;if(a.mood==="coop"&&!g.cooperative)return -9999;if(a.mood==="compete"&&a.who!=="solo"&&g.cooperative)return -9999;
+var n=Number(a.players||4);if(!(supportsPlayers(g,n))||!ageFits(g))return -9999;if(a.mood==="coop"&&!g.cooperative)return -9999;if(a.mood==="compete"&&a.who!=="solo"&&g.cooperative)return -9999;
 var t=Number(a.time||30),over=g.play_time_max-t;if(over<=0)return score(g);
 var allowance=t<=15?15:t<=30?15:t<=60?30:0;if(over>allowance)return -9999;
 var old=a.time,s;a.time=String(Math.max(t,g.play_time_max));s=score(g);a.time=old;
@@ -61,18 +65,28 @@ function results(){
   document.querySelector('.diagnosis-heading').textContent=a.who==='solo'?'あなたの、今日の1本。':'あなたたちの、今日の1本。';
   document.querySelector('.diagnosis-subtitle').textContent=a.who==='solo'?'ひとりの時間に、今の気分に。':'今のメンバーに、今の気分に。';
   var intro=relaxedCount?'<div class="result-intro"><h2 class="sr-only" tabindex="-1">今日は、これで遊ぼう。</h2><p>まずは条件ぴったりの候補。足りない分だけ、遊ぶ時間を少し広げた候補も載せています。</p></div>':'<div class="result-intro"><h2 class="sr-only" tabindex="-1">今日は、これで遊ぼう。</h2><p>今日の条件に合う候補から選ぼう。</p></div>';
-  root.innerHTML=intro+(r.length?resultMarkup(r[0][0],0,r[0][2]):'<p>人数・時間・協力の条件を満たす候補がありません。遊べる時間を延ばすなど、条件を変えてお試しください。</p>')+(r.length>1?'<h2 class="results-alternatives-title">こんな1本も、きっと楽しい。</h2><div class="result-alternatives">'+r.slice(1).map(function(x,k){return resultMarkup(x[0],k+1,x[2])}).join('')+'</div>':'')+'<div class="result-retry"><p>同じメンバーでも、気分が変われば遊びも変わる。</p><a class="btn secondary" href="'+B+'diagnosis/">条件を変えてもう一度</a></div>';
+  root.innerHTML=intro+(a.min_age&&a.min_age!=='skip'?'<p class="small">年齢条件：最年少'+a.min_age+'歳。掲載版の対象年齢が条件を満たす作品のみ表示しています。対象年齢だけで遊びやすさが決まるわけではありません。 <a href="'+B+'scenes/children/">年齢・人数・時間で全作品を比較</a></p>':'')+(r.length?resultMarkup(r[0][0],0,r[0][2]):'<p>人数・時間・年齢・遊び方の条件を同時に満たす候補がありません。年齢の条件は緩めず、遊べる時間などを変えてお試しください。</p><p><a href="'+B+'scenes/children/">年齢・人数から全作品を比較する →</a></p>')+(r.length>1?'<h2 class="results-alternatives-title">こんな1本も、きっと楽しい。</h2><div class="result-alternatives">'+r.slice(1).map(function(x,k){return resultMarkup(x[0],k+1,x[2])}).join('')+'</div>':'')+'<div class="result-retry"><p>同じメンバーでも、気分が変われば遊びも変わる。</p><a class="btn secondary" href="'+B+'diagnosis/">条件を変えてもう一度</a></div>';
   root.querySelector('h2').focus({preventScroll:true});
   window.scrollTo({top:0,behavior:'instant'});
 }
 function render(){
   if(i>=qs.length){results();return}
-  var q=qs[i],qi=originalKeys.indexOf(q[0]),pct=Math.round(i/qs.length*100),scene=[1,4,2,5,3,6][qi];
-  var options=q[0]==='players'&&a.who==='solo'?[['1','1人']]:q[0]==='mood'&&a.who==='solo'?[['think','じっくり考えたい'],['relax','気軽に遊びたい'],['compete','自分の記録に挑みたい']]:q[2];
+  var q=qs[i],qi=q[0]==='min_age'?1:originalKeys.indexOf(q[0]),pct=Math.round(i/qs.length*100),scene=q[0]==='min_age'?4:[1,4,2,5,3,6][qi];
+  var options=q[0]==='min_age'&&a.who==='children'?q[2].filter(function(x){return x[0]!=='skip'}):q[0]==='players'&&a.who==='solo'?[['1','1人']]:q[0]==='mood'&&a.who==='solo'?[['think','じっくり考えたい'],['relax','気軽に遊びたい'],['compete','自分の記録に挑みたい']]:q[2];
   root.className='diagnosis-state';root.setAttribute('aria-busy','false');
-  root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">'+(a.who==='solo'?'ひとりの時間を、楽しもう。':'一緒に遊ぶ時間を、思い浮かべて。')+'</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+questionSub[qi]+'</p><div class="answers '+(q[0]==='players'?'player-answers':'')+'">'+options.map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
+  root.innerHTML=(presetLabel?'<p class="preset-context">条件：'+presetLabel+'（掲載時間の上限。説明・準備時間は別） <a href="'+B+'diagnosis/">条件を変更</a></p>':'')+'<div class="question-status"><span class="eyebrow">JUST GO WITH YOUR FEELING</span><span class="step-counter">0'+(i+1)+' / 0'+qs.length+'</span></div><div class="progress" role="progressbar" aria-label="診断の進み具合" aria-valuemin="0" aria-valuemax="'+qs.length+'" aria-valuenow="'+i+'"><b style="width:'+pct+'%"></b></div><div class="diagnosis-visual-shell"><div class="question-visual q'+(qi+1)+'"><div class="scene-art s'+scene+'" aria-hidden="true"></div><div class="question-visual-label">'+(a.who==='solo'?'ひとりの時間を、楽しもう。':'一緒に遊ぶ時間を、思い浮かべて。')+'</div></div><div class="question-panel"><h2 tabindex="-1">'+q[1]+'</h2><p class="small">'+(q[0]==='min_age'?'掲載版の対象年齢がこの年齢以下の作品だけを候補にします。子どもの年齢はアクセス解析に送信しません。':questionSub[qi])+'</p><div class="answers '+(q[0]==='players'||q[0]==='min_age'?'player-answers':'')+'">'+options.map(function(o){return '<button class="answer" data-v="'+o[0]+'"><strong>'+o[1]+'</strong><span class="answer-arrow" aria-hidden="true">→</span></button>'}).join('')+'</div><p class="diag-tip">直感で選んでOK。タップして次へ進みます。</p>'+(i>0?'<button class="question-back">← ひとつ前の質問へ</button>':'')+'</div></div>';
   root.querySelector('h2').focus({preventScroll:true});
-  root.querySelectorAll('.answer').forEach(function(b){b.onclick=function(){a[q[0]]=b.dataset.v;kyoTrack('diagnosis_answer',{question_id:q[0],answer_value:b.dataset.v,step:i+1});i++;render()}});
+  root.querySelectorAll('.answer').forEach(function(b){b.onclick=function(){
+    if(q[0]==='who'){
+      delete a.min_age;
+      a.who=b.dataset.v;
+      qs=baseQs.slice();
+      if(a.who==='family'||a.who==='children')qs.splice(1,0,ageQuestion);
+    }else a[q[0]]=b.dataset.v;
+    // A child's age is used only in this tab for matching. Never send it as an event.
+    if(q[0]!=='min_age')kyoTrack('diagnosis_answer',{question_id:q[0],answer_value:b.dataset.v,step:i+1});
+    i++;render();
+  }});
   var back=root.querySelector('.question-back');if(back)back.onclick=function(){i--;render()};
 }
 
