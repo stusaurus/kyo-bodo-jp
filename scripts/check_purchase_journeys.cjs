@@ -110,7 +110,7 @@ async function inspectOffer(page,gid,width,route){
           await link.click();
         }else{
           await visit(page,'diagnosis/?test=1');
-          for(const choice of ['family','4','compete','30','1','half']){
+          for(const choice of ['family','8','4','compete','30','1','half']){
             await page.locator('.answer[data-v="'+choice+'"]').click();
           }
           const cards=page.locator('.result-card');
@@ -119,7 +119,7 @@ async function inspectOffer(page,gid,width,route){
             const link=card.locator('a[data-track="game_detail_click"]');
             const id=await link.getAttribute('data-game-id');
             const g=byId.get(id);
-            assert(g&&!g.cooperative&&canPlay(g,4)&&g.play_time_max<=30,
+            assert(g&&!g.cooperative&&canPlay(g,4)&&g.play_time_max<=30&&g.age<=8,
               'competitive recommendation invalid '+id);
             const text=await card.innerText();
             assert(text.includes(String(g.age)+'歳〜'),'age missing '+id);
@@ -141,6 +141,28 @@ async function inspectOffer(page,gid,width,route){
         console.log(JSON.stringify(result));
         await page.close();
       }
+      // Children's journey: age remains a hard gate in results, with no analytics age event.
+      const kid=await context.newPage(),kidErrors=[];
+      kid.on('pageerror',e=>kidErrors.push(e.message));
+      await visit(kid,'diagnosis/?test=1');
+      for(const choice of ['children','5','2','compete','30','1','half']){
+        await kid.locator('.answer[data-v="'+choice+'"]').click();
+      }
+      const kidCards=kid.locator('.result-card');
+      assert(await kidCards.count()>0,'child age-filtered diagnosis should return games');
+      for(const card of await kidCards.all()){
+        const id=await card.locator('a[data-track="game_detail_click"]').getAttribute('data-game-id');
+        const g=byId.get(id);
+        assert(g&&g.age<=5&&canPlay(g,2)&&!g.cooperative,'underage or incompatible recommendation '+id);
+        assert((await card.innerText()).includes(g.age+'歳〜'));
+      }
+      const ageAnswers=await kid.evaluate(()=>window.dataLayer.filter(x=>x[0]==='event'&&x[1]==='diagnosis_answer'));
+      assert(ageAnswers.every(x=>x[2].question_id!=='min_age'&&x[2].answer_value!=='5'));
+      assert.equal(await kid.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),true);
+      assert.deepEqual(kidErrors,[]);
+      await kid.screenshot({path:path.join(out,'diagnosis-child-age-'+width+'.png'),fullPage:true,animations:'disabled'});
+      console.log(JSON.stringify({route:'children-age',width,ageMax:5,count:await kidCards.count(),privacy:'no age event',jsErrors:0,overflow:0}));
+      await kid.close();
       await context.close();
     }
   }finally{
