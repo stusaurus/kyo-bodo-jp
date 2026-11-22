@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def test_all_diagnosis_conditions_respect_members_time_and_cooperation():
     js=(ROOT/'assets/diagnosis.js').read_text()
-    logic=js[js.index('function score('):js.index('\nfunction rak(')]
+    logic=js[js.index('function ageFits('):js.index('\nfunction rak(')]
     program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
     let count=0;
     for(let n=2;n<=14;n++)for(let t of [15,30,60,120])for(let mood of ['laugh','compete','think','coop','relax','chat']){
@@ -24,7 +24,7 @@ def test_all_diagnosis_conditions_respect_members_time_and_cooperation():
 
 def test_relaxed_results_keep_players_and_cooperation_hard_and_fill_common_short_case():
     js=(ROOT/'assets/diagnosis.js').read_text()
-    logic=js[js.index('function score('):js.index('\nfunction rak(')]
+    logic=js[js.index('function ageFits('):js.index('\nfunction rak(')]
     program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
     a={players:'2',time:'15',mood:'coop',who:'couple',difficulty:'1',balance:'half'};
     let exact=games.map(g=>[g,score(g)]).filter(x=>x[1]>-100).sort((x,y)=>y[1]-x[1]);
@@ -44,7 +44,7 @@ def test_relaxed_results_keep_players_and_cooperation_hard_and_fill_common_short
 
 def test_competitive_group_results_exclude_cooperative_games_even_when_time_relaxed():
     js=(ROOT/'assets/diagnosis.js').read_text()
-    logic=js[js.index('function score('):js.index('\nfunction rak(')]
+    logic=js[js.index('function ageFits('):js.index('\nfunction rak(')]
     program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
     for (let n=2;n<=14;n++) for (let t of [15,30,60,120]) {
       a={players:String(n),time:String(t),mood:'compete',who:'family',difficulty:'1',balance:'half'};
