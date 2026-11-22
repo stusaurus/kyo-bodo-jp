@@ -63,7 +63,7 @@ def test_all_88_game_detail_and_card_outbound_offers_match_the_same_source():
 
 def test_all_88_games_respect_competitive_and_cooperative_choice_for_every_group():
     js = (ROOT / "assets" / "diagnosis.js").read_text(encoding="utf-8")
-    logic = js[js.index("function score("):js.index("\nfunction rak(")]
+    logic = js[js.index("function ageFits("):js.index("\nfunction rak(")]
     program = (
         "var games=" + json.dumps(site.GAMES, ensure_ascii=False) +
         ";var a={};function label(k,v){return v};" + logic + r"""
