@@ -63,7 +63,7 @@ def test_competitive_group_results_exclude_cooperative_games_even_when_time_rela
 
 def test_youngest_player_age_is_hard_condition_in_exact_and_relaxed_results():
     js=(ROOT/'assets/diagnosis.js').read_text()
-    logic=js[js.index('function ageFits('):js.index('\\nfunction rak(')]
+    logic=js[js.index('function ageFits('):js.index('function rak(')]
     program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
     for(const who of ['family','children'])for(let age=4;age<=14;age++)for(const n of [2,4,6]){
       a={who,players:String(n),min_age:String(age),time:'15',mood:'compete',difficulty:'1',balance:'half'};
