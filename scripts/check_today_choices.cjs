@@ -114,7 +114,7 @@ function server(root,port){
       assert.equal(await todaySearch.getAttribute('data-affiliate'),null);
       assert.equal(await todaySearch.getAttribute('rel'),'noopener');
       await page.goto('http://127.0.0.1:8788/kyo-bodo-jp/diagnosis/?test=1',{waitUntil:'domcontentloaded'});
-      for(const answer of ['family','2','think','120','3','skill']){
+      for(const answer of ['family','skip','2','think','120','3','skill']){
         await page.locator('.answer[data-v="'+answer+'"]').click();
       }
       const diagnosisSearch=page.locator('.result-card a[data-track="rakuten_search_click"]');
