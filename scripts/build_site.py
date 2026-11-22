@@ -782,6 +782,10 @@ def scene_page(s):
         choice_link += (f'<p class="small"><a class="text-link" href="{u("scenes/couple/")}">'
                         '夫婦・カップルなら会話・協力・対戦から選ぶ →</a></p>')
 
+    if s["scene_id"] == "friends":
+        choice_link += (f'<p><a class="text-link" href="{u("guides/three-player/")}">'
+                        '3人で遊べる作品を時間・協力型で比較 →</a></p>')
+
     if s["scene_id"] in ("children", "family"):
         choice_link += (f'<p class="small"><a class="text-link" '
                         f'href="{u("guides/gift-board-games/")}">'
@@ -800,6 +804,67 @@ def scene_page(s):
     }
     title,desc=seo.get(s["scene_id"],(s["title"]+"ボードゲーム",s["intro"]))
     return shell(title,desc,body,"scenes/"+s["scene_id"]+"/",'<script type="application/ld+json">'+schema+'</script>')
+
+
+def three_player_guide():
+    """Search landing page for exactly three participants, not a popularity ranking."""
+    matching = [g for g in GAMES if supports_players(g, 3)]
+    if not matching:
+        raise ValueError("No catalog games support three players")
+    def table(title, games, anchor):
+        rows = []
+        for g in games:
+            if not supports_players(g, 3):
+                raise ValueError("Three-player guide includes unsupported game")
+            source = (f'<a href="{e(g["specs_source"])}" rel="noopener noreferrer" target="_blank">人数・時間の出典</a>'
+                      if g.get("specs_source") else "販売版の仕様を要確認")
+            rows.append(
+                f'<tr><th scope="row"><a href="{u("games/"+g["game_id"]+"/")}">{e(g["title"])}</a></th>'
+                f'<td>{e(player_label(g))}</td><td>{format_play_time(g)}</td>'
+                f'<td>{g["age"]}歳〜</td><td>{"協力" if g["cooperative"] else "対戦・その他"}</td>'
+                f'<td>{source}</td></tr>'
+            )
+        if not rows:
+            return ""
+        return (f'<section class="section" id="{anchor}"><h2>{e(title)}（{len(rows)}本）</h2>'
+                '<div class="scene-table-scroll" role="region" tabindex="0" aria-label="3人向け比較表。横にスクロールできます">'
+                '<table class="scene-data-table"><thead><tr><th>作品</th><th>対応人数</th>'
+                '<th>時間</th><th>対象年齢</th><th>遊び方</th><th>出典</th></tr></thead><tbody>'
+                + ''.join(rows) + '</tbody></table></div></section>')
+    quick = [g for g in matching if g["play_time_max"] <= 20]
+    coop = [g for g in matching if g["cooperative"] and g not in quick]
+    other = [g for g in matching if g not in quick and g not in coop]
+    body = (
+        f'<section class="page-hero"><div class="breadcrumb"><a href="{u()}">ホーム</a> / '
+        f'<a href="{u("scenes/friends/")}">友達で遊ぶ</a> / 3人</div>'
+        '<div class="eyebrow">THREE PLAYERS</div><h1>3人で遊べるボードゲームを比較</h1>'
+        f'<p>3人で集まったときに遊べる作品を、掲載人数が3人に対応する{len(matching)}本から比較。'
+        '20分以内の短時間、協力型、その他の作品に分けて、対象年齢・時間・遊び方を確認できます。</p>'
+        '<p class="small">3人で遊べるという対応人数は、3人が最適という評価ではありません。'
+        '人気順位・実遊レビューではなく、登録された版の仕様による分類です。</p>'
+        f'<nav aria-label="3人向け作品の分類"><a href="#three-short">20分以内（{len(quick)}本）</a>　'
+        f'<a href="#three-coop">協力型・21分以上（{len(coop)}本）</a>　'
+        f'<a href="#three-other">その他・21分以上（{len(other)}本）</a></nav></section>'
+        + table("20分以内で遊べる3人対応作品", quick, "three-short")
+        + table("3人で協力する21分以上の作品", coop, "three-coop")
+        + table("3人対応・21分以上のその他の作品", other, "three-other")
+        + f'<section class="section"><h2>3人で選ぶときの注意点</h2>'
+        '<p>2人専用ゲームは3人では遊べません。また、対応人数が3人を含んでいても、'
+        '3人向けの追加ルールや人数別の準備が必要な場合があります。'
+        '購入前に販売版の説明書と人数表記を確認してください。</p>'
+        '<p>プレイ時間は掲載値で、説明・準備・片付けを含むとは限りません。'
+        '商品の価格・在庫・販売版はリンク先で再確認してください。</p>'
+        f'<p><a class="text-link" href="{u("scenes/friends/")}">友達向け全体から探す →</a> '
+        f'<a class="text-link" href="{u("diagnosis/")}">条件を入力して診断する →</a></p></section>'
+    )
+    schema = json.dumps({"@context":"https://schema.org","@type":"ItemList",
+                         "name":"3人で遊べるボードゲームの比較",
+                         "itemListElement":[{"@type":"ListItem","position":i+1,
+                         "url":canon("games/"+g["game_id"]+"/"),"name":g["title"]}
+                         for i,g in enumerate(matching)]},ensure_ascii=False)
+    return shell("3人で遊べるボードゲーム比較｜20分以内・協力型・人数から選ぶ",
+                 "3人で遊べるボードゲームを掲載版の人数・時間・対象年齢で比較。20分以内、協力型、その他に分類し、出典を確認して選べます。",
+                 body,"guides/three-player/",'<script type="application/ld+json">'+schema+'</script>')
 
 
 def two_player_cooperative_guide():
@@ -953,10 +1018,11 @@ def main():
     write("index.html",home());write("diagnosis/index.html",diagnosis());write("games/index.html",games_index());write("scenes/index.html",scenes_index())
     for g in GAMES: write("games/"+g["game_id"]+"/index.html",game_page(g))
     for s in SCENES: write("scenes/"+s["scene_id"]+"/index.html",scene_page(s))
+    write("guides/three-player/index.html",three_player_guide())
     write("guides/two-player-cooperative/index.html",two_player_cooperative_guide())
     write("guides/gift-board-games/index.html",render_gift_guide(
         BY_ID, supports_players, card, shell, e, u, canon, player_label, format_play_time))
-    paths=["", "diagnosis/","games/","scenes/","guides/two-player-cooperative/","guides/gift-board-games/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
+    paths=["", "diagnosis/","games/","scenes/","guides/two-player-cooperative/","guides/three-player/","guides/gift-board-games/"]+["games/"+g["game_id"]+"/" for g in GAMES]+["scenes/"+s["scene_id"]+"/" for s in SCENES]
     xml='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join("<url><loc>"+e(canon(p))+"</loc></url>" for p in paths)+"</urlset>"
     write("sitemap.xml",xml);write("robots.txt","User-agent: *\nAllow: /\nSitemap: "+canon("sitemap.xml")+"\n")
     write("404.html",shell("ページが見つかりません","ページが見つかりません。",'<section class="page-hero"><h1>ページが見つかりません</h1><a class="btn primary" href="'+u()+'">トップへ</a></section>',extra='<meta name="robots" content="noindex">'))
