@@ -59,3 +59,34 @@ def test_competitive_group_results_exclude_cooperative_games_even_when_time_rela
     '''
     result=subprocess.run(['node','-e',program],capture_output=True,text=True)
     assert result.returncode==0,result.stderr
+
+
+def test_youngest_player_age_is_hard_condition_in_exact_and_relaxed_results():
+    js=(ROOT/'assets/diagnosis.js').read_text()
+    logic=js[js.index('function ageFits('):js.index('\\nfunction rak(')]
+    program='var games='+json.dumps(GAMES,ensure_ascii=False)+';var a={};function label(k,v){return v};'+logic+'''
+    for(const who of ['family','children'])for(let age=4;age<=14;age++)for(const n of [2,4,6]){
+      a={who,players:String(n),min_age:String(age),time:'15',mood:'compete',difficulty:'1',balance:'half'};
+      for(const g of games)if(score(g)>-100||relaxedScore(g)>-100){
+        if(g.age>age||!supportsPlayers(g,n)||g.cooperative)throw Error('underage/mismatch '+g.game_id);
+      }
+    }
+    a={who:'children',players:'2',min_age:'5',time:'30',mood:'compete',difficulty:'1',balance:'half'};
+    if(score(games.find(g=>g.game_id==='testplay-no'))>-100)throw Error('13+ recommended to five-year-old');
+    if(score(games.find(g=>g.game_id==='gobblet-gobblers'))<=-100)throw Error('age eligible game rejected');
+    a.min_age='skip';
+    if(!ageFits(games.find(g=>g.game_id==='testplay-no')))throw Error('adult-only option broken');
+    console.log('age hard gate verified');
+    '''
+    result=subprocess.run(['node','-e',program],capture_output=True,text=True)
+    assert result.returncode==0,result.stderr
+
+
+def test_child_age_question_is_conditional_and_not_sent_to_analytics():
+    js=(ROOT/'assets/diagnosis.js').read_text()
+    assert "a.who==='family'||a.who==='children'" in js
+    assert "q[0]!=='min_age'" in js
+    assert "delete a.min_age" in js
+    assert "||!ageFits(g)" in js
+    assert "掲載版の対象年齢" in js
+    assert "年齢の条件は緩めず" in js
