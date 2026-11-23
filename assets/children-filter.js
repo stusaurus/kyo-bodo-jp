@@ -10,6 +10,7 @@
   var count=document.getElementById('children-choice-count');
   var empty=document.getElementById('children-choice-empty');
   var reset=document.getElementById('children-choice-reset');
+  var nineQuick=document.getElementById('children-nine-quick');
   var ages=document.getElementById('children-age');
   var players=document.getElementById('children-players');
   var times=document.getElementById('children-time');
@@ -45,6 +46,16 @@
     }
   }
   form.hidden=false;
+  if(nineQuick){
+    nineQuick.hidden=false;
+    nineQuick.addEventListener('click',function(){
+      ages.value='9';
+      players.value='2';
+      times.value='30';
+      track('nine_year_quick',render());
+      ages.focus();
+    });
+  }
   render();
   form.addEventListener('submit',function(event){event.preventDefault()});
   [ages,players,times].forEach(function(input){

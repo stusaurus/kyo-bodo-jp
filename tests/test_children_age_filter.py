@@ -119,3 +119,20 @@ def test_only_children_scene_changes_and_schema_remains_true():
         other = m.scene_page(next(s for s in m.SCENES if s["scene_id"] == sid))
         assert 'id="children-age-compare"' not in other
         assert "children-filter.js" not in other
+
+def test_nine_year_quick_filter_uses_existing_controls_without_child_age_telemetry():
+    from pathlib import Path
+    html = m.children_age_filter()
+    js = Path("assets/children-filter.js").read_text(encoding="utf-8")
+    assert html.count('id="children-nine-quick" hidden') == 1
+    assert "9歳・2人・30分以内の候補を表示" in html
+    assert "nineQuick.hidden=false" in js
+    for assignment in ("ages.value='9'", "players.value='2'", "times.value='30'"):
+        assert assignment in js
+    assert "track('nine_year_quick',render())" in js
+    assert "child_age:" not in js and "age:ages.value" not in js
+    matching = [g for g in eligible() if g["age"] <= 9
+                and m.supports_players(g, 2) and g["play_time_max"] <= 30]
+    assert matching
+    assert 'id="children-choice-reset"' in html
+    assert "ages.value='6'" in js and "players.value='2'" in js
