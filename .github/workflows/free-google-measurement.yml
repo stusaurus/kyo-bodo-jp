@@ -71,6 +71,23 @@ jobs:
         run: |
           python analytics/read_only_report.py
           cat audit-results/free-google/report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Require actual official API results (not a green missing-data report)
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("audit-results/free-google/report.json").read_text(encoding="utf-8"))
+          allowed = {"OBSERVED_ROWS", "NO_OBSERVED_ROWS"}
+          failures = [(source, report.get(source, {}).get("status", "MISSING"),
+                       report.get(source, {}).get("reason", ""))
+                      for source in ("ga4", "gsc")
+                      if report.get(source, {}).get("status") not in allowed]
+          if failures:
+              for source, status, reason in failures:
+                  print(f"::error title={source.upper()} official API unavailable::{status}: {reason}. Check GitHub Variables KYO_GCP_WIF_PROVIDER / KYO_GCP_SERVICE_ACCOUNT and Google read-only permissions.")
+              raise SystemExit(1)
+          print("OFFICIAL_GOOGLE_DATA_OK: both sources responded; missing rows remain unknown, not zero.")
+          PY
       - name: Save read-only status and aggregate source evidence
         if: always()
         uses: actions/upload-artifact@v4
