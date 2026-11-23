@@ -85,6 +85,40 @@ def parse_gsc(site_payload, page_payload, window):
                       "Three-day final-data lag; newly published pages may not be covered."]}
 
 
+
+def parse_gsc_queries(payload, window):
+    """Report disclosed query rows only; GSC anonymization is not zero demand."""
+    rows = payload.get("rows", [])
+    if not isinstance(rows, list):
+        return {"status": "UNAVAILABLE", "reason": "MALFORMED_QUERY_ROWS",
+                "rows": None}
+    selected = []
+    for item in rows:
+        keys = item.get("keys", [])
+        if not isinstance(keys, list) or len(keys) != 2:
+            return {"status": "UNAVAILABLE", "reason": "MALFORMED_QUERY_KEYS",
+                    "rows": None}
+        page, query = keys
+        if not isinstance(page, str) or not isinstance(query, str):
+            return {"status": "UNAVAILABLE", "reason": "MALFORMED_QUERY_KEYS",
+                    "rows": None}
+        if page not in (SITE + "scenes/children/", SITE + "scenes/two-player/"):
+            continue
+        value = metrics(item)
+        if value is None:
+            return {"status": "UNAVAILABLE", "reason": "MALFORMED_QUERY_METRICS",
+                    "rows": None}
+        selected.append({"page": page[len(SITE):], "query": query,
+                         **value})
+    return {"status": "OBSERVED_ROWS" if selected else "NO_OBSERVED_ROWS",
+            "rows": selected[:30],
+            "returned_rows": len(rows),
+            "window": [d.isoformat() for d in window],
+            "notes": ["GSC may anonymize low-volume queries.",
+                      "No disclosed query row does not mean zero searches.",
+                      "Only two site-owned search landing pages are included."]}
+
+
 def ga4_quality(response):
     meta = response.get("metadata") or {}
     if meta.get("subjectToThresholding") or meta.get("dataLossFromOtherRow"):
@@ -179,7 +213,13 @@ def fetch_gsc(session, today):
         return safe_json(session.post(endpoint, json=payload, timeout=45), "GSC_QUERY")
     site = query(base)
     pages = query({**base, "dimensions": ["page"], "rowLimit": 25000})
-    return parse_gsc(site, pages, (start, end))
+    result = parse_gsc(site, pages, (start, end))
+    try:
+        disclosed = query({**base, "dimensions": ["page", "query"], "rowLimit": 25000})
+        result["search_queries"] = parse_gsc_queries(disclosed, (start, end))
+    except Exception:
+        result["search_queries"] = {"status": "UNAVAILABLE", "reason": "QUERY_API_FAILED", "rows": None}
+    return result
 
 
 def fetch_ga4(session, today):
@@ -247,6 +287,17 @@ def to_markdown(report):
                   "- 全体：" + str(b["site_metrics"] or "不明"), ""]
         for p, m in b["pages"].items():
             lines.append("- " + (p or "トップ") + "：" + (str(m) if m else "不明"))
+    if "search_queries" in b:
+        q = b["search_queries"]
+        lines += ["", "### GSC 検索クエリ（公開可能な行のみ）",
+                  "- 状態：" + q["status"],
+                  "- 少数検索語はGoogle側で匿名化されるため、行がない場合も検索需要0とは判断しません。"]
+        if q.get("rows"):
+            for item in q["rows"]:
+                lines.append("- " + item["page"] + " ／ " + item["query"] +
+                             "：表示 " + str(item["impressions"]) +
+                             "、クリック " + str(item["clicks"]) +
+                             "、平均順位 " + str(item["average_position"]))
     if "event_counts" in a:
         lines += ["", "### GA4（noteギフトキャンペーン）",
                   "- 期間：" + " ～ ".join(a["window"]),
