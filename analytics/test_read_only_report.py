@@ -69,6 +69,22 @@ class FreeOfficialMeasurementTests(TestCase):
         self.assertIsNone(m.metrics({"clicks": "x", "impressions": 2,
                                      "ctr": 0.0, "position": 1.5}))
 
+    def test_gsc_query_rows_are_site_scoped_and_missing_is_unknown(self):
+        window = (dt.date(2026, 10, 24), dt.date(2026, 11, 20))
+        valid = {"keys": [m.SITE + "scenes/children/", "小学生 ボードゲーム"],
+                 "clicks": 0, "impressions": 5, "ctr": 0.0, "position": 47.8}
+        other = {"keys": ["https://other.example/scenes/children/", "test"],
+                 "clicks": 2, "impressions": 100, "ctr": 0.02, "position": 1}
+        result = m.parse_gsc_queries({"rows": [valid, other]}, window)
+        self.assertEqual(result["status"], "OBSERVED_ROWS")
+        self.assertEqual(len(result["rows"]), 1)
+        self.assertEqual(result["rows"][0]["query"], "小学生 ボードゲーム")
+        empty = m.parse_gsc_queries({}, window)
+        self.assertEqual(empty["status"], "NO_OBSERVED_ROWS")
+        self.assertEqual(empty["rows"], [])
+        self.assertEqual(m.parse_gsc_queries({"rows": None}, window)["status"],
+                         "UNAVAILABLE")
+
     def test_ga4_registered_operator_dimension_is_provisional(self):
         dims0 = ["20261120", "note_campaign_landing", m.CAMPAIGN,
                  "note / referral", "/kyo-bodo-jp/guides/gift-board-games/", "0"]
