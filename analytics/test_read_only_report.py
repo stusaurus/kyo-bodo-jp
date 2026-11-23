@@ -85,6 +85,22 @@ class FreeOfficialMeasurementTests(TestCase):
         self.assertEqual(m.parse_gsc_queries({"rows": None}, window)["status"],
                          "UNAVAILABLE")
 
+    def test_organic_funnel_is_site_scoped_and_unknown_not_zero(self):
+        window = (dt.date(2026, 11, 16), dt.date(2026, 11, 22))
+        event = row(["Organic Search", "affiliate_click", "/kyo-bodo-jp/games/scout/"], [2])
+        visits = row(["Organic Search"], [4])
+        result = m.parse_organic({"rows": [event]}, {"rows": [visits]}, window)
+        self.assertEqual(result["status"], "OBSERVED_ROWS")
+        self.assertEqual(result["event_counts"]["affiliate_click"], 2)
+        self.assertIsNone(result["event_counts"]["game_detail_click"])
+        self.assertEqual(result["sessions_including_tests"], 4)
+        empty = m.parse_organic({}, {}, window)
+        self.assertEqual(empty["status"], "NO_OBSERVED_ROWS")
+        self.assertIsNone(empty["sessions_including_tests"])
+        foreign = row(["Organic Search", "affiliate_click", "/daily-cost-jp/"], [20])
+        self.assertEqual(m.parse_organic({"rows": [foreign]}, {}, window)["status"],
+                         "QUALITY_RESTRICTED")
+
     def test_ga4_registered_operator_dimension_is_provisional(self):
         dims0 = ["20261120", "note_campaign_landing", m.CAMPAIGN,
                  "note / referral", "/kyo-bodo-jp/guides/gift-board-games/", "0"]
