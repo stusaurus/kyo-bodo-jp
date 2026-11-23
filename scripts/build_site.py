@@ -621,7 +621,7 @@ def children_age_filter():
 <p class="small">たとえば「9歳から」の作品には{nine_examples}があります。両作品を含め、
 実際に一緒に遊ぶ人数や制限時間で候補が変わります。表示しているのは製品の対象年齢で、
 小学校の学年や9歳の子に必ず合うという保証ではありません。</p>
-<form id="children-choice-form" aria-label="親子向けボードゲームの絞り込み" hidden>
+<p><button type="button" id="children-nine-quick" hidden>9歳・2人・30分以内の候補を表示</button></p>\n<form id="children-choice-form" aria-label="親子向けボードゲームの絞り込み" hidden>
 <label for="children-age">最年少の子どもの年齢<select id="children-age" name="age">{ages}</select></label>
 <label for="children-players">実際に遊ぶ人数（大人も含む）<select id="children-players" name="players">{players}</select></label>
 <label for="children-time">遊べる時間の上限<select id="children-time" name="minutes">{times}</select></label>
