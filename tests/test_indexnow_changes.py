@@ -35,12 +35,14 @@ def test_initial_baseline_compares_live_content():
         return b"unchanged"
     current = {a:m.digest(b"unchanged"),c:m.digest(b"new")}
     with patch.object(m,"read_public",side_effect=read):
-        assert m.changes(m.previous_manifest(current),current) == [b,c]
+        previous, pending = m.previous_manifest(current)
+        assert pending == []
+        assert m.changes(previous,current) == [b,c]
 
 def test_notify_no_changes_makes_no_submission(tmp_path):
     plan = tmp_path/"plan.json"
     plan.write_text(json.dumps({"manifest_sha256":m.digest(b"manifest"),"urls":[]}))
-    with patch.object(m,"PLAN",plan), patch.object(m,"read_public",return_value=b"manifest"), patch.object(m,"urlopen") as send:
+    with patch.object(m,"PLAN",plan), patch.object(m,"RECEIPT",tmp_path/"receipt"), patch.object(m,"read_public",return_value=b"manifest"), patch.object(m,"urlopen") as send:
         m.notify()
         send.assert_not_called()
 
@@ -51,3 +53,34 @@ def test_notify_mismatched_deployment_is_rejected(tmp_path):
         with pytest.raises(RuntimeError):
             m.notify()
         send.assert_not_called()
+
+
+def test_pending_urls_survive_missing_receipt(tmp_path):
+    a,b = m.BASE+"a/",m.BASE+"b/"
+    current = {a:m.digest(b"new")}
+    public = json.dumps({"pages":current,"pending":[a,b]}).encode()
+    receipt = tmp_path/"receipt"
+    with patch.object(m,"RECEIPT",receipt), patch.object(m,"read_public",return_value=public):
+        previous,pending = m.previous_manifest(current)
+        assert previous == current
+        assert pending == [a,b]
+        receipt.write_text("stale")
+        assert m.previous_manifest(current)[1] == [a,b]
+        receipt.write_text(m.digest(public)+"\n")
+        assert m.previous_manifest(current)[1] == []
+
+
+def test_successful_notify_records_receipt_only_after_acceptance(tmp_path):
+    plan = tmp_path/"plan.json"
+    receipt = tmp_path/"receipt"
+    manifest = b"published manifest"
+    plan.write_text(json.dumps({"manifest_sha256":m.digest(manifest),"urls":[m.BASE]}))
+    with patch.object(m,"PLAN",plan), patch.object(m,"RECEIPT",receipt), patch.object(m,"read_public",side_effect=[manifest,b"testkey"]), patch.dict("os.environ",{"INDEXNOW_KEY":"testkey"}), patch.object(m,"urlopen") as send:
+        send.return_value.__enter__.return_value.status = 500
+        with pytest.raises(RuntimeError):
+            m.notify()
+        assert not receipt.exists()
+    with patch.object(m,"PLAN",plan), patch.object(m,"RECEIPT",receipt), patch.object(m,"read_public",side_effect=[manifest,b"testkey"]), patch.dict("os.environ",{"INDEXNOW_KEY":"testkey"}), patch.object(m,"urlopen") as send:
+        send.return_value.__enter__.return_value.status = 200
+        m.notify()
+        assert receipt.read_text().strip() == m.digest(manifest)
