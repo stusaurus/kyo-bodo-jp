@@ -278,6 +278,36 @@ function serve(root,port){return new Promise(resolve=>{
    assert.equal(familyErrors.length,0,familyErrors.join(','));
    records.push({label:'family-four-player',width,gameCount:familyIds.size,errors:familyErrors});
    await family.close();
+   const groupPage=await context.newPage();const groupErrors=[];
+   groupPage.on('pageerror',error=>groupErrors.push(error.message));
+   assert.equal((await groupPage.goto('http://127.0.0.1:8766/kyo-bodo-jp/scenes/large-group/?test=1',{waitUntil:'domcontentloaded'})).status(),200);
+   await groupPage.locator('.scene-hero-copy a[href="#group-size-comparison"]').click();
+   assert.equal(await groupPage.evaluate(()=>location.hash),'#group-size-comparison');
+   const groupSection=groupPage.locator('#group-size-comparison');
+   assert.equal(await groupSection.locator('details').count(),5);
+   const checkedLinks=new Set();
+   for(const n of [4,5,6,7,8]){
+     const panel=groupSection.locator('details[data-group-size="'+n+'"]');
+     await panel.locator('summary').click();
+     const rows=panel.locator('[data-group-game]:visible');
+     const count=Number((await panel.locator('summary').innerText()).match(/（(\d+)本）/)[1]);
+     assert.equal(await rows.count(),count);
+     const ids=await rows.evaluateAll(els=>els.map(el=>el.dataset.groupGame));
+     assert.equal(new Set(ids).size,ids.length);assert(!ids.includes('gobblet-gobblers'));
+     if(n===8)assert(!ids.includes('just-one'));
+     for(const href of await rows.locator('a').evaluateAll(els=>els.map(a=>a.getAttribute('href')))){
+       assert(href.startsWith('/kyo-bodo-jp/games/'));
+       if(!checkedLinks.has(href)){assert.equal((await groupPage.request.get('http://127.0.0.1:8766'+href)).status(),200);checkedLinks.add(href);}
+     }
+     assert(await groupPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'group comparison overflow');
+     if(n!==8)await panel.locator('summary').click();
+   }
+   await groupSection.screenshot({path:path.join(out,'group-size-'+width+'.png'),animations:'disabled'});
+   const groupLink=groupSection.locator('details[data-group-size="8"] a[data-game-id]').first();
+   const groupHref=await groupLink.getAttribute('href');await groupLink.click();
+   assert.equal(await groupPage.evaluate(()=>location.pathname),groupHref);
+   assert.equal(groupErrors.length,0,groupErrors.join(','));
+   await groupPage.close();
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
