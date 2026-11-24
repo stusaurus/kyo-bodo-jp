@@ -311,6 +311,48 @@ def parse_organic(events_response, visits_response, window):
             "note": "Event counts are not distinct users, purchases, or confirmed commissions."}
 
 
+
+def parse_organic_breakdown(response, dimension):
+    import re
+    reason = ga4_quality(response)
+    if reason:
+        return unavailable("GA4 organic breakdown", reason, "QUALITY_RESTRICTED")
+    counts = {}
+    known_sources = {"google", "bing", "yahoo", "duckduckgo", "baidu", "yandex",
+                     "ecosia", "brave", "naver", "aol", "ask"}
+    for row in response.get("rows", []):
+        try:
+            values = row["dimensionValues"]
+            if len(values) != 1 or len(row["metricValues"]) != 1:
+                raise ValueError("invalid dimensions")
+            value = values[0]["value"]
+            count = int(row["metricValues"][0]["value"])
+            if count < 0 or not isinstance(value, str):
+                raise ValueError("invalid value")
+            if dimension == "sessionSource":
+                label = value.lower()
+                if label not in known_sources:
+                    label = "(unknown source)" if label in ("(not set)", "") else "(other source)"
+            elif dimension == "landingPage":
+                if value in ("", "(not set)"):
+                    label = "(unknown landing page)"
+                elif not value.startswith("/kyo-bodo-jp/"):
+                    return unavailable("GA4 organic breakdown", "UNEXPECTED_LANDING_SCOPE",
+                                       "QUALITY_RESTRICTED")
+                elif re.fullmatch(r"/kyo-bodo-jp/(?:[a-z0-9-]+/)*(?:index\.html)?", value):
+                    label = value
+                else:
+                    label = "(other site path)"
+            else:
+                raise ValueError("unexpected dimension")
+            counts[label] = counts.get(label, 0) + count
+        except (KeyError, TypeError, ValueError, IndexError):
+            return unavailable("GA4 organic breakdown", "MALFORMED_BREAKDOWN", "QUALITY_RESTRICTED")
+    return {"status": "OBSERVED_ROWS" if counts else "NO_OBSERVED_ROWS",
+            "rows": [{"label": k, "sessions_including_tests": v}
+                     for k, v in sorted(counts.items(), key=lambda x: (-x[1], x[0]))]}
+
+
 def fetch_organic(session, today):
     """GA4 organic-search funnel for this host only; never mix note campaigns."""
     window = (today - dt.timedelta(days=8), today - dt.timedelta(days=2))
@@ -342,7 +384,18 @@ def fetch_organic(session, today):
                            "values": ["game_detail_click", "affiliate_click",
                                       "rakuten_search_click"], "caseSensitive": True}}}])
     visits = query(["sessionDefaultChannelGroup"], "sessions", [channel, host, site_path])
-    return parse_organic(events, visits, window)
+    result = parse_organic(events, visits, window)
+    if result['status'] not in ('OBSERVED_ROWS', 'NO_OBSERVED_ROWS'):
+        return result
+    for field, dimension in (('sources', 'sessionSource'), ('landing_pages', 'landingPage')):
+        if dimension not in dimensions:
+            result[field] = unavailable('GA4 organic breakdown', 'DIMENSION_UNAVAILABLE', 'DATA_LIMITED')
+            continue
+        try:
+            result[field] = parse_organic_breakdown(query([dimension], 'sessions', [channel, host, site_path]), dimension)
+        except Exception:
+            result[field] = unavailable('GA4 organic breakdown', 'BREAKDOWN_QUERY_FAILED')
+    return result
 
 
 def to_markdown(report):
@@ -387,6 +440,12 @@ def to_markdown(report):
             for name, count in organic["event_counts"].items():
                 lines.append("- " + name + "：" + str(count if count is not None else "不明"))
             lines.append("- イベント回数は購入者数・確定報酬ではありません。")
+            for field, label in (("sources", "検索参照元別"), ("landing_pages", "入口ページ別")):
+                detail = organic.get(field, {})
+                lines += ["", "#### " + label, "- 状態：" + detail.get("status", "不明")]
+                for item in detail.get("rows", []):
+                    lines.append("- " + item["label"] + "：" + str(item["sessions_including_tests"]) + " セッション")
+            lines.append("- 参照元はGA4の帰属情報で、実訪問者やGSCクリックの証明ではありません。")
     return "\n".join(lines) + "\n"
 
 
