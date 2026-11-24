@@ -334,12 +334,14 @@ def fetch_organic(session, today):
                   "limit": 10000}, timeout=45), "GA4_ORGANIC_QUERY")
     channel = exact("sessionDefaultChannelGroup", "Organic Search")
     host = exact("hostName", "stusaurus.github.io")
+    site_path = {"filter": {"fieldName": "pagePath", "stringFilter": {
+        "matchType": "BEGINS_WITH", "value": "/kyo-bodo-jp/"}}}
     events = query(["sessionDefaultChannelGroup", "eventName", "pagePath"],
-                   "eventCount", [channel, host, {"filter": {
+                   "eventCount", [channel, host, site_path, {"filter": {
                        "fieldName": "eventName", "inListFilter": {
                            "values": ["game_detail_click", "affiliate_click",
                                       "rakuten_search_click"], "caseSensitive": True}}}])
-    visits = query(["sessionDefaultChannelGroup"], "sessions", [channel, host])
+    visits = query(["sessionDefaultChannelGroup"], "sessions", [channel, host, site_path])
     return parse_organic(events, visits, window)
 
 
