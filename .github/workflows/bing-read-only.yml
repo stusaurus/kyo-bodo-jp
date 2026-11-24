@@ -6,6 +6,9 @@ on:
       - 'analytics/test_bing_read_only.py'
       - '.github/workflows/bing-read-only.yml'
   workflow_dispatch:
+  schedule:
+    # 09:17 JST daily, off the top of the hour.
+    - cron: '17 0 * * *'
 permissions:
   contents: read
 jobs:
@@ -21,7 +24,7 @@ jobs:
       - run: python -m unittest discover -s analytics -p 'test_bing_read_only.py' -v
   official:
     needs: tests
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
