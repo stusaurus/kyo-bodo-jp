@@ -12,6 +12,7 @@ BASE = "https://stusaurus.github.io/kyo-bodo-jp/"
 HOST = "stusaurus.github.io"
 MANIFEST = "indexnow-content-manifest.json"
 PLAN = Path("indexnow-plan.json")
+RECEIPT = Path("indexnow-receipt.txt")
 NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
 
 def digest(data):
@@ -59,7 +60,16 @@ def read_public(url):
 
 def previous_manifest(current):
     try:
-        previous = json.loads(read_public(BASE + MANIFEST))
+        raw = read_public(BASE + MANIFEST)
+        payload = json.loads(raw)
+        previous = payload["pages"]
+        pending = payload["pending"]
+        if not isinstance(pending, list) or len(pending) != len(set(pending)):
+            raise ValueError("invalid pending URLs")
+        for url in pending:
+            validate_url(url)
+        acknowledged = RECEIPT.exists() and RECEIPT.read_text().strip() == digest(raw)
+        pending = [] if acknowledged else pending
     except HTTPError as exc:
         if exc.code != 404:
             raise
@@ -70,22 +80,22 @@ def previous_manifest(current):
         common = [url for url in urls if url in current]
         with ThreadPoolExecutor(max_workers=4) as pool:
             previous.update(zip(common, pool.map(lambda u: digest(read_public(u)), common)))
-        return previous
+        return previous, []
     if not isinstance(previous, dict) or not previous:
         raise ValueError("invalid previous manifest")
     for url, checksum in previous.items():
         validate_url(url)
         if not isinstance(checksum, str) or len(checksum) != 64 or any(c not in "0123456789abcdef" for c in checksum):
             raise ValueError("invalid checksum")
-    return previous
+    return previous, pending
 
 def prepare():
     site = Path("site")
     current = manifest_for(site)
-    previous = previous_manifest(current)
-    manifest_bytes = (json.dumps(current, sort_keys=True) + "\n").encode()
+    previous, pending = previous_manifest(current)
+    urls = sorted(set(changes(previous, current)) | set(pending))
+    manifest_bytes = (json.dumps({"pages": current, "pending": urls}, sort_keys=True) + "\n").encode()
     (site / MANIFEST).write_bytes(manifest_bytes)
-    urls = changes(previous, current)
     PLAN.write_text(json.dumps({"manifest_sha256": digest(manifest_bytes),
                                 "urls": urls}, indent=2), encoding="utf-8")
     print("IndexNow plan:", len(urls), "changed/added/deleted URLs;", len(current), "current pages")
@@ -101,6 +111,7 @@ def notify():
         validate_url(url)
     if not urls:
         print("IndexNow: no changed URLs; notification skipped")
+        RECEIPT.write_text(plan["manifest_sha256"] + "\n")
         return
     key = os.environ["INDEXNOW_KEY"]
     key_url = BASE + key + ".txt"
@@ -116,6 +127,7 @@ def notify():
             if response.status not in (200, 202):
                 raise RuntimeError("unexpected IndexNow response")
             print("IndexNow", response.status, "changed URLs", len(batch))
+    RECEIPT.write_text(plan["manifest_sha256"] + "\n")
 
 if __name__ == "__main__":
     import sys
