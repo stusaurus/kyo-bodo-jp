@@ -136,3 +136,31 @@ def test_nine_year_quick_filter_uses_existing_controls_without_child_age_telemet
     assert matching
     assert 'id="children-choice-reset"' in html
     assert "ages.value='6'" in js and "players.value='2'" in js
+
+
+def test_four_player_family_comparison_uses_exact_catalog_constraints():
+    html = m.family_four_player_choices()
+    expected = [g for g in m.GAMES if m.supports_players(g, 4)
+                and g["play_time_max"] <= 30 and g["age"] <= 12]
+    actual = re.findall(r'data-family-game="([^"]+)"', html)
+    assert expected
+    assert len(actual) == len(set(actual)) == len(expected)
+    assert set(actual) == {g["game_id"] for g in expected}
+    assert "gobblet-gobblers" not in actual
+    for low, high in ((0, 5), (6, 7), (8, 9), (10, 12)):
+        group = [g["game_id"] for g in expected if low <= g["age"] <= high]
+        if group:
+            assert any(re.findall(r'data-family-game="([^"]+)"', block) == group
+                       for block in html.split("</details>"))
+    for g in expected:
+        assert f'href="{m.u("games/" + g["game_id"] + "/")}"' in html
+        assert f'対象{g["age"]}歳〜' in html
+    assert 'data-source="family_four_player"' in html
+    assert "人気順・実遊評価ではありません" in html
+    assert "<details open>" in html
+    for scene in m.SCENES:
+        page = m.scene_page(scene)
+        assert ('id="family-four-player"' in page) == (scene["scene_id"] == "family")
+        if scene["scene_id"] == "family":
+            assert 'href="#family-four-player"' in page
+            assert 'id="children-age-compare"' not in page
