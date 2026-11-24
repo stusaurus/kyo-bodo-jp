@@ -789,6 +789,40 @@ def two_player_search_answer():
     )
 
 
+def family_four_player_choices():
+    """Four-person compatibility, published max time, and age bands from catalog."""
+    eligible = [g for g in GAMES if supports_players(g, 4)
+                and g["play_time_max"] <= 30 and g["age"] <= 12]
+    groups = []
+    for low, high, label in ((0, 5, "5歳以下"), (6, 7, "6〜7歳"),
+                             (8, 9, "8〜9歳"), (10, 12, "10〜12歳")):
+        matching = [g for g in eligible if low <= g["age"] <= high]
+        if not matching:
+            continue
+        items = "".join(
+            f'<li class="children-choice-item" data-family-game="{e(g["game_id"])}">'
+            f'<a href="{u("games/" + g["game_id"] + "/")}" data-track="game_detail_click" '
+            f'data-game-id="{e(g["game_id"])}" data-source="family_four_player">'
+            f'<strong>{e(g["title"])}</strong>'
+            f'<span>{e(player_label(g))}／{format_play_time(g)}／対象{g["age"]}歳〜</span>'
+            f'<small>すること：{e(g["how_to_play"][1])}</small></a></li>'
+            for g in matching
+        )
+        opened = " open" if not groups else ""
+        groups.append(f'<details{opened}><summary>対象年齢が{label}の作品（{len(matching)}本）</summary>'
+                      f'<ul class="children-choice-results">{items}</ul></details>')
+    return f'''<section class="section children-choice" id="family-four-player">
+<div class="eyebrow">FAMILY GAME NIGHT</div>
+<h2>家族4人で30分以内に遊べるボードゲーム</h2>
+<p>大人も含めて4人全員が参加でき、掲載プレイ時間の上限が30分以内の作品を対象年齢別に比較します。
+最年少の参加者の年齢以下の対象年齢を選んでください。例えば8歳なら「5歳以下」「6〜7歳」と「8〜9歳」のうち対象8歳以下の作品が候補です。</p>
+<p class="small">対象年齢12歳以下の掲載作品{len(eligible)}本。各年齢区分はカタログ掲載順で、人気順・実遊評価ではありません。</p>
+{''.join(groups)}
+<p class="small">対象年齢は製品の目安です。理解度や読み書き、説明・準備・片付けの時間も考慮し、購入前に販売版の対象年齢・人数・ルールを確認してください。</p>
+<p><a class="text-link" href="{u("scenes/children/")}#children-age-compare">2〜6人・6〜12歳の条件を変えて探す →</a></p>
+</section>'''
+
+
 def scene_page(s):
     ranked = scene_representatives(s)
     order_note = ('2人だけの人数表記と複数人数対応を組み合わせた比較例。'
@@ -831,8 +865,11 @@ def scene_page(s):
                         f'href="{u("guides/gift-board-games/")}">'
                         'プレゼント用に年齢・人数からボードゲームを比べる →</a></p>')
 
+    if s["scene_id"] == "family":
+        choice_link += '<p><a class="text-link" href="#family-four-player">家族4人・30分以内の候補を年齢別に比較 →</a></p>'
+
     scene_h1 = ("2人用・2人でも遊べる" if s["scene_id"] == "two-player" else s["title"])
-    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{two_player_search_answer() if s["scene_id"] == "two-player" else ""}{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{children_search_answer() if s["scene_id"] == "children" else ""}{children_age_filter() if s["scene_id"] == "children" else ""}{couple_choice_guide() if s["scene_id"] == "couple" else ""}{scene_comparison_table(s, ranked)}{short_time_finder() if s["scene_id"] == "short" else ""}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
+    body=f'''<section class="scene-page-hero" style="--scene-sprite:url('{asset("scene-sprite.webp")}')"><div class="scene-hero-card"><div class="scene-hero-copy"><div class="breadcrumb"><a href="{u()}">ホーム</a> / <a href="{u("scenes/")}">シーン</a> / {e(s["title"])}</div><div class="eyebrow">{"PLAY SOLO" if s["scene_id"] == "solo" else "PLAY TOGETHER"}</div><h1>{e(scene_h1)}<br>ボードゲーム</h1><p>{e(s["intro"])}</p><a class="text-link" href="{u("diagnosis/?src=scene_page")}">{"1人用を診断で探す" if s["scene_id"] == "solo" else "このメンバーで診断する"} <span class="arrow" aria-hidden="true">→</span></a>{choice_link}</div><div class="scene-art s{scene_i}" aria-hidden="true"></div></div></section>{two_player_search_answer() if s["scene_id"] == "two-player" else ""}{render_two_player_quick_filter(GAMES,u,asset,player_label,supports_players) if s["scene_id"] == "two-player" else ""}{two_player_rule_contrasts() if s["scene_id"] == "two-player" else ""}{two_player_format_guide() if s["scene_id"] == "two-player" else ""}{family_four_player_choices() if s["scene_id"] == "family" else ""}{children_search_answer() if s["scene_id"] == "children" else ""}{children_age_filter() if s["scene_id"] == "children" else ""}{couple_choice_guide() if s["scene_id"] == "couple" else ""}{scene_comparison_table(s, ranked)}{short_time_finder() if s["scene_id"] == "short" else ""}{scene_selection_guide(s, ranked)}<section class="section"><div class="scene-result-head"><div><div class="eyebrow">FOR THIS MOMENT</div><h2>このシーンに合う{len(ranked)}本</h2></div><span>{order_note}</span></div><div class="grid">{"".join(card(g,"scene_page",i+1) for i,g in enumerate(ranked))}</div></section><script>document.addEventListener("DOMContentLoaded",function(){{kyoTrack("scene_view",{{scene_id:{json.dumps(s["scene_id"])},game_count:{len(ranked)}}})}})</script>'''
     schema=json.dumps({"@context":"https://schema.org","@type":"ItemList","name":s["title"]+"ボードゲーム","itemListElement":[{"@type":"ListItem","position":i+1,"url":canon("games/"+g["game_id"]+"/"),"name":g["title"]} for i,g in enumerate(ranked)]},ensure_ascii=False)
     seo={
         "two-player":("2人用ボードゲームおすすめ比較｜2人専用と2人対応の違い", "2人でできるボードゲームを2人専用と複数人数対応に分けて紹介。カップル・友人・夫婦で、遊べる時間・対戦か協力か・対象年齢を確認。人気順位ではありません。"),
