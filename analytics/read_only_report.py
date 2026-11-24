@@ -274,6 +274,77 @@ def fetch_ga4(session, today):
     return parse_ga4(raw, visits, has_operator, window)
 
 
+
+def parse_organic(events_response, visits_response, window):
+    """Site-scoped organic-search events, not verified users or purchases."""
+    for response in (events_response, visits_response):
+        reason = ga4_quality(response)
+        if reason:
+            return unavailable("GA4 organic", reason, "QUALITY_RESTRICTED")
+    counts = {name: None for name in ("game_detail_click", "affiliate_click",
+                                      "rakuten_search_click")}
+    for row in events_response.get("rows", []):
+        try:
+            values = [x["value"] for x in row["dimensionValues"]]
+            count = int(row["metricValues"][0]["value"])
+            if (len(values) != 3 or values[0] != "Organic Search"
+                    or values[1] not in counts or count < 0
+                    or not values[2].startswith("/kyo-bodo-jp/")):
+                raise ValueError("invalid organic event")
+            counts[values[1]] = (counts[values[1]] or 0) + count
+        except (KeyError, TypeError, ValueError, IndexError):
+            return unavailable("GA4 organic", "MALFORMED_ORGANIC_EVENT", "QUALITY_RESTRICTED")
+    sessions = None
+    if visits_response.get("rows"):
+        try:
+            rows = visits_response["rows"]
+            if len(rows) != 1 or rows[0]["dimensionValues"][0]["value"] != "Organic Search":
+                raise ValueError("invalid channel")
+            sessions = int(rows[0]["metricValues"][0]["value"])
+            if sessions < 0:
+                raise ValueError("negative sessions")
+        except (KeyError, TypeError, ValueError, IndexError):
+            return unavailable("GA4 organic", "MALFORMED_ORGANIC_SESSIONS", "QUALITY_RESTRICTED")
+    return {"status": "OBSERVED_ROWS" if events_response.get("rows") or sessions is not None
+            else "NO_OBSERVED_ROWS", "window": [x.isoformat() for x in window],
+            "sessions_including_tests": sessions, "event_counts": counts,
+            "note": "Event counts are not distinct users, purchases, or confirmed commissions."}
+
+
+def fetch_organic(session, today):
+    """GA4 organic-search funnel for this host only; never mix note campaigns."""
+    window = (today - dt.timedelta(days=8), today - dt.timedelta(days=2))
+    property_resource = "properties/" + GA4_PROPERTY
+    metadata = safe_json(session.get(GA_API + "/" + property_resource + "/metadata",
+                                     timeout=30), "GA4_ORGANIC_METADATA")
+    dimensions = {x.get("apiName") for x in metadata.get("dimensions", [])}
+    required = {"sessionDefaultChannelGroup", "eventName", "pagePath", "hostName"}
+    if not required.issubset(dimensions):
+        return unavailable("GA4 organic", "REQUIRED_DIMENSIONS_UNAVAILABLE", "DATA_LIMITED")
+    def exact(field, value):
+        return {"filter": {"fieldName": field, "stringFilter": {
+            "matchType": "EXACT", "value": value}}}
+    def query(dims, metric, filters):
+        return safe_json(session.post(GA_API + "/" + property_resource + ":runReport",
+            json={"dateRanges": [{"startDate": window[0].isoformat(),
+                                   "endDate": window[1].isoformat()}],
+                  "dimensions": [{"name": x} for x in dims],
+                  "metrics": [{"name": metric}],
+                  "dimensionFilter": {"andGroup": {"expressions": filters}},
+                  "limit": 10000}, timeout=45), "GA4_ORGANIC_QUERY")
+    channel = exact("sessionDefaultChannelGroup", "Organic Search")
+    host = exact("hostName", "stusaurus.github.io")
+    site_path = {"filter": {"fieldName": "pagePath", "stringFilter": {
+        "matchType": "BEGINS_WITH", "value": "/kyo-bodo-jp/"}}}
+    events = query(["sessionDefaultChannelGroup", "eventName", "pagePath"],
+                   "eventCount", [channel, host, site_path, {"filter": {
+                       "fieldName": "eventName", "inListFilter": {
+                           "values": ["game_detail_click", "affiliate_click",
+                                      "rakuten_search_click"], "caseSensitive": True}}}])
+    visits = query(["sessionDefaultChannelGroup"], "sessions", [channel, host, site_path])
+    return parse_organic(events, visits, window)
+
+
 def to_markdown(report):
     a, b = report["ga4"], report["gsc"]
     lines = ["## きょうボド｜Google公式API 無料・読み取り専用計測", "",
@@ -306,6 +377,16 @@ def to_markdown(report):
             lines.append("- " + name + "：" + str(counts))
         lines += ["- セッション・ユーザー（運営者テスト含む）：" +
                   str(a["visits"] if a["visits"] else "不明")]
+    organic = report.get("organic")
+    if organic:
+        lines += ["", "### GA4 自然検索（運営者テスト混在の可能性）",
+                  "- 状態：" + organic["status"]]
+        if "event_counts" in organic:
+            lines += ["- 期間：" + " ～ ".join(organic["window"]),
+                      "- セッション：" + str(organic["sessions_including_tests"] if organic["sessions_including_tests"] is not None else "不明")]
+            for name, count in organic["event_counts"].items():
+                lines.append("- " + name + "：" + str(count if count is not None else "不明"))
+            lines.append("- イベント回数は購入者数・確定報酬ではありません。")
     return "\n".join(lines) + "\n"
 
 
@@ -331,6 +412,7 @@ def run(today=None, session=None):
     result = {"status": "READ_ONLY",
               "ga4": read(fetch_ga4, "GA4"),
               "gsc": read(fetch_gsc, "GSC"),
+              "organic": read(fetch_organic, "GA4 organic"),
               "tested_at": today.isoformat(),
               "revenue": "NOT_QUERIED",
               "contains_personal_information": False}
