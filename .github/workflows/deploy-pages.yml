@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -71,6 +71,13 @@ jobs:
       - name: Add IndexNow verification key
         run: printf '%s' '7d4f93c2a6814eb5b0d87f216ca9e403' > site/7d4f93c2a6814eb5b0d87f216ca9e403.txt
 
+      - name: Restore latest successful IndexNow receipt
+        uses: actions/cache/restore@v4
+        with:
+          path: indexnow-receipt.txt
+          key: indexnow-receipt-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            indexnow-receipt-
       - name: Prepare IndexNow change plan before deployment
         run: python scripts/indexnow_changes.py prepare
       - uses: actions/upload-artifact@v4
@@ -108,3 +115,8 @@ jobs:
         env:
           INDEXNOW_KEY: 7d4f93c2a6814eb5b0d87f216ca9e403
         run: python scripts/indexnow_changes.py notify
+      - name: Save acknowledged IndexNow receipt
+        uses: actions/cache/save@v4
+        with:
+          path: indexnow-receipt.txt
+          key: indexnow-receipt-${{ github.run_id }}-${{ github.run_attempt }}
