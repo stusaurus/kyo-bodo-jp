@@ -245,6 +245,39 @@ function serve(root,port){return new Promise(resolve=>{
      after.cards.map((c,i)=>({url:'https://stusaurus.github.io/kyo-bodo-jp/games/'+c.game+'/',
        name:c.title,position:i+1})),
      'Structured-data ItemList must exactly match approved page cards, not an invented ranking');
+   const family=await context.newPage();const familyErrors=[];
+   family.on('pageerror',error=>familyErrors.push(error.message));
+   const familyResponse=await family.goto('http://127.0.0.1:8766/kyo-bodo-jp/scenes/family/?test=1',{waitUntil:'domcontentloaded'});
+   assert.equal(familyResponse.status(),200);
+   await family.locator('.scene-hero-copy a[href="#family-four-player"]').click();
+   assert.equal(await family.evaluate(()=>location.hash),'#family-four-player');
+   const familySection=family.locator('#family-four-player');
+   const familyGroups=familySection.locator('details');
+   assert((await familyGroups.count())>0);
+   const familyIds=new Set();
+   for(let i=0;i<await familyGroups.count();i++){
+     const group=familyGroups.nth(i);
+     if(!await group.evaluate(el=>el.open))await group.locator('summary').click();
+     const rows=group.locator('[data-family-game]');
+     const count=Number((await group.locator('summary').innerText()).match(/（(\d+)本）/)[1]);
+     assert.equal(await rows.count(),count);
+     for(const row of await rows.evaluateAll(els=>els.map(el=>({id:el.dataset.familyGame,href:el.querySelector('a').getAttribute('href')})))){
+       assert(!familyIds.has(row.id));familyIds.add(row.id);
+       assert.equal(row.href,'/kyo-bodo-jp/games/'+row.id+'/');
+       assert.equal((await family.request.get('http://127.0.0.1:8766'+row.href)).status(),200);
+     }
+     assert.equal(await group.locator('[data-family-game]:visible').count(),count);
+     assert(await family.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'family comparison overflow');
+   }
+   assert(!familyIds.has('gobblet-gobblers'));
+   await familySection.screenshot({path:path.join(out,'family-four-player-'+width+'.png'),animations:'disabled'});
+   const firstFamilyLink=familySection.locator('a[data-game-id]').first();
+   const firstFamilyHref=await firstFamilyLink.getAttribute('href');
+   await firstFamilyLink.click();
+   assert.equal(await family.evaluate(()=>location.pathname),firstFamilyHref);
+   assert.equal(familyErrors.length,0,familyErrors.join(','));
+   records.push({label:'family-four-player',width,gameCount:familyIds.size,errors:familyErrors});
+   await family.close();
    await context.close();
   }
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({status:'PASS',records},null,2));
