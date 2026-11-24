@@ -85,6 +85,22 @@ class FreeOfficialMeasurementTests(TestCase):
         self.assertEqual(m.parse_gsc_queries({"rows": None}, window)["status"],
                          "UNAVAILABLE")
 
+    def test_organic_breakdowns_hide_unknown_sources_and_unsafe_paths(self):
+        sources = m.parse_organic_breakdown({"rows": [
+            row(["google"], [3]), row(["bing"], [2]), row(["arbitrary-source"], [7]),
+            row(["(not set)"], [1])]}, "sessionSource")
+        self.assertEqual(sources["status"], "OBSERVED_ROWS")
+        self.assertEqual({r["label"]: r["sessions_including_tests"] for r in sources["rows"]},
+                         {"google": 3, "bing": 2, "(other source)": 7, "(unknown source)": 1})
+        landing = m.parse_organic_breakdown({"rows": [
+            row(["/kyo-bodo-jp/scenes/children/"], [4]),
+            row(["/kyo-bodo-jp/?sensitive=test"], [1])]}, "landingPage")
+        self.assertEqual(landing["rows"][0]["label"], "/kyo-bodo-jp/scenes/children/")
+        self.assertNotIn("sensitive", str(landing))
+        self.assertEqual(m.parse_organic_breakdown({"rows": [
+            row(["/daily-cost-jp/"], [1])]}, "landingPage")["status"], "QUALITY_RESTRICTED")
+        self.assertEqual(m.parse_organic_breakdown({}, "sessionSource")["status"], "NO_OBSERVED_ROWS")
+
     def test_organic_funnel_is_site_scoped_and_unknown_not_zero(self):
         window = (dt.date(2026, 11, 16), dt.date(2026, 11, 22))
         event = row(["Organic Search", "affiliate_click", "/kyo-bodo-jp/games/scout/"], [2])
