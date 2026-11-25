@@ -164,3 +164,26 @@ def test_four_player_family_comparison_uses_exact_catalog_constraints():
         if scene["scene_id"] == "family":
             assert 'href="#family-four-player"' in page
             assert 'id="children-age-compare"' not in page
+
+
+def test_group_size_comparison_exact_membership_and_scene_isolation():
+    html = m.group_size_choices()
+    for n in (4, 5, 6, 7, 8):
+        panel = re.search(rf'<details id="group-size-{n}" data-group-size="{n}">(.*?)</details>', html, re.S)
+        assert panel
+        ids = re.findall(r'data-group-game="([^"]+)"', panel[1])
+        expected = [g["game_id"] for g in m.GAMES if m.supports_players(g, n)]
+        assert ids == expected and len(ids) == len(set(ids))
+        assert f'{n}人で遊べる作品（{len(expected)}本）' in panel[1]
+        assert "gobblet-gobblers" not in ids
+        if n == 8:
+            assert "just-one" not in ids
+        for gid in ids:
+            assert f'href="{m.u("games/" + gid + "/")}"' in panel[1]
+    for scene in m.SCENES:
+        page = m.scene_page(scene)
+        assert ('id="group-size-comparison"' in page) == (scene["scene_id"] == "large-group")
+        if scene["scene_id"] == "large-group":
+            assert 'href="#group-size-comparison"' in page
+            assert '4・5・6・7・8人で比較' in page
+    assert "人気順や実遊評価ではありません" in html
