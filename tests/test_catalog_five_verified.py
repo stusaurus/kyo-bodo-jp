@@ -23,7 +23,7 @@ ADDED = {
 
 def test_five_verified_editions_have_no_duplicate_records():
     ids = [g["game_id"] for g in GAMES]
-    assert len(ids) == len(set(ids)) == 88
+    assert len(ids) == len(set(ids)) == 91
     assert set(ADDED).issubset(ids)
     for gid, (*facts, src) in ADDED.items():
         g = site.BY_ID[gid]
@@ -40,7 +40,7 @@ def test_five_verified_editions_have_no_duplicate_records():
 def test_short_play_family_and_solo_cohorts_expand_consistently():
     short = [g for g in GAMES if g["play_time_max"] <= 20]
     solo = [g for g in GAMES if supports_players(g, 1)]
-    assert len(short) == 32
+    assert len(short) == 35
     assert len(solo) == 14
     assert {"nana-toridori", "nmbr9", "houseki-ippai"} <= {
         g["game_id"] for g in short
@@ -116,3 +116,21 @@ def test_every_new_game_prevents_accessory_only_advertising():
             title = f"{game['title']} {bad} ボードゲーム"
             matched, _, _ = match_item(game, {"itemName": title})
             assert not matched, (gid, bad)
+
+
+def test_three_new_party_games_are_sourced_and_safely_matched():
+    facts = {
+        "animal-old-maid": (2, 6, 15, 15, 6, "アークライト"),
+        "ding": (2, 7, 10, 10, 8, "アークライト"),
+        "eggsposed": (3, 8, 20, 20, 9, "オインクゲームズ"),
+    }
+    for gid, (*expected, publisher) in facts.items():
+        game = site.BY_ID[gid]
+        assert tuple(game[k] for k in ("players_min", "players_max", "play_time_min", "play_time_max", "age")) == tuple(expected)
+        assert game["specs_source"].startswith("https://")
+        assert not game["cooperative"]
+        assert match_item(game, {"itemName": f"{publisher} {game['title']} ボードゲーム"})[0]
+        assert not match_item(game, {"itemName": f"{game['title']} ボードゲーム"})[0]
+        for bad in ("中古", "拡張セット", "カードスリーブ", "英語版", "2個セット"):
+            assert not match_item(game, {"itemName": f"{publisher} {game['title']} {bad}"})[0]
+        assert f'/kyo-bodo-jp/games/{gid}/' in site.games_index()
