@@ -15,7 +15,7 @@ VERIFIED = {
 
 
 def test_four_primary_sources_match_age_players_and_publisher_minutes():
-    assert len(site.GAMES) == 88
+    assert len(site.GAMES) == 91
     for gid, (pmin, pmax, age, duration, source) in VERIFIED.items():
         game = site.BY_ID[gid]
         assert (game["players_min"], game["players_max"], game["age"]) == (pmin, pmax, age), gid
