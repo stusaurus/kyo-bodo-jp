@@ -86,18 +86,18 @@ def test_nine_year_age_option_is_available_without_assuming_grade_or_reviews():
     assert options == [str(n) for n in range(6, 13)]
     assert html.count('<option value="9">9歳</option>') == 1
     age9 = [g for g in eligible() if g["age"] == 9]
-    assert [g["game_id"] for g in age9] == ["scout", "insider-game"]
+    assert [g["game_id"] for g in age9] == ["scout", "insider-game", "eggsposed"]
     for g in age9:
         assert f'href="{m.u("games/" + g["game_id"] + "/")}"' in html
         assert g["title"] in html
-    # A four-player 20-minute selection at nine includes both newly eligible
+    # A four-player 20-minute selection at nine includes the newly eligible
     # games that an eight-year-old's age selection correctly excludes.
     def selected(age):
         return [g["game_id"] for g in eligible()
                 if g["age"] <= age
                 and m.supports_players(g, 4)
                 and g["play_time_max"] <= 20]
-    assert set(selected(9)) - set(selected(8)) == {"scout", "insider-game"}
+    assert set(selected(9)) - set(selected(8)) == {"scout", "insider-game", "eggsposed"}
     assert "小学校の学年や9歳の子に必ず合うという保証ではありません" in html
     assert "最年少の子どもの年齢を6〜12歳の1歳刻み" in html
 
