@@ -13,7 +13,7 @@ def s_title(sid):
 def test_short_scene_hero_links_to_existing_complete_finder():
     html = site.scene_page(scene("short"))
     count = sum(g["play_time_max"] <= 20 for g in site.GAMES)
-    assert count == 32  # current verified catalog baseline, not a claimed popularity count
+    assert count == 35  # current verified catalog baseline, not a claimed popularity count
     assert html.count('id="short-time-finder"') == 1
     assert html.count('href="#short-time-finder"') == 1
     assert f"10・15・20分と人数から{count}本を絞り込む" in html
