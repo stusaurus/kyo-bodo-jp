@@ -5,10 +5,10 @@ from scripts import build_site as site
 
 ROOT=Path(__file__).resolve().parents[1]
 
-def test_compare_controls_keep_all_88_crawlable_product_links():
+def test_compare_controls_keep_all_91_crawlable_product_links():
     html=site.games_index()
-    assert len(GAMES)==88
-    assert html.count('class="catalog-card game-list-card"')==88
+    assert len(GAMES)==91
+    assert html.count('class="catalog-card game-list-card"')==91
     assert html.count('class="catalog-compare"')==1
     assert 'id="catalogCompareFirst"' in html
     assert 'id="catalogCompareSecond"' in html
