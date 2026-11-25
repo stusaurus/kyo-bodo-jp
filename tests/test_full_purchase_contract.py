@@ -30,8 +30,8 @@ class Links(HTMLParser):
         ]
 
 
-def test_all_88_game_detail_and_card_outbound_offers_match_the_same_source():
-    assert len(site.GAMES) == 88
+def test_all_91_game_detail_and_card_outbound_offers_match_the_same_source():
+    assert len(site.GAMES) == 91
     assert len({g["game_id"] for g in site.GAMES}) == len(site.GAMES)
     for g in site.GAMES:
         gid = g["game_id"]
@@ -61,7 +61,7 @@ def test_all_88_game_detail_and_card_outbound_offers_match_the_same_source():
         assert site.canon("games/" + gid + "/") in site.game_page(g)
 
 
-def test_all_88_games_respect_competitive_and_cooperative_choice_for_every_group():
+def test_all_91_games_respect_competitive_and_cooperative_choice_for_every_group():
     js = (ROOT / "assets" / "diagnosis.js").read_text(encoding="utf-8")
     logic = js[js.index("function ageFits("):js.index("\nfunction rak(")]
     program = (
