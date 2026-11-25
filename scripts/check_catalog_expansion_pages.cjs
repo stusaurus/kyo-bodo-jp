@@ -1,4 +1,4 @@
-/* Real Chromium QA for eight source-backed game detail pages at mobile and desktop widths. */
+/* Real Chromium QA for eleven source-backed game detail pages at mobile and desktop widths. */
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -25,11 +25,15 @@ const fixtures = [
   {id:'nmbr9', title:'ナンバーナイン',
    source:'https://mobiusgames.shop-pro.jp/?pid=145075144', players:'1〜4人', time:'20分', age:'8歳〜'},
   {id:'houseki-ippai', title:'宝石がいっぱい！',
-   source:'https://arclightgames.jp/product/576houseki/', players:'2〜6人', time:'5分', age:'4歳〜'}
+   source:'https://arclightgames.jp/product/576houseki/', players:'2〜6人', time:'5分', age:'4歳〜'},
+  {id:'animal-old-maid', title:'どうぶつババ抜き',
+   source:'https://arclightgames.jp/product/%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E3%83%90%E3%83%90%E6%8A%9C%E3%81%8D/', players:'2〜6人', time:'15分', age:'6歳〜'},
+  {id:'ding', title:'ディング！', source:'https://arclightgames.jp/product/517nds/', players:'2〜7人', time:'10分', age:'8歳〜'},
+  {id:'eggsposed', title:'ばれたま', source:'https://oinkgames.com/ja/games/analog/eggsposed/', players:'3〜8人', time:'20分', age:'9歳〜'}
 ];
 
 const catalog = JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
-assert.equal(catalog.length,88,'generated catalog must include exactly 83 games');
+assert.equal(catalog.length,91,'generated catalog must include exactly 91 games');
 for (const game of fixtures) {
   assert(catalog.some(row=>row.game_id===game.id),'generated catalog missing '+game.id);
 }
