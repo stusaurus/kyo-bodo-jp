@@ -79,7 +79,7 @@ async function visibleIds(page){
         assert.deepEqual(ids,expected,config.label+' wrong candidates at '+width);
         if(config.label==='age9-4p-short'){
           assert(ids.includes('scout')&&ids.includes('insider-game')&&ids.includes('eggsposed'), '9y 4p should contain all three age-nine games');
-          assert(ids.length===idsFor(8,4,'20').length+2,'9y must add only the two published age-nine games');
+          assert.deepEqual(ids.filter(id=>!idsFor(8,4,'20').includes(id)),['scout','insider-game','eggsposed'],'9y must add exactly the three source-catalog age-nine games');
         }
         if(config.label==='age9-2p-short'){
           assert(ids.includes('scout')&&!ids.includes('insider-game')&&!ids.includes('eggsposed'), '9y 2p excludes games requiring at least three players');
