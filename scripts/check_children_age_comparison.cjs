@@ -78,11 +78,11 @@ async function visibleIds(page){
         const expected=idsFor(config.age,config.players,config.time);
         assert.deepEqual(ids,expected,config.label+' wrong candidates at '+width);
         if(config.label==='age9-4p-short'){
-          assert(ids.includes('scout')&&ids.includes('insider-game'), '9y 4p should contain both age-nine games');
+          assert(ids.includes('scout')&&ids.includes('insider-game')&&ids.includes('eggsposed'), '9y 4p should contain all three age-nine games');
           assert(ids.length===idsFor(8,4,'20').length+2,'9y must add only the two published age-nine games');
         }
         if(config.label==='age9-2p-short'){
-          assert(ids.includes('scout')&&!ids.includes('insider-game'), '9y 2p should exclude Insider requiring at least four');
+          assert(ids.includes('scout')&&!ids.includes('insider-game')&&!ids.includes('eggsposed'), '9y 2p excludes games requiring at least three players');
         }
         assert.equal((await page.locator('#children-choice-count').innerText()).trim(),expected.length+'本');
         assert.equal(await page.locator('#children-choice-empty').isVisible(),expected.length===0);
