@@ -18,7 +18,7 @@ FACTS = {
 
 
 def test_individual_facts_are_backed_by_the_exact_edition_source():
-    assert len(m.GAMES) == 88
+    assert len(m.GAMES) == 91
     for gid, (pmin, pmax, tmin, tmax, age, url) in FACTS.items():
         g = m.BY_ID[gid]
         assert (g["players_min"], g["players_max"],
