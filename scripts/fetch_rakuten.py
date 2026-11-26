@@ -74,7 +74,7 @@ CONTEXT_RULES={
 PER_GAME_BLOCK={
     "animal-old-maid":["セット販売","まとめ買い","2個セット","ぬいぐるみ"],
     "ding":["リングディング","リング・ディング","セット販売","2個セット"],
-    "eggsposed":["セット販売","まとめ買い","2個セット"],
+    "eggsposed":["セット販売","まとめ買い","2個セット","ミラー","手鏡","鏡","mirror","キーホルダー","アクリルスタンド","缶バッジ"],
     "ito":["レインボー","クラシック"],
     "the-mind":["エクストリーム","extreme"],
     "splendor":["デュエル","duel"],
@@ -313,6 +313,9 @@ def query_variants(g):
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
+        # Manufacturer press release: https://prtimes.jp/main/html/rd/p/000000007.000041113.html
+        "animal-old-maid":"4542325120453",
+        "eggsposed":"4571394095485",
         "splendor-duel":"3558380101895",
         "catan-junior":"4543471004000",
         "wavelength":"3558380081296",
