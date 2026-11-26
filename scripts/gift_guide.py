@@ -53,7 +53,7 @@ PRESCHOOL_CHOICES = (
     ("houseki-ippai", 4, "めくって探す", "https://arclightgames.jp/product/576houseki/"),
     ("nanjamonja", 4, "名前を覚えて呼ぶ", "https://suppe.sugorokuya.jp/items/160022"),
     ("animal-upon-animal", 4, "木の動物を積む", "https://item.rakuten.co.jp/boardgame-sugorokuya/sg60183rkt/"),
-    ("rhino-hero", 5, "カードのビルを積む", "https://www.edion.com/detail.html?p_cd=00061003965"),
+    ("rhino-hero", 5, "カードのビルを積む", "https://www.edion.com/detail.html?deqwas_inflow=QGRzcDUwOnVDQTNrQzJ4VWstd1VLMmo3a0hrcmc6aXRlbV92aWV3OjowMDA2NjkxMzUyODoxUQ&p_cd=00061003965"),
 )
 
 
