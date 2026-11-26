@@ -3,6 +3,7 @@
 Data is checked against the Japanese distributor or reputable authorized store.
 These are product specifications, not live Rakuten inventory or test-play claims.
 """
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from scripts import build_site as site
 
 FACTS = {
@@ -20,7 +21,7 @@ FACTS = {
 
 
 def test_two_player_specs_use_version_appropriate_primary_sources():
-    assert len(site.GAMES) == 91
+    assert len(site.GAMES) == CATALOG_COUNT
     for gid, (pmin, pmax, tmin, tmax, age, source) in FACTS.items():
         g = site.BY_ID[gid]
         assert (g["players_min"], g["players_max"],

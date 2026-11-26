@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const http=require('node:http');
 const assert=require('node:assert/strict');
+const {catalog_count:CATALOG_COUNT,short_count:SHORT_COUNT,solo_count:SOLO_COUNT}=require('../data/catalog_qa_baseline.json');
 
 const root=path.resolve('site');
 const out=path.resolve('audit-results/short-time-finder');
@@ -51,7 +52,7 @@ async function visibleIds(page){
   const server=await createServer();
   const browser=await chromium.launch();
   try{
-    assert.equal(eligible.length,35,'catalog changed; reevaluate full short-time cohort');
+    assert.equal(eligible.length,SHORT_COUNT,'catalog changed; reevaluate full short-time cohort');
     for(const width of [320,390,1440]){
       const ctx=await browser.newContext({
         viewport:{width,height:840},isMobile:width<500,hasTouch:width<500
@@ -64,7 +65,7 @@ async function visibleIds(page){
                                      {waitUntil:'domcontentloaded'});
       assert.equal(response.status(),200);
       await page.locator('#short-time-form').waitFor({state:'visible'});
-      assert.equal(await page.locator('#short-time-results li').count(),35);
+      assert.equal(await page.locator('#short-time-results li').count(),SHORT_COUNT);
       assert((await page.title()).includes('20分以内・短時間'));
       assert((await page.locator('h1').textContent()).includes('短時間'));
       const scenarios=[

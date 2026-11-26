@@ -1,14 +1,15 @@
 """Two-game comparison exposes only factual catalog attributes and verified detail links."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from pathlib import Path
 from data.catalog import GAMES
 from scripts import build_site as site
 
 ROOT=Path(__file__).resolve().parents[1]
 
-def test_compare_controls_keep_all_91_crawlable_product_links():
+def test_compare_controls_keep_all_catalog_crawlable_product_links():
     html=site.games_index()
-    assert len(GAMES)==91
-    assert html.count('class="catalog-card game-list-card"')==91
+    assert len(GAMES)==CATALOG_COUNT
+    assert html.count('class="catalog-card game-list-card"')==CATALOG_COUNT
     assert html.count('class="catalog-compare"')==1
     assert 'id="catalogCompareFirst"' in html
     assert 'id="catalogCompareSecond"' in html

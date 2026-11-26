@@ -4,6 +4,7 @@
  */
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const {catalog_count:CATALOG_COUNT,short_count:SHORT_COUNT,solo_count:SOLO_COUNT}=require('../data/catalog_qa_baseline.json');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const root=path.resolve('site'),out=path.resolve('audit-results/purchase-journeys');
 fs.mkdirSync(out,{recursive:true});
@@ -11,7 +12,7 @@ const base='/kyo-bodo-jp/',port=8798,origin='http://127.0.0.1:'+port;
 const games=JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
 const offers=JSON.parse(fs.readFileSync(path.join(root,'data/rakuten.json'),'utf8'));
 const byId=new Map(games.map(g=>[g.game_id,g]));
-assert.equal(games.length,91);
+assert.equal(games.length,CATALOG_COUNT);
 function serve(){
   return new Promise(resolve=>{
     const server=http.createServer((req,res)=>{

@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
 const assert = require('node:assert/strict');
+const {catalog_count:CATALOG_COUNT,short_count:SHORT_COUNT,solo_count:SOLO_COUNT}=require('../data/catalog_qa_baseline.json');
 
 const root = path.resolve('site');
 const output = path.resolve('audit-results/catalog-expansion');
@@ -33,7 +34,7 @@ const fixtures = [
 ];
 
 const catalog = JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
-assert.equal(catalog.length,91,'generated catalog must include exactly 91 games');
+assert.equal(catalog.length,CATALOG_COUNT,`generated catalog must include exactly ${CATALOG_COUNT} games`);
 for (const game of fixtures) {
   assert(catalog.some(row=>row.game_id===game.id),'generated catalog missing '+game.id);
 }

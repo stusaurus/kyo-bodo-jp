@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const http=require('node:http');
 const assert=require('node:assert/strict');
+const {catalog_count:CATALOG_COUNT,short_count:SHORT_COUNT,solo_count:SOLO_COUNT}=require('../data/catalog_qa_baseline.json');
 const root=path.resolve('site'),base='/kyo-bodo-jp/',port=8798;
 const out=path.resolve('audit-results/catalog-compare');
 fs.mkdirSync(out,{recursive:true});
@@ -36,9 +37,9 @@ function start(){
       assert.equal(response.status(),200);
       await page.locator('#catalogCompare:not([hidden])').waitFor({timeout:15000});
       const first=page.locator('#catalogCompareFirst'),second=page.locator('#catalogCompareSecond'),results=page.locator('#catalogCompareResult');
-      assert.equal(await first.locator('option').count(),92,'must offer all 91 catalog titles');
-      assert.equal(await second.locator('option').count(),92);
-      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),91,'catalog remains complete');
+      assert.equal(await first.locator('option').count(),(CATALOG_COUNT+1),`must offer all ${CATALOG_COUNT} catalog titles`);
+      assert.equal(await second.locator('option').count(),(CATALOG_COUNT+1));
+      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),CATALOG_COUNT,'catalog remains complete');
       await first.selectOption('nana-toridori');
       assert.equal(await results.locator('.catalog-compare-card').count(),0);
       await second.selectOption('nmbr9');
@@ -77,10 +78,10 @@ function start(){
       const noJS=await browser.newContext({viewport:{width,height:850},javaScriptEnabled:false});
       const without=await noJS.newPage();
       await without.goto('http://127.0.0.1:'+port+base+'games/');
-      assert.equal(await without.locator('.game-list-card:not([hidden])').count(),91);
+      assert.equal(await without.locator('.game-list-card:not([hidden])').count(),CATALOG_COUNT);
       assert.equal(await without.locator('#catalogCompare:not([hidden])').count(),0);
       await noJS.close();
-      console.log(JSON.stringify({width,catalog:91,compare:2,duplicate:'blocked',detailLinks:2,noJS:'91 links',overflow:0,jsErrors:0,privateAnalytics:true}));
+      console.log(JSON.stringify({width,catalog:CATALOG_COUNT,compare:2,duplicate:'blocked',detailLinks:2,noJS:`${CATALOG_COUNT} links`,overflow:0,jsErrors:0,privateAnalytics:true}));
     }
   }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

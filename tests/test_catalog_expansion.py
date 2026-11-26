@@ -1,4 +1,5 @@
 """Regression tests for source-backed additions to the board-game catalog."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 import unittest
 
 from data.catalog import GAMES, supports_players
@@ -11,7 +12,7 @@ class CatalogExpansionTests(unittest.TestCase):
         cls.by_id = {game["game_id"]: game for game in GAMES}
 
     def test_new_games_are_unique_and_sourced(self):
-        self.assertEqual(len(GAMES), 91)
+        self.assertEqual(len(GAMES), CATALOG_COUNT)
         self.assertEqual(len(self.by_id), len(GAMES))
         specs = {
             "nana-card-game": (2, 5, 15, 15, 6),

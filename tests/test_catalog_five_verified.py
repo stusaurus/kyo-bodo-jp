@@ -3,6 +3,7 @@
 Source: Japanese publisher / authorized distributor pages on 2026-11-19.
 Gameplay blurbs are descriptions of rules, not firsthand testing, popularity or stock.
 """
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from data.catalog import GAMES, supports_players
 from scripts import build_site as site
 from scripts.fetch_rakuten import match_item
@@ -23,7 +24,7 @@ ADDED = {
 
 def test_five_verified_editions_have_no_duplicate_records():
     ids = [g["game_id"] for g in GAMES]
-    assert len(ids) == len(set(ids)) == 91
+    assert len(ids) == len(set(ids)) == CATALOG_COUNT
     assert set(ADDED).issubset(ids)
     for gid, (*facts, src) in ADDED.items():
         g = site.BY_ID[gid]
@@ -40,8 +41,8 @@ def test_five_verified_editions_have_no_duplicate_records():
 def test_short_play_family_and_solo_cohorts_expand_consistently():
     short = [g for g in GAMES if g["play_time_max"] <= 20]
     solo = [g for g in GAMES if supports_players(g, 1)]
-    assert len(short) == 35
-    assert len(solo) == 14
+    assert len(short) == SHORT_COUNT
+    assert len(solo) == SOLO_COUNT
     assert {"nana-toridori", "nmbr9", "houseki-ippai"} <= {
         g["game_id"] for g in short
     }

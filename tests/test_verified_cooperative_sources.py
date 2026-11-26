@@ -1,4 +1,5 @@
 """Verified primary-source facts for high-intent cooperative game buying decisions."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from html import unescape
 from scripts import build_site as m
 
@@ -18,7 +19,7 @@ FACTS = {
 
 
 def test_individual_facts_are_backed_by_the_exact_edition_source():
-    assert len(m.GAMES) == 91
+    assert len(m.GAMES) == CATALOG_COUNT
     for gid, (pmin, pmax, tmin, tmax, age, url) in FACTS.items():
         g = m.BY_ID[gid]
         assert (g["players_min"], g["players_max"],
