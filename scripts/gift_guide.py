@@ -49,6 +49,43 @@ def gift_groups(by_id, supports_players):
     return tuple(result)
 
 
+PRESCHOOL_CHOICES = (
+    ("houseki-ippai", 4, "めくって探す", "https://arclightgames.jp/product/576houseki/"),
+    ("nanjamonja", 4, "名前を覚えて呼ぶ", "https://suppe.sugorokuya.jp/items/160022"),
+    ("animal-upon-animal", 4, "木の動物を積む", "https://item.rakuten.co.jp/boardgame-sugorokuya/sg60183rkt/"),
+    ("rhino-hero", 5, "カードのビルを積む", "https://www.edion.com/detail.html?p_cd=00061003965"),
+)
+
+
+def preschool_gift_section(by_id, supports_players, e, u, player_label, format_play_time):
+    rows = []
+    for gid, age, style, source in PRESCHOOL_CHOICES:
+        g = by_id[gid]
+        if g["age"] != age or not all(supports_players(g, n) for n in (2, 4)) or g["play_time_max"] > 20:
+            raise ValueError("Preschool gift facts changed: " + gid)
+        rows.append(
+            f'<tr><th scope="row"><a href="{u("games/" + gid + "/")}" data-track="game_detail_click" '
+            f'data-game-id="{e(gid)}" data-source="gift_preschool">{e(g["title"])}</a></th>'
+            f'<td>{age}歳〜</td><td>{e(player_label(g))}</td><td>{format_play_time(g)}</td>'
+            f'<td>{e(style)}</td><td><a href="{e(source)}" rel="noopener">仕様の参照先</a></td></tr>'
+        )
+    return (
+        '<section class="section" id="gift-preschool" aria-labelledby="gift-preschool-title">'
+        '<h2 id="gift-preschool-title">4歳・5歳のクリスマスプレゼント：親子2人でも家族4人でも遊べる候補</h2>'
+        '<p>初めてのボードゲームなら、文字をたくさん読む必要がなく、短い時間で遊べるものから検討しましょう。'
+        '下の4作品は掲載版の対象年齢が4歳または5歳で、2人・4人の両方に対応し、所要時間の上限が20分以内です。'
+        '5歳の候補は4歳向けと区別しています。対象年齢は遊びやすさの保証ではありません。</p>'
+        '<p class="small">表は横にスクロールできます。商品詳細で遊び方と購入先を確認できます。</p>'
+        '<div class="scene-table-scroll" role="region" tabindex="0" aria-label="4歳・5歳向け4作品比較表">'
+        '<table class="scene-data-table"><caption>年齢・人数・所要時間で比較（人気順ではありません）</caption>'
+        '<thead><tr><th scope="col">作品</th><th scope="col">対象年齢</th><th scope="col">人数</th>'
+        '<th scope="col">時間</th><th scope="col">主な遊び方</th><th scope="col">仕様</th></tr></thead>'
+        '<tbody>' + "".join(rows) + '</tbody></table></div>'
+        '<p>贈る前に、箱の注意表示・小さな部品・必要な机の広さを確認し、大人が最初の説明を手伝いましょう。'
+        'プレゼント用の到着予定日と送料は販売店で確認してください。</p></section>'
+    )
+
+
 def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_label, format_play_time):
     selections = gift_groups(by_id, supports_players)
     sections = []
@@ -92,13 +129,13 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
         f'<a href="{u("scenes/children/")}">小学生と遊ぶ</a> / プレゼント選び</div>'
         '<div class="eyebrow">A GIFT TO PLAY TOGETHER</div>'
         '<h1>ボードゲームのプレゼントを年齢・人数で選ぶ</h1>'
-        '<p>小学生へのクリスマスや誕生日の贈り物を探している方へ。'
+        '<p>幼児・小学生へのクリスマスや誕生日の贈り物を探している方へ。'
         '「誰と遊ぶ？」「何分遊べる？」を先に確認し、贈ったあと実際に使える1本を探しましょう。</p>'
-        '<p class="small">きょうボドの掲載作品から、対象年齢が6・8・10歳以下で、'
+        '<p class="small">4歳・5歳向けの4作品に加え、きょうボドの掲載作品から、対象年齢が6・8・10歳以下で、'
         '2人以上の遊び方が登録されている例を各3本紹介します。'
         '人気ランキング・実際に遊んだ体験談・売れ筋順位ではありません。</p>'
         '<nav class="gift-jumps" aria-label="対象年齢から贈り物を探す">'
-        + navigation + '</nav></section>'
+        + '<a href="#gift-preschool">4歳・5歳の候補を見る →</a>' + navigation + '</nav></section>'
         '<section class="section gift-checklist" aria-labelledby="gift-checklist-title">'
         '<div class="eyebrow">BEFORE YOU GIFT</div>'
         '<h2 id="gift-checklist-title">プレゼントを買う前に、3つだけ確認</h2>'
@@ -110,11 +147,12 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
         '<li><strong>遊ぶ時間と販売版</strong><span>説明・準備も含めた時間の余裕を確認。'
         '購入先では商品名、版、対象年齢、価格、送料、到着日と在庫を確かめてください。</span></li>'
         '</ol></section>'
+        + preschool_gift_section(by_id, supports_players, e, u, player_label, format_play_time)
         + "".join(sections) +
         '<section class="section gift-after" aria-labelledby="gift-after-title">'
         '<div class="eyebrow">ONE MORE CHECK</div>'
         '<h2 id="gift-after-title">7歳・9歳・11歳なら、条件を細かく指定</h2>'
-        '<p>上の9作品は比較例です。年齢が7歳・9歳・11歳などの場合や、'
+        '<p>上の作品は比較例です。年齢が7歳・9歳・11歳などの場合や、'
         '一緒に遊ぶ人数が決まっている場合は、既存の小学生向け絞り込みで'
         '<strong>1歳刻みの年齢・2〜6人・時間</strong>から全掲載候補を見直せます。</p>'
         f'<p><a class="btn primary" href="{u("scenes/children/")}">小学生向けの年齢・人数で探す →</a></p>'
@@ -138,8 +176,8 @@ def render_gift_guide(by_id, supports_players, card, shell, e, u, canon, player_
         ],
     }, ensure_ascii=False)
     return shell(
-        "ボードゲームのプレゼント｜小学生・家族向けに年齢と人数で選ぶ",
-        "クリスマス・誕生日のボードゲームプレゼントを6歳・8歳・10歳から比較。掲載作品の人数・遊び方・時間・対象年齢を見比べ、購入版・送料・在庫の確認点も紹介。",
+        "ボードゲームのプレゼント｜4歳・5歳・小学生向けに年齢と人数で選ぶ",
+        "クリスマス・誕生日のボードゲームプレゼントを4歳・5歳・6歳・8歳・10歳から比較。掲載作品の人数・遊び方・時間・対象年齢を見比べ、購入版・送料・在庫の確認点も紹介。",
         content, "guides/gift-board-games/",
         '<script type="application/ld+json">' + schema + '</script>'
     )
