@@ -49,3 +49,12 @@ def test_campaign_tracking_does_not_collect_query_or_referrer():
     assert 'utm_term' not in tracked
     assert 'email' not in tracked
     assert 'landing_path:location.pathname' in tracked
+
+
+def test_preschool_note_campaign_has_separate_fixed_attribution():
+    js = m.ANALYTICS
+    assert 'preschoolCampaign="preschool_gift_20261127"' in js
+    assert 'saved.campaign===preschoolCampaign' in js
+    assert 'preschoolMatch=incoming===preschoolCampaign&&p.get("utm_content")==="gift_preschool"&&' in js
+    assert 'oldMatch||giftMatch||preschoolMatch' in js
+    assert 'content:preschoolMatch?"gift_preschool":giftMatch?"gift_guide"' in js

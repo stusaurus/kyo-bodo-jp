@@ -202,6 +202,36 @@ async function context(browser,width){
         'wrong landing destination must not be counted');
       await fakeGiftCtx.close();
 
+      // Distinguish the preschool article from the earlier gift article.
+      const preschoolCampaign='preschool_gift_20261127';
+      const preschoolQuery='utm_source=note&utm_medium=referral&utm_campaign='+preschoolCampaign+'&utm_content=gift_preschool';
+      const preCtx=await context(browser,width),pre=await preCtx.newPage();
+      await pre.goto(origin+giftPath+'?'+preschoolQuery+'&test=1#gift-preschool',{waitUntil:'domcontentloaded'});
+      const preLanding=(await events(pre)).find(e=>e.name==='note_campaign_landing');
+      assert(preLanding);
+      assert.equal(preLanding.data.entry_campaign,preschoolCampaign);
+      assert.equal(preLanding.data.entry_content,'gift_preschool');
+      const preChoice=pre.locator('#gift-preschool a[data-game-id="houseki-ippai"]');
+      await preChoice.click();
+      await pre.waitForURL('**/games/houseki-ippai/');
+      const preOutbound=pre.locator('.product-panel a.btn.rakuten.large');
+      const preAffiliate=await preOutbound.getAttribute('data-affiliate')==='rakuten';
+      await safeClick(pre,preOutbound);
+      const preEvents=await events(pre);
+      const preEvent=preEvents.find(e=>e.name===(preAffiliate?'affiliate_click':'rakuten_search_click'));
+      assert(preEvent);
+      assert.equal(preEvent.data.entry_campaign,preschoolCampaign);
+      assert.equal(preEvent.data.entry_content,'gift_preschool');
+      assert.equal(preEvents.filter(e=>e.name==='affiliate_click').length,preAffiliate?1:0);
+      await pre.goto(origin+giftPath+'?'+preschoolQuery+'&test=1',{waitUntil:'domcontentloaded'});
+      assert.equal((await events(pre)).filter(e=>e.name==='note_campaign_landing').length,0);
+      await preCtx.close();
+      const wrongCtx=await context(browser,width),wrong=await wrongCtx.newPage();
+      await wrong.goto(origin+base+'scenes/two-player/?'+preschoolQuery+'&test=1',{waitUntil:'domcontentloaded'});
+      assert.equal((await events(wrong)).filter(e=>e.name==='note_campaign_landing').length,0);
+      await wrong.goto(origin+giftPath+'?'+preschoolQuery.replace('utm_content=gift_preschool','utm_content=gift_guide')+'&test=1',{waitUntil:'domcontentloaded'});
+      assert.equal((await events(wrong)).filter(e=>e.name==='note_campaign_landing').length,0);
+      await wrongCtx.close();
       const spoofCtx=await context(browser,width),spoof=await spoofCtx.newPage();
       await spoof.goto(origin+base+'scenes/two-player/?utm_source=note&utm_medium=referral&utm_campaign=anything_else&test=1',
         {waitUntil:'domcontentloaded'});
