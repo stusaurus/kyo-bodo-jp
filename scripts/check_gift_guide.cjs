@@ -73,8 +73,21 @@ function server(){
         assert.equal(response.status(),200,'missing detail '+link.id);
       }
       const nav=page.locator('.gift-jumps a');
-      assert.equal(await nav.count(),3);
+      assert.equal(await nav.count(),4);
+      const preschool=page.locator('#gift-preschool');
+      const preschoolIds=['houseki-ippai','nanjamonja','animal-upon-animal','rhino-hero'];
+      const preschoolLinks=preschool.locator('a[data-source="gift_preschool"]');
+      assert.deepEqual(await preschoolLinks.evaluateAll(xs=>xs.map(x=>x.dataset.gameId)),preschoolIds);
+      for(const id of preschoolIds){
+        const g=games.find(x=>x.game_id===id);
+        assert(g && g.age<=5 && g.players_min<=2 && g.players_max>=4 && g.play_time_max<=20);
+        const href=await preschool.locator('a[data-game-id="'+id+'"]').getAttribute('href');
+        assert.equal(href,base+'games/'+id+'/');
+        assert.equal((await page.request.get('http://127.0.0.1:'+port+href)).status(),200);
+      }
       await nav.first().click();
+      assert.equal(new URL(page.url()).hash,'#gift-preschool');
+      await nav.nth(1).click();
       assert.equal(new URL(page.url()).hash,'#age-6');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+3),false,'overflow '+width);
       assert.deepEqual(errors,[],errors.join('; '));
@@ -96,7 +109,7 @@ function server(){
         assert(await page.locator('a[href="'+guidePath+'"]').count()>0,'no discovery link: '+entry);
       }
       assert.deepEqual(errors,[],errors.join('; '));
-      console.log(JSON.stringify({width,guide200:true,groups:3,qualifiedGames:9,detailLinks200:9,discoveredFrom:3,ga4Blocked:true,jsErrors:0,overflow:0}));
+      console.log(JSON.stringify({width,guide200:true,groups:3,qualifiedGames:9,preschoolGames:4,detailLinks200:13,discoveredFrom:3,ga4Blocked:true,jsErrors:0,overflow:0}));
       await ctx.close();
     }
   }finally{await browser.close();await new Promise(resolve=>serve.close(resolve));}
