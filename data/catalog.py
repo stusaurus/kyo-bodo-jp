@@ -34,7 +34,7 @@ g("splendor","宝石の煌き",2,4,30,30,10,"2412314443112","軽いルールで�
 g("dobble","ドブル",2,8,15,15,6,"1123513554555","見つけた瞬間に声が出る反射神経ゲーム。","カードを2枚見る|共通するマークを探す|先に見つけて宣言する","小学生|短時間|大人数","ドブル 日本語版 ボードゲーム","children|family|large_group|beginner"),
 g("ito","ito",2,10,30,30,8,"1125545444554","価値観のズレがそのまま笑いになる会話ゲーム。","秘密の数字を受け取る|お題に沿って数字の大きさを言葉で表す|相談して数字順に並べる","初対面|友達|大人数","ito アークライト ボードゲーム","friends|family|large_group|beginner"),
 g("ito-rainbow","ito レインボー",2,14,5,15,8,"1125545444555","大人数ほど価値観のズレが面白い短時間版。","数字カードを受け取る|お題で数字感を表現する|みんなで順番を予想する","大人数|初対面|短時間","ito レインボー ボードゲーム","friends|large_group|beginner"),
-g("nanjamonja","ナンジャモンジャ",2,6,10,20,4,"1124513554455","変な名前を付けた瞬間からもう面白い。","新しいキャラに名前を付ける|同じキャラが出たら名前を呼ぶ|早く正しく呼んだ人がカードを取る","子ども|家族|笑いたい","ナンジャモンジャ ボードゲーム","children|family|friends|beginner"),
+g("nanjamonja","ナンジャモンジャ",2,6,15,15,4,"1124513554455","変な名前を付けた瞬間からもう面白い。","新しいキャラに名前を付ける|同じキャラが出たら名前を呼ぶ|早く正しく呼んだ人がカードを取る","子ども|家族|笑いたい","ナンジャモンジャ ボードゲーム","children|family|friends|beginner"),
 g("hannin-wa-odoru","犯人は踊る",3,8,10,20,8,"1224513444555","犯人カードが誰の手にあるか最後まで読めない。","カードを配る|順番にカード効果を使う|探偵で犯人を当てるか犯人が逃げ切る","友達|大人数|短時間","犯人は踊る ボードゲーム","friends|large_group|party"),
 g("codenames","コードネーム",4,8,15,30,10,"2344512334554","一言ヒントで仲間と頭がつながるチーム戦。","2チームに分かれる|ヒント役が一言と数字を伝える|仲間が正しい単語を当てる","友達|大人数|初対面","コードネーム 日本語版 ボードゲーム","friends|large_group|party"),
 g("codenames-duet","コードネーム：デュエット",2,2,15,30,10,"2343425552224","2人で相談しながら単語を当てる協力型。","2人で盤面を見る|交互に一言ヒントを出す|時間内にすべての正解語を当てる","夫婦|カップル|協力","コードネーム デュエット 日本語版","couple|cooperative"),
@@ -126,6 +126,7 @@ g("eggsposed","ばれたま",3,8,20,20,9,"2235513344554","鳥の陣営を隠し�
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    "nanjamonja": "https://sugorokuya.jp/p/nanjamonja/",
     # Japanese publisher facts verified 2026-11-25.
     "animal-old-maid": "https://arclightgames.jp/product/%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E3%83%90%E3%83%90%E6%8A%9C%E3%81%8D/",
     "ding": "https://arclightgames.jp/product/517nds/",
