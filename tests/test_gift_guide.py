@@ -1,4 +1,5 @@
 """Gift discovery must use real catalog facts without fake sales or popularity."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 import importlib.util
 import json
 import re
@@ -31,7 +32,7 @@ def test_gift_guide_contains_nine_distinct_age_and_player_qualified_games():
             assert m.supports_players(g, 2)
             assert len(g["how_to_play"]) == 3
             assert g["play_time_min"] <= g["play_time_max"]
-    assert len(m.GAMES) == 91
+    assert len(m.GAMES) == CATALOG_COUNT
 
 
 def test_gift_guide_has_factual_comparison_and_internal_purchase_safe_links():

@@ -1,4 +1,5 @@
 """Short-time comparison is complete, source-grounded and safe without JavaScript."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from pathlib import Path
 import re
 from scripts import build_site as site
@@ -7,14 +8,14 @@ EXPECTED = [g for g in site.GAMES if g["play_time_max"] <= 20]
 
 
 def test_full_short_catalog_not_just_twelve_examples():
-    assert len(site.GAMES) == 91
-    assert len(EXPECTED) == 35
+    assert len(site.GAMES) == CATALOG_COUNT
+    assert len(EXPECTED) == SHORT_COUNT
     html = site.short_time_finder()
     ids = re.findall(r'data-short-game="([^"]+)"', html)
     assert ids == [g["game_id"] for g in EXPECTED]
-    assert len(set(ids)) == 35
-    assert "全91作品" in html
-    assert "全35本" in html
+    assert len(set(ids)) == SHORT_COUNT
+    assert f"全{CATALOG_COUNT}作品" in html
+    assert f"全{SHORT_COUNT}本" in html
     assert "人気順・実際の試遊評価ではありません" in html
 
 
@@ -46,9 +47,9 @@ def test_short_scene_renders_existing_comparison_and_new_complete_finder():
     assert 'id="short-time-empty"' in html
     assert 'id="short-time-reset"' in html
     assert 'short-filter.js' in html
-    assert html.count('data-short-game="') == 35
+    assert html.count('data-short-game="') == SHORT_COUNT
     assert 'scene-quick-comparison' in html
-    assert html.count('data-short-minutes=') == 35
+    assert html.count('data-short-minutes=') == SHORT_COUNT
     assert 'data-track="game_detail_click"' in html
     assert 'rel="canonical" href="' + site.canon("scenes/short/") + '"' in html
     assert '20分以内・短時間で遊べるボードゲームおすすめ' in html

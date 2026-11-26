@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -22,11 +23,12 @@ jobs:
       - name: Audit public desktop and mobile pages
         env:
           SEO_BASE: https://stusaurus.github.io/kyo-bodo-jp/
-          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/"
+          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/,games/animal-old-maid/,games/ding/,games/eggsposed/,scenes/family/,scenes/large-group/"
         run: |
           node <<'AUDIT_NODE'
             const {chromium}=require('/tmp/seo-audit/node_modules/playwright');
             const fs=require('fs');
+            const {short_count:SHORT_COUNT}=require('./data/catalog_qa_baseline.json');
             const base=process.env.SEO_BASE;
             const paths=['',...process.env.SEO_PATHS.split(',')];
             (async()=>{
@@ -72,7 +74,7 @@ jobs:
                     if(response.status()!==200)issues.push('HTTP '+response.status());
                     if(!data.title||!data.description||data.canonical!==url||data.h1!==1||!data.viewport.includes('width=device-width')||data.invalidSchemas||/noindex/i.test(data.robots))issues.push('SEO metadata or canonical inconsistent');
                     if(data.documentWidth>data.viewportWidth+2)warnings.push('horizontal overflow '+data.documentWidth+' > '+data.viewportWidth);
-                    if(p==='scenes/short/'&&data.shortCount!==32)issues.push('20-minute comparison does not show 32 games');
+                    if(p==='scenes/short/'&&data.shortCount!==SHORT_COUNT)issues.push(`20-minute comparison count ${data.shortCount} differs from reviewed ${SHORT_COUNT}`);
                     if(p==='scenes/solo/'&&data.soloCards!==14)issues.push('solo comparison does not show 14 games');
                     if(p==='guides/two-player-cooperative/'&&data.cooperativeRows!==15)issues.push('two-player cooperative guide does not show 15 games');
                     if(p==='scenes/children/'&&!data.childNine)issues.push('missing age-nine filter option');

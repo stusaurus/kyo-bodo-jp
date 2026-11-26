@@ -1,4 +1,5 @@
 """A focused couple discovery path without popularity or affiliate claims."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 import importlib.util
 import re
 from html import unescape
@@ -72,4 +73,4 @@ def test_non_couple_scenes_remain_unchanged_by_couple_section():
     for s in m.SCENES:
         if s["scene_id"] != "couple":
             assert 'id="couple-choose"' not in m.scene_page(s)
-    assert len(m.GAMES) == 91
+    assert len(m.GAMES) == CATALOG_COUNT

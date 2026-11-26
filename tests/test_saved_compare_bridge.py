@@ -1,4 +1,5 @@
 """Existing opt-in saved shelf can lead to two-item comparison without URL tracking."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from pathlib import Path
 from scripts import build_site as site
 
@@ -33,13 +34,13 @@ def test_existing_selection_only_read_when_shelf_fragment_requested():
     assert "history.replaceState" not in js
 
 def test_existing_catalog_and_home_remain_crawlable_without_js():
-    assert len(site.GAMES)==91
+    assert len(site.GAMES)==CATALOG_COUNT
     home=site.home()
     assert 'id="todaySavedGames"' in home
     catalog=site.games_index()
     assert 'id="catalogCompareFirst"' in catalog
     assert 'id="catalogCompareSecond"' in catalog
-    assert catalog.count('class="catalog-card game-list-card"')==91
+    assert catalog.count('class="catalog-card game-list-card"')==CATALOG_COUNT
     assert 'assets/catalog-compare.js' in catalog
 
 

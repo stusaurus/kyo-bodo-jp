@@ -4,6 +4,7 @@ const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
 const assert=require('node:assert/strict');
+const {catalog_count:CATALOG_COUNT,short_count:SHORT_COUNT,solo_count:SOLO_COUNT}=require('../data/catalog_qa_baseline.json');
 const root=path.resolve('site'), base='/kyo-bodo-jp/', port=8797;
 const out=path.resolve('audit-results/catalog-search');
 fs.mkdirSync(out,{recursive:true});
@@ -34,9 +35,9 @@ function server(){
       const res=await page.goto('http://127.0.0.1:'+port+base+'games/',{waitUntil:'domcontentloaded'});
       assert.equal(res.status(),200);
       const cards=page.locator('.game-list-card'),search=page.locator('#catalogTitleSearch');
-      assert.equal(await cards.count(),91);
-      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),91);
-      assert.equal(await page.locator('#filterCount').innerText(),'91本のゲーム');
+      assert.equal(await cards.count(),CATALOG_COUNT);
+      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),CATALOG_COUNT);
+      assert.equal(await page.locator('#filterCount').innerText(),`${CATALOG_COUNT}本のゲーム`);
       await search.fill('ナナトリドリ');
       assert.equal(await page.locator('.game-list-card:not([hidden])').count(),1);
       assert.equal(await page.locator('.game-list-card:not([hidden])').getAttribute('data-search-title'),'ナナトリドリ');
@@ -54,10 +55,10 @@ function server(){
       assert.equal(await page.locator('.game-list-card:not([hidden])').count(),0);
       await page.locator('#catalogSearchReset').click();
       const twoGames=await page.locator('.game-list-card:not([hidden])').count();
-      assert(twoGames>20&&twoGames<91,'category should remain active after resetting query');
+      assert(twoGames>20&&twoGames<CATALOG_COUNT,'category should remain active after resetting query');
       await page.locator('[data-filter="all"]').click();
-      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),91);
-      assert.equal(await page.locator('#filterCount').innerText(),'91本のゲーム');
+      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),CATALOG_COUNT);
+      assert.equal(await page.locator('#filterCount').innerText(),`${CATALOG_COUNT}本のゲーム`);
       assert.equal(await search.inputValue(),'');
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+3);
       assert.equal(overflow,false,'catalog overflows at '+width);
@@ -66,12 +67,12 @@ function server(){
       await page.screenshot({path:path.join(out,'catalog-search-'+width+'.png'),animations:'disabled'});
       const href=await page.locator('.game-list-card:not([hidden])').getAttribute('href');
       assert.equal((await page.request.get('http://127.0.0.1:'+port+href)).status(),200);
-      console.log(JSON.stringify({width,all:91,search:1,categoryTwo:twoGames,zeroState:true,overflow:0,jsErrors:0}));
+      console.log(JSON.stringify({width,all:CATALOG_COUNT,search:1,categoryTwo:twoGames,zeroState:true,overflow:0,jsErrors:0}));
       await ctx.close();
       const ctxNoJS=await browser.newContext({viewport:{width,height:850},javaScriptEnabled:false});
       const nojs=await ctxNoJS.newPage();
       await nojs.goto('http://127.0.0.1:'+port+base+'games/');
-      assert.equal(await nojs.locator('.game-list-card:not([hidden])').count(),91,'all links remain visible without JS');
+      assert.equal(await nojs.locator('.game-list-card:not([hidden])').count(),CATALOG_COUNT,'all links remain visible without JS');
       await ctxNoJS.close();
     }
   }finally{await browser.close();await new Promise(resolve=>app.close(resolve))}

@@ -1,11 +1,12 @@
 """Catalog title search remains crawlable and does not transmit search terms."""
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from pathlib import Path
 from scripts import build_site as site
 from data.catalog import GAMES
 
 def test_all_titles_remain_static_and_indexable():
     markup=site.games_index()
-    assert len(GAMES)==91
+    assert len(GAMES)==CATALOG_COUNT
     assert markup.count('data-search-title=')==len(GAMES)
     assert markup.count('class="catalog-card game-list-card"')==len(GAMES)
     assert 'id="catalogTitleSearch"' in markup

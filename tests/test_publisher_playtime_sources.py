@@ -3,6 +3,7 @@
 Sources verified 2026-11-21 against matching currently retained Rakuten offers.
 The catalogue must not infer a playtime interval from a publisher's single estimate.
 """
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
 from scripts import build_site as site
 
 
@@ -15,7 +16,7 @@ VERIFIED = {
 
 
 def test_four_primary_sources_match_age_players_and_publisher_minutes():
-    assert len(site.GAMES) == 91
+    assert len(site.GAMES) == CATALOG_COUNT
     for gid, (pmin, pmax, age, duration, source) in VERIFIED.items():
         game = site.BY_ID[gid]
         assert (game["players_min"], game["players_max"], game["age"]) == (pmin, pmax, age), gid
