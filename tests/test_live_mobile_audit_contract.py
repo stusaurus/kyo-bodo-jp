@@ -15,6 +15,8 @@ EXPECTED_PATHS = {
     "guides/two-player-cooperative/", "guides/gift-board-games/", "games/ito/", "games/mandala/",
     "games/quarto/", "games/nana-toridori/", "games/incan-gold-rediscovered/",
     "games/ciao-ciao/", "games/nmbr9/", "games/houseki-ippai/",
+    "games/animal-old-maid/", "games/ding/", "games/eggsposed/",
+    "scenes/family/", "scenes/large-group/",
 }
 
 
@@ -34,7 +36,7 @@ def test_existing_public_audit_covers_new_acquisition_and_purchase_pages():
     match = re.search(r'^\s*SEO_PATHS: "([^"]+)"\s*$', text, flags=re.M)
     assert match
     paths = match.group(1).split(",")
-    assert len(paths) == len(set(paths)) == 15
+    assert len(paths) == len(set(paths)) == len(EXPECTED_PATHS)
     assert set(paths) == EXPECTED_PATHS
     assert "const paths=['',...process.env.SEO_PATHS.split(',')];" in text
     assert "for(const width of [320,390,1440])" in text
@@ -62,8 +64,10 @@ def test_live_audit_blocks_ga4_transport_before_any_navigation():
 
 def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification():
     script = audit_js()
-    assert "data.shortCount!==32" in script
-    assert "20-minute comparison does not show 32 games" in script
+    assert "data.shortCount!==SHORT_COUNT" in script
+    assert "require('./data/catalog_qa_baseline.json')" in script
+    assert "actions/checkout@v4" in workflow_text()
+    assert "20-minute comparison count ${data.shortCount} differs from reviewed ${SHORT_COUNT}" in script
     assert "solo comparison does not show 14 games" in script
     assert "data.coupleDecisionHeading" in script
     assert "data.coupleChoiceLinks.length!==expected.length" in script
