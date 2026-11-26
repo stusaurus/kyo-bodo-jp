@@ -53,10 +53,10 @@ if(p.get("test")==="1"||p.get("test")==="0"){op=p.get("test")==="1";try{if(op)lo
 // Only the published note campaign is recognized. Query strings, referrers,
 // user identifiers and child ages are never added to custom analytics events.
 var noteKey="kyo_bodo_note_entry_v1",noteEntry=null,noteLandingNew=false;
-var campaign="two_player_trial_20261118",giftCampaign="gift_guide_20261119",now=Date.now();
+var campaign="two_player_trial_20261118",giftCampaign="gift_guide_20261119",preschoolCampaign="preschool_gift_20261127",now=Date.now();
 try{
   var saved=JSON.parse(sessionStorage.getItem(noteKey)||"null");
-  if(saved&&(saved.campaign===campaign||saved.campaign===giftCampaign)&&saved.at>0&&now>=saved.at&&now-saved.at<30*60*1000){
+  if(saved&&(saved.campaign===campaign||saved.campaign===giftCampaign||saved.campaign===preschoolCampaign)&&saved.at>0&&now>=saved.at&&now-saved.at<30*60*1000){
     noteEntry=saved;
   }else{
     sessionStorage.removeItem(noteKey);
@@ -66,9 +66,11 @@ try{
   // the expected non-personal content tag. Do not record arbitrary UTM values.
   var giftMatch=incoming===giftCampaign&&p.get("utm_content")==="gift_guide"&&
     location.pathname==="/kyo-bodo-jp/guides/gift-board-games/";
-  if(p.get("utm_source")==="note"&&p.get("utm_medium")==="referral"&&(oldMatch||giftMatch)){
+  var preschoolMatch=incoming===preschoolCampaign&&p.get("utm_content")==="gift_preschool"&&
+    location.pathname==="/kyo-bodo-jp/guides/gift-board-games/";
+  if(p.get("utm_source")==="note"&&p.get("utm_medium")==="referral"&&(oldMatch||giftMatch||preschoolMatch)){
     if(!noteEntry||noteEntry.campaign!==incoming){
-      noteEntry={campaign:incoming,content:giftMatch?"gift_guide":(p.get("utm_content")==="coop_guide"?"coop_guide":"unspecified"),landing_path:location.pathname,at:now};
+      noteEntry={campaign:incoming,content:preschoolMatch?"gift_preschool":giftMatch?"gift_guide":(p.get("utm_content")==="coop_guide"?"coop_guide":"unspecified"),landing_path:location.pathname,at:now};
       sessionStorage.setItem(noteKey,JSON.stringify(noteEntry));
       noteLandingNew=true;
     }
