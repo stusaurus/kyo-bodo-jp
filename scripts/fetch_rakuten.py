@@ -313,6 +313,8 @@ def query_variants(g):
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
+        # Manufacturer press release: https://prtimes.jp/main/html/rd/p/000000007.000041113.html
+        "animal-old-maid":"4542325120453",
         "eggsposed":"4571394095485",
         "splendor-duel":"3558380101895",
         "catan-junior":"4543471004000",
