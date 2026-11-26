@@ -72,4 +72,4 @@ def test_non_couple_scenes_remain_unchanged_by_couple_section():
     for s in m.SCENES:
         if s["scene_id"] != "couple":
             assert 'id="couple-choose"' not in m.scene_page(s)
-    assert len(m.GAMES) == 88
+    assert len(m.GAMES) == 91

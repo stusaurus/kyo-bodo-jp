@@ -36,9 +36,9 @@ function start(){
       assert.equal(response.status(),200);
       await page.locator('#catalogCompare:not([hidden])').waitFor({timeout:15000});
       const first=page.locator('#catalogCompareFirst'),second=page.locator('#catalogCompareSecond'),results=page.locator('#catalogCompareResult');
-      assert.equal(await first.locator('option').count(),89,'must offer all 88 catalog titles');
-      assert.equal(await second.locator('option').count(),89);
-      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),88,'catalog remains complete');
+      assert.equal(await first.locator('option').count(),92,'must offer all 91 catalog titles');
+      assert.equal(await second.locator('option').count(),92);
+      assert.equal(await page.locator('.game-list-card:not([hidden])').count(),91,'catalog remains complete');
       await first.selectOption('nana-toridori');
       assert.equal(await results.locator('.catalog-compare-card').count(),0);
       await second.selectOption('nmbr9');
@@ -77,10 +77,10 @@ function start(){
       const noJS=await browser.newContext({viewport:{width,height:850},javaScriptEnabled:false});
       const without=await noJS.newPage();
       await without.goto('http://127.0.0.1:'+port+base+'games/');
-      assert.equal(await without.locator('.game-list-card:not([hidden])').count(),88);
+      assert.equal(await without.locator('.game-list-card:not([hidden])').count(),91);
       assert.equal(await without.locator('#catalogCompare:not([hidden])').count(),0);
       await noJS.close();
-      console.log(JSON.stringify({width,catalog:88,compare:2,duplicate:'blocked',detailLinks:2,noJS:'88 links',overflow:0,jsErrors:0,privateAnalytics:true}));
+      console.log(JSON.stringify({width,catalog:91,compare:2,duplicate:'blocked',detailLinks:2,noJS:'91 links',overflow:0,jsErrors:0,privateAnalytics:true}));
     }
   }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

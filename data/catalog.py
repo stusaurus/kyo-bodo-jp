@@ -116,6 +116,9 @@ g("incan-gold-rediscovered","インカの黄金 再発掘",3,8,20,40,8,"22345143
 g("ciao-ciao","チャオチャオ",2,4,20,25,8,"1234514444342","サイコロの目を秘密にして宣言し、うそを見抜くブラフゲーム。","筒の中でサイコロを振って出目を秘密にする|進む数を宣言し、ほかの人は本当かどうか疑う|見破られたうそのコマが落とされるなかでゴールを目指す","友達|家族|2人|駆け引き","チャオチャオ メビウスゲームズ ボードゲーム","friends|family|couple|strategy"),
 g("nmbr9","ナンバーナイン",1,4,20,20,8,"3311114443315","同じ数字タイルを使い、上の段ほど得点が高くなる配置パズル。","数字カードをめくり全員が同じ数字タイルを受け取る|タイル同士がつながるように重ねて高い段を作る|全20枚を置き終えたら高さと数字による得点を比べる","1人|家族|パズル|短時間","ナンバーナイン NMBR9 日本語版 メビウスゲームズ","solo|family|children|strategy|short"),
 g("houseki-ippai","宝石がいっぱい！",2,6,5,5,4,"1113415555555","カードをめくって宝石を発見する、5分の記憶と運のゲーム。","裏向きの採掘カードを広げる|順番にめくり見つかった宝石などを受け取る|宝石が11個見つかったら得点を比べる","親子|幼児|家族|短時間","宝石がいっぱい アークライト カードゲーム","family|children|beginner|short|party"),
+g("animal-old-maid","どうぶつババ抜き",2,6,15,15,6,"1124514454555","動物の鳴き声を手がかりに、カードを引く相手や欲しいカードを考えるババ抜き。","カードを配る|相手からカードを引き動物の鳴き声をまねる|組を捨てながら最後にカラスを持たないようにする","家族|小学生|短時間","どうぶつババ抜き アークライト カードゲーム","family|children|beginner|short|party"),
+g("ding","ディング！",2,7,10,10,8,"1124514444555","周囲の状況を観察して割り込みの機会を探す手札消化ゲーム。","手札を配る|色か数字が合うカードを出し特殊条件なら宣言して割り込む|先に手札を使い切る","家族|友達|大人数|短時間","ディング アークライト カードゲーム","family|friends|large_group|party|short|beginner"),
+g("eggsposed","ばれたま",3,8,20,20,9,"2235513344554","鳥の陣営を隠しながら巣のタマゴと参加者の発言を手がかりに推理するゲーム。","役割を秘密に確認する|会話しながら巣のタマゴをめぐって行動する|自分の陣営の勝利条件を目指す","友達|大人数|心理戦","ばれたま オインクゲームズ ボードゲーム","friends|large_group|party|short"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
@@ -123,6 +126,10 @@ g("houseki-ippai","宝石がいっぱい！",2,6,5,5,4,"1113415555555","カー�
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    # Japanese publisher facts verified 2026-11-25.
+    "animal-old-maid": "https://arclightgames.jp/product/%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E3%83%90%E3%83%90%E6%8A%9C%E3%81%8D/",
+    "ding": "https://arclightgames.jp/product/517nds/",
+    "eggsposed": "https://oinkgames.com/ja/games/analog/eggsposed/",
     # Primary Japanese-edition distributor/manufacturer facts checked 2026-11-21:
     # Dobble 2023 edition ~15min; Splendor 2024 edition ~30min;
     # Gobblet Gobblers Japanese edition 5min; Lost Cities: Original 2025 30min.

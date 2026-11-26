@@ -196,7 +196,7 @@ def test_public_js_purchase_paths_use_the_same_edition_specific_search_as_detail
     from urllib.parse import quote
     monkeypatch.setattr(site, "RAKUTEN", {})
     by_id = {g["game_id"]: g for g in site.public_game_data()}
-    assert len(by_id) == len(site.GAMES) == 88
+    assert len(by_id) == len(site.GAMES) == 91
     assert by_id[gid]["rakuten_query"] == expected
     static_url, _, _ = site.load_rakuten(site.BY_ID[gid])
     dynamic_url = "https://search.rakuten.co.jp/search/mall/" + quote(by_id[gid]["rakuten_query"]) + "/"
@@ -239,7 +239,7 @@ def test_emitted_public_json_is_safe_and_does_not_expose_fake_offers(monkeypatch
     site.main()
     exported = json.loads((site.SITE / "data" / "games.json").read_text(encoding="utf-8"))
     assert exported == site.public_game_data()
-    assert len(exported) == 88
+    assert len(exported) == 91
     for gid, phrase in site.UNRESOLVED_SEARCH_QUERIES.items():
         actual = next(g for g in exported if g["game_id"] == gid)
         assert actual["rakuten_query"] == phrase

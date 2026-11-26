@@ -72,6 +72,10 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
             name="マンダラ MANDALA 日本語版 ボードゲーム"
         if g["game_id"]=="sagrada":
             name="サグラダ 日本語版 Engames ボードゲーム"
+        if g["game_id"] in ("animal-old-maid", "ding"):
+            name += " アークライト"
+        if g["game_id"] == "eggsposed":
+            name += " オインクゲームズ"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 

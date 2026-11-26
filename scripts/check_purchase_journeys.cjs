@@ -11,7 +11,7 @@ const base='/kyo-bodo-jp/',port=8798,origin='http://127.0.0.1:'+port;
 const games=JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
 const offers=JSON.parse(fs.readFileSync(path.join(root,'data/rakuten.json'),'utf8'));
 const byId=new Map(games.map(g=>[g.game_id,g]));
-assert.equal(games.length,88);
+assert.equal(games.length,91);
 function serve(){
   return new Promise(resolve=>{
     const server=http.createServer((req,res)=>{

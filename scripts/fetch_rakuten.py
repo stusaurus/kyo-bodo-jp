@@ -24,6 +24,9 @@ GENERIC_BLOCK_TERMS=[
 
 # Short / generic titles need an extra product-context anchor.
 CONTEXT_RULES={
+    "animal-old-maid":["アークライト"],
+    "ding":["アークライト"],
+    "eggsposed":["オインク","oinkgames"],
     "ito":["アークライト","ボードゲーム","カードゲーム"],
     "ito-rainbow":["アークライト","ボードゲーム","カードゲーム"],
     "love-letter":["ボードゲーム","カードゲーム","アークライト"],
@@ -69,6 +72,9 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
+    "animal-old-maid":["セット販売","まとめ買い","2個セット","ぬいぐるみ"],
+    "ding":["リングディング","リング・ディング","セット販売","2個セット"],
+    "eggsposed":["セット販売","まとめ買い","2個セット"],
     "ito":["レインボー","クラシック"],
     "the-mind":["エクストリーム","extreme"],
     "splendor":["デュエル","duel"],
