@@ -143,3 +143,25 @@ def test_gift_detail_recomparison_does_not_change_offer_identity(monkeypatch):
     assert 'rel="sponsored noopener"' in panel
     assert panel.count('data-source="game_detail_gift"') == 1
     assert 'href="' + m.u("guides/gift-board-games/") + '"' in panel
+
+
+def test_preschool_gift_comparison_keeps_age_and_purchase_paths_exact():
+    from scripts.gift_guide import PRESCHOOL_CHOICES, preschool_gift_section
+    html = page()
+    assert 'href="#gift-preschool"' in html
+    section = html.split('id="gift-preschool"', 1)[1].split("</section>", 1)[0]
+    assert section.count('data-source="gift_preschool"') == 4
+    assert section.count("仕様の参照先") == 4
+    for gid, age, style, source in PRESCHOOL_CHOICES:
+        g = m.BY_ID[gid]
+        assert g["age"] == age
+        assert all(m.supports_players(g, n) for n in (2, 4))
+        assert g["play_time_max"] <= 20
+        assert m.u("games/" + gid + "/") in section
+        assert m.e(source) in section
+        assert m.e(style) in section
+    assert 'data-affiliate=' not in section
+    bad = {k: dict(v) for k, v in m.BY_ID.items()}
+    bad["houseki-ippai"]["age"] = 6
+    with pytest.raises(ValueError, match="Preschool gift facts changed"):
+        preschool_gift_section(bad, m.supports_players, m.e, m.u, m.player_label, m.format_play_time)
