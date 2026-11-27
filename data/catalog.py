@@ -122,6 +122,9 @@ g("eggsposed","ばれたま",3,8,20,20,9,"2235513344554","鳥の陣営を隠し�
 g("dominion-2nd","ドミニオン：第二版",2,4,30,30,14,"4522313422112","財宝や王国カードを購入して自分の山札を育て、勝利点を競うデッキ構築ゲーム。","初期カードを各自の山札にする|カードの効果を使い財宝や王国カードを購入する|終了時に勝利点を比べる","友達|戦略|じっくり","ドミニオン 第二版 日本語版 ホビージャパン","friends|strategy"),
 g("deep-sea-adventure-boost","海底探険 深版",2,6,30,30,8,"2333514454543","全員が共有する空気の残量を考えながら、海底の財宝を持ち帰る競争。","ダイスを振り進む数を選ぶ|財宝を拾うか潜水艦へ戻るか考える|無事に持ち帰った財宝の得点を比べる","家族|友達|駆け引き","海底探険 深版 オインクゲームズ","family|friends|large_group|party"),
 g("telestrations-2nd","テレストレーション（二版）",4,8,30,30,12,"1125513354553","お題の絵と、その絵から推測した言葉を交互に伝えるお絵描き伝言ゲーム。","お題を確認して絵を描く|隣の人の絵や言葉を見て交互に伝える|最後に最初のお題と伝言の変化を見比べる","友達|大人数|会話","テレストレーション 二版 テンデイズゲームズ 日本語版","friends|large_group|party|beginner"),
+g("pig-10","ぴっぐテン",2,8,15,15,6,"1122414454555","場の数字を足しながら、ぴったり10を作ってカードを集めるゲーム。","手札から数字カードを1枚出す|合計を10にするか特殊な数字の効果を使う|カードを最も多く集めた人が勝ち","家族|小学生|短時間","ぴっぐテン メビウスゲームズ 日本語版","family|children|friends|short|beginner|large_group"),
+g("zogen","ゾーゲン",2,6,20,20,6,"1124514454555","微生物が1体増減するカードを探して素早く出す反射神経ゲーム。","中央のカードに注目する|微生物が1体増減するカードを名前を呼びながら出す|最初に手札を3枚まで減らすと1位","家族|友達|短時間","ゾーゲン オインクゲームズ カードゲーム","family|children|friends|short|party|beginner"),
+g("king-of-tokyo-new","新・キング・オブ・トーキョー",2,6,30,30,8,"2342513444542","怪獣を操り、ダイスの結果で攻撃や回復、能力強化を行う対戦ゲーム。","ダイスを振り必要な目を残す|攻撃や回復、エネルギーなどを処理する|勝利点20点を得るか最後の1体になると勝ち","家族|友達|対戦","新 キング オブ トーキョー ホビージャパン 日本語版","family|friends|party|beginner"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
@@ -129,6 +132,10 @@ g("telestrations-2nd","テレストレーション（二版）",4,8,30,30,12,"11
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    # Japanese publisher specifications checked 2026-11-27.
+    "pig-10": "https://mobiusgames.shop-pro.jp/?pid=145076352",
+    "zogen": "https://oinkgames.com/ja/games/analog/zogen/",
+    "king-of-tokyo-new": "https://hobbyjapan.games/shin_kot/",
     # Japanese editions checked 2026-11-27; Telestrations duration also checked against retail JAN listing.
     "dominion-2nd": "https://hobbyjapan.games/dominion_2nd/",
     "deep-sea-adventure-boost": "https://oinkgames.com/ja/games/analog/deep-sea-adventure-boost/",
