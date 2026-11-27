@@ -17,6 +17,8 @@ def test_new_game_facts_and_match_constraints():
         assert match_item(g, {"itemName": good})[0]
         for name in bad + [good + " 中古", good + " 拡張版", good + " 英語版", good + " カードスリーブ"]:
             assert not match_item(g, {"itemName": name})[0], (gid, name)
+    for name in ("メビウスゲームズ マグネットガイスター", "Drei Magier Magnet Geister ボードゲーム"):
+        assert not match_item(games["geister"], {"itemName": name})[0]
     assert games["magic-maze-pocket"]["cooperative"]
     assert not games["geister"]["cooperative"]
     assert not games["penguin-party"]["cooperative"]

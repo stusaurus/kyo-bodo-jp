@@ -81,7 +81,7 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
-    "geister":["ミニ","mini","キーホルダー","ぬいぐるみ","コマのみ","まとめ買い","セット販売","2個セット"],
+    "geister":["マグネット","magnet","ミニ","mini","キーホルダー","ぬいぐるみ","コマのみ","まとめ買い","セット販売","2個セット"],
     "penguin-party":["プールパーティ","pool party","スマートゲームズ","キーホルダー","ぬいぐるみ","まとめ買い","セット販売","2個セット"],
     "magic-maze-pocket":["拡張","キッズ","kids","アクセサリー","まとめ買い","セット販売","2個セット"],
     "pig-10":["まとめ買い","セット販売","2個セット","ぬいぐるみ","キーホルダー"],
