@@ -120,7 +120,7 @@ PER_GAME_BLOCK={
     "patchwork":["ドゥードゥル","doodle"],
     "challengers":["ビーチカップ","beachcup"],
     "nine-tiles":["ポケモン","pokemon","ムーミン","サンリオ","パニック","ミッキー","mickey"],
-    "machi-koro":["街コロ通","街コロ2","街コロツー"],
+    "machi-koro":["街コロ通","街コロ2","街コロツー","街コロプラス","街コロシャープ","街コロライフ","旧版","旧装版","セット販売","まとめ買い"],
     "cat-in-the-box":["じゃらし","アドメイト","add.mate"],
     "catan":["ジュニア","junior"],
     "splendor-duel":["偽造者","counterfeiters"],
@@ -249,6 +249,8 @@ def match_item(g,item):
         return False,"missing_pig10_japanese_edition",-450
     if g["game_id"]=="magic-maze-pocket" and not has_term(name,"日本語版"):
         return False,"missing_magic_maze_pocket_japanese_edition",-450
+    if g["game_id"]=="machi-koro" and not (has_term(name,"街コロ") and has_term(name,"新装版") and (has_term(name,"グランディング") or has_term(name,"Grounding"))):
+        return False,"missing_machi_koro_new_edition_identity",-450
     required=CONTEXT_RULES.get(g["game_id"])
     if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork","the-game") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
@@ -344,6 +346,7 @@ def query_variants(g):
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
+        "machi-koro":"4560463140249",
         "geister":"4580215110153",
         "penguin-party":"4562365270864",
         "magic-maze-pocket":"0790757739697",

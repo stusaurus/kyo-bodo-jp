@@ -94,6 +94,8 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
             name += " ニューゲームズオーダー"
         if g["game_id"] == "magic-maze-pocket":
             name += " 心火GAMES 日本語版"
+        if g["game_id"] == "machi-koro":
+            name += " グランディング"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 
@@ -125,7 +127,7 @@ def test_preferred_base_game_examples_are_accepted():
         ("patchwork","パッチワーク 日本語版 ボードゲーム ホビージャパン"),
         ("challengers","チャレンジャーズ！ 日本語版 ボードゲーム"),
         ("nine-tiles","ナインタイル オインクゲームズ ボードゲーム"),
-        ("machi-koro","街コロ ボードゲーム"),
+        ("machi-koro","グランディング 街コロ 新装版 ボードゲーム"),
         ("take-it-easy","テイク・イット・イージー ボードゲーム"),
         ("cat-in-the-box","キャット・イン・ザ・ボックス 日本語版 ボードゲーム"),
     ]
