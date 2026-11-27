@@ -16,6 +16,8 @@ EXPECTED_PATHS = {
     "games/quarto/", "games/nana-toridori/", "games/incan-gold-rediscovered/",
     "games/ciao-ciao/", "games/nmbr9/", "games/houseki-ippai/",
     "games/animal-old-maid/", "games/ding/", "games/eggsposed/",
+    "games/dominion-2nd/", "games/deep-sea-adventure-boost/", "games/telestrations-2nd/",
+    "games/pig-10/", "games/zogen/", "games/king-of-tokyo-new/",
     "scenes/family/", "scenes/large-group/",
 }
 
@@ -73,6 +75,9 @@ def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification(
     assert "data.coupleChoiceLinks.length!==expected.length" in script
     assert "scenes/couple/" in script
     assert "guides/gift-board-games/" in script
+    assert "data.preschoolLinks.length!==preschool.length" in script
+    assert "data.preschoolLinks.some((x,i)=>x.id!==preschool[i]" in script
+    assert "'houseki-ippai','nanjamonja','animal-upon-animal','rhino-hero'" in script
     assert "data.giftGroupCount!==3" in script
     assert "data.giftDetailLinks.length!==expected.length" in script
     assert "data.giftTableLinks.length!==expected.length" in script
