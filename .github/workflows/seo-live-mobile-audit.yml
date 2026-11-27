@@ -23,7 +23,7 @@ jobs:
       - name: Audit public desktop and mobile pages
         env:
           SEO_BASE: https://stusaurus.github.io/kyo-bodo-jp/
-          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/,games/animal-old-maid/,games/ding/,games/eggsposed/,scenes/family/,scenes/large-group/"
+          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/,games/animal-old-maid/,games/ding/,games/eggsposed/,games/dominion-2nd/,games/deep-sea-adventure-boost/,games/telestrations-2nd/,games/pig-10/,games/zogen/,games/king-of-tokyo-new/,scenes/family/,scenes/large-group/"
         run: |
           node <<'AUDIT_NODE'
             const {chromium}=require('/tmp/seo-audit/node_modules/playwright');
@@ -65,6 +65,7 @@ jobs:
                         giftDetailLinks:[...document.querySelectorAll('.gift-age .gift-cards a[data-track="game_detail_click"][data-source="gift_guide"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         giftTableLinks:[...document.querySelectorAll('.gift-age .gift-table a[data-gift-detail][data-track="game_detail_click"][data-source="gift_guide"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         giftGroupCount:document.querySelectorAll('.gift-age').length,
+                        preschoolLinks:[...document.querySelectorAll('#gift-preschool a[data-track="game_detail_click"][data-source="gift_preschool"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         coupleChoiceLinks:[...document.querySelectorAll('.couple-choice-card a[data-source="couple_choice"]')].map(a=>({id:a.dataset.gameId,href:a.getAttribute('href')})),
                         coupleDecisionHeading:!!document.querySelector('#couple-choose-title'),
                         gaConfigured:!!window.KYO_BODO_CONFIG?.gaMeasurementId,
@@ -84,6 +85,8 @@ jobs:
                          data.giftDetailLinks.some((x,i)=>x.id!==expected[i]||x.href!==new URL('games/'+expected[i]+'/',base).pathname)||
                          data.giftTableLinks.some((x,i)=>x.id!==expected[i]||x.href!==new URL('games/'+expected[i]+'/',base).pathname))
                         issues.push('gift guide product choices or internal details are inconsistent');
+                      const preschool=['houseki-ippai','nanjamonja','animal-upon-animal','rhino-hero'];
+                      if(data.preschoolLinks.length!==preschool.length||data.preschoolLinks.some((x,i)=>x.id!==preschool[i]||x.href!==new URL('games/'+preschool[i]+'/',base).pathname))issues.push('preschool gift links are inconsistent');
                     }
                     if(p==='scenes/couple/'){
                       const expected=['ito','codenames-duet','patchwork'];

@@ -24,6 +24,9 @@ GENERIC_BLOCK_TERMS=[
 
 # Short / generic titles need an extra product-context anchor.
 CONTEXT_RULES={
+    "pig-10":["メビウス"],
+    "zogen":["オインク","oinkgames"],
+    "king-of-tokyo-new":["ホビージャパン","hobbyjapan"],
     "dominion-2nd":["ホビージャパン","hobbyjapan"],
     "deep-sea-adventure-boost":["オインク","oinkgames"],
     "telestrations-2nd":["テンデイズ","tendays"],
@@ -75,6 +78,9 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
+    "pig-10":["まとめ買い","セット販売","2個セット","ぬいぐるみ","キーホルダー"],
+    "zogen":["セット販売","まとめ買い","2個セット","キーホルダー","アクリル","缶バッジ","ポーチ","ミラー","手鏡"],
+    "king-of-tokyo-new":["パワーアップ","power up","邪悪覚醒","モンスターパック","monster pack","モンスターボックス","ダークエディション","オリジン","デュエル","マインドバグ","ハロウィン","サイバートゥース","アヌビス","キングコング","クトゥルフ","ニューヨーク","セット販売","まとめ買い","2個セット","ダイスのみ","フィギュアのみ"],
     "dominion-2nd":["陰謀","海辺","錬金術","繁栄","異郷","暗黒時代","ギルド","収穫祭","冒険","帝国","夜想曲","ルネサンス","移動動物園","同盟","略奪","旭日","基本カード","デュアルセット","セット販売","まとめ買い","2個セット","第1版","初版"],
     "deep-sea-adventure-boost":["拡張ダイス","ジッパーバッグ","ポーチ","ミラー","キーホルダー","アクリル","缶バッジ","セット販売","まとめ買い","2個セット","深版対応"],
     "telestrations-2nd":["アフターダーク","after dark","6人用","6player","12人用","12player","ファミリーパック","family pack","セット販売","まとめ買い","2個セット","マーカーのみ","ペンのみ","イレーサーのみ","初版"],
@@ -137,6 +143,8 @@ PER_GAME_BLOCK={
 
 # Accepted title aliases. Default is the catalog title itself.
 ALIASES={
+    "pig-10":["ぴっぐテン","ピッグテン"],
+    "king-of-tokyo-new":["新キングオブトーキョー"],
     "dominion-2nd":["ドミニオン第二版","ドミニオン第2版","ドミニオン二版","ドミニオン2版"],
     "deep-sea-adventure-boost":["海底探険深版","海底探検深版"],
     "telestrations-2nd":["テレストレーション第二版","テレストレーション第2版","テレストレーション二版","テレストレーション2版"],
@@ -229,6 +237,10 @@ def match_item(g,item):
 
     if g["game_id"]=="dominion-2nd" and not has_term(name,"日本語版"):
         return False,"missing_dominion_japanese_base_identity",-450
+    if g["game_id"]=="king-of-tokyo-new" and not has_term(name,"日本語版"):
+        return False,"missing_king_of_tokyo_japanese_edition",-450
+    if g["game_id"]=="pig-10" and not (has_term(name,"日本語版") or has_term(name,"日本語説明書付き")):
+        return False,"missing_pig10_japanese_edition",-450
     required=CONTEXT_RULES.get(g["game_id"])
     if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork","the-game") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
@@ -324,6 +336,9 @@ def query_variants(g):
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
+        "pig-10":"4580215110122",
+        "zogen":"4571394090701",
+        "king-of-tokyo-new":"4981932022680",
         "dominion-2nd":"4981932023069",
         "deep-sea-adventure-boost":"4571394093757",
         "telestrations-2nd":"4560450500865",
