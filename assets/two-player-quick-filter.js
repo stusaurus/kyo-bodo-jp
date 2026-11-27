@@ -10,6 +10,8 @@
     var counter=root.querySelector('[data-two-quick-count]');
     var empty=root.querySelector('[data-two-quick-empty]');
     var form=root.querySelector('form');
+    var more=root.querySelector('[data-two-quick-more]');
+    var expanded=false;
     if(!items.length||!counter||!empty||!form)return;
     function filter(){
       var settings=new FormData(form);
@@ -24,14 +26,20 @@
           &&(!coop||node.dataset.cooperative==='1')
           &&(!versus||node.dataset.cooperative==='0');
       });
-      var chosen=matched.slice(0,3);
+      var chosen=expanded?matched:matched.slice(0,3);
+      if(more){
+        more.hidden=matched.length<=3;
+        more.textContent=expanded?'最初の3本に戻す':'一致する'+matched.length+'本をすべて見る';
+        more.setAttribute('aria-expanded',String(expanded&&matched.length>3));
+      }
       items.forEach(function(node){node.hidden=!chosen.includes(node);});
       empty.hidden=matched.length>0;
       counter.textContent=matched.length
         ?matched.length+'本が条件に一致。うち'+chosen.length+'本を表示（優劣・人気順ではありません）'
         :'この条件に合う掲載候補はありません。';
     }
-    form.addEventListener('change',filter);
+    form.addEventListener('change',function(){expanded=false;filter();});
+    if(more)more.addEventListener('click',function(){expanded=!expanded;filter();});
     filter();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);

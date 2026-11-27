@@ -44,6 +44,9 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<li data-two-game[^>]*>', html)), min(8, len(self.games)))
         self.assertEqual(len(re.findall(r'<li data-two-game[^>]* hidden>', html)), max(0, min(8,len(self.games))-3))
         self.assertIn('遊べる時間', html)
+        self.assertIn('name="minutes" value="20"', html)
+        self.assertIn('name="minutes" value="60"', html)
+        self.assertIn('data-two-quick-more aria-controls="two-quick-results" hidden', html)
         self.assertIn('協力するゲーム', html)
         self.assertIn('対戦するゲーム', html)
         self.assertIn('name="style" value="versus"', html)
@@ -52,7 +55,7 @@ class TwoPlayerQuickFilterTests(unittest.TestCase):
         # Never force a six-year-old to select an older child or skip age validation.
         self.assertTrue(any(g["age"] <= 4 for g in self.games))
         self.assertTrue(any(g["age"] == 6 for g in self.games))
-        for age in ("4", "6", "8", "10", "12"):
+        for age in ("4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"):
             self.assertIn(f'name="age" value="{age}"', html)
         self.assertLess(html.index('name="age" value="4"'), html.index('name="age" value="6"'))
 

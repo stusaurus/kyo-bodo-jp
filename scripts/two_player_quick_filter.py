@@ -44,9 +44,9 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
     if not rows:
         return ""
     choices = (
-        ("minutes", "遊べる時間", (("0", "指定なし"), ("15", "15分以内"), ("30", "30分以内"))),
+        ("minutes", "遊べる時間", (("0", "指定なし"), ("15", "15分以内"), ("20", "20分以内"), ("30", "30分以内"), ("60", "60分以内"))),
         ("style", "遊び方", (("any", "どちらでも"), ("versus", "対戦するゲーム"), ("cooperative", "協力するゲーム"))),
-        ("age", "一番小さい人の年齢", (("0", "指定なし"), ("4", "4歳"), ("6", "6歳"), ("8", "8歳"), ("10", "10歳"), ("12", "12歳"))),
+        ("age", "一番小さい人の年齢", (("0", "指定なし"),) + tuple((str(age), f"{age}歳") for age in sorted(set(range(4, 15)) | {int(g["age"]) for g in eligible if int(g["age"]) > 0}))),
     )
     filters = []
     for name, legend, options in choices:
@@ -69,7 +69,8 @@ def render_two_player_quick_filter(games, url, asset_url, player_label, supports
         '条件を選ぶと候補が絞られます。下の一覧からも全候補を確認できます。</p>'
         '<p class="two-quick-empty" data-two-quick-empty hidden>'
         '条件を広げるか、掲載されている全候補をご覧ください。</p>'
-        '<ul class="two-quick-results">' + "".join(rows) + '</ul>'
+        '<ul class="two-quick-results" id="two-quick-results">' + "".join(rows) + '</ul>'
+        '<button type="button" class="btn" data-two-quick-more aria-controls="two-quick-results" hidden>一致する候補をすべて見る</button>'
         '<p><a class="text-link" href="#two-player-format-title">2人専用の候補を先に見る →</a> ' +
         '<a class="text-link" href="#two-player-choices">遊び方の詳しい比較を見る →</a></p>'
         '</section>'
