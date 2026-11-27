@@ -94,6 +94,8 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
             name += " ニューゲームズオーダー"
         if g["game_id"] == "magic-maze-pocket":
             name += " 心火GAMES 日本語版"
+        if g["game_id"] == "ticket-ride-europe":
+            name += " 日本語版"
         if g["game_id"] == "machi-koro":
             name += " グランディング"
         ok,reason,_=m.match_item(g,item(name))
