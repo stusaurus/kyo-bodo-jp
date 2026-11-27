@@ -110,6 +110,51 @@ function serve(root,port){return new Promise(resolve=>{
      assert(await quick.locator('[data-two-quick-empty]').isVisible());
      await quick.locator('input[name="style"][value="any"]').check();
      await quick.locator('input[name="age"][value="0"]').check();
+     // Real browser: all eligible results, exact filters, collapse/reset and empty state.
+     const more=quick.locator('[data-two-quick-more]');
+     const visibleIds=()=>quick.locator('[data-two-game]:visible a').evaluateAll(els=>els.map(x=>x.dataset.gameId));
+     const expectedIds=(minutes,age,style)=>quick.locator('[data-two-game]').evaluateAll((els,criteria)=>els.filter(x=>
+       (!criteria.minutes||Number(x.dataset.timeMax)<=criteria.minutes)&&
+       (!criteria.age||Number(x.dataset.minAge)<=criteria.age)&&
+       (criteria.style==='any'||x.dataset.cooperative===(criteria.style==='cooperative'?'1':'0'))
+     ).map(x=>x.querySelector('a').dataset.gameId),{minutes,age,style});
+     const all=await expectedIds(0,0,'any');
+     assert(all.length>3);
+     assert.deepEqual(await visibleIds(),all.slice(0,3));
+     assert(await more.isVisible());
+     await more.click();
+     assert.deepEqual(await visibleIds(),all);
+     assert.equal(await more.getAttribute('aria-expanded'),'true');
+     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'expanded result page overflow');
+     await more.click();
+     assert.deepEqual(await visibleIds(),all.slice(0,3));
+     assert.equal(await more.getAttribute('aria-expanded'),'false');
+     await quick.locator('input[name="minutes"][value="20"]').check();
+     await quick.locator('input[name="age"][value="7"]').check();
+     const filtered=await expectedIds(20,7,'any');
+     assert(filtered.length>3,'fixture needs more than three age-7 short games');
+     assert.deepEqual(await visibleIds(),filtered.slice(0,3));
+     await more.click();
+     assert.deepEqual(await visibleIds(),filtered);
+     assert.equal(await more.getAttribute('aria-expanded'),'true');
+     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'filtered result page overflow');
+     await quick.locator('input[name="age"][value="9"]').check();
+     const nine=await expectedIds(20,9,'any');
+     assert.deepEqual(await visibleIds(),nine.slice(0,3));
+     assert.equal(await more.getAttribute('aria-expanded'),'false');
+     await quick.locator('input[name="style"][value="cooperative"]').check();
+     await quick.locator('input[name="age"][value="4"]').check();
+     assert.equal((await visibleIds()).length,0);
+     assert(!(await more.isVisible()));
+     assert(await quick.locator('[data-two-quick-empty]').isVisible());
+     await quick.locator('input[name="minutes"][value="60"]').check();
+     await quick.locator('input[name="style"][value="any"]').check();
+     await quick.locator('input[name="age"][value="13"]').check();
+     assert.deepEqual(await visibleIds(),(await expectedIds(60,13,'any')).slice(0,3));
+     await quick.locator('input[name="minutes"][value="0"]').check();
+     await quick.locator('input[name="age"][value="0"]').check();
+     await quick.screenshot({path:path.join(out,'two-player-expanded-controls-'+width+'.png'),animations:'disabled'});
+     console.log('TWO_PLAYER_EXPAND_BROWSER '+JSON.stringify({width,all:all.length,age7_20min:filtered.length,age9_20min:nine.length,overflow:0}));
     }
     if(index){
      const shortcut=page.locator('.scene-hero-copy a[href="#two-player-choices"]');

@@ -14,12 +14,13 @@ function build(records) {
   const fields={minutes:'0',style:'any',age:'0'};
   const counter={textContent:''};
   const empty={hidden:true};
-  let onChange;
+  let onChange,onMore;
+  const more={hidden:true,textContent:'',attrs:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(event,fn){if(event==='click')onMore=fn;}};
   const form={addEventListener:(event,fn)=>{if(event==='change')onChange=fn;}};
   const root={
     querySelectorAll:selector=>selector==='[data-two-game]'?items:[],
     querySelector:selector=>({
-      '[data-two-quick-count]':counter,'[data-two-quick-empty]':empty,
+      '[data-two-quick-count]':counter,'[data-two-quick-empty]':empty,'[data-two-quick-more]':more,
       form
     })[selector]
   };
@@ -30,7 +31,8 @@ function build(records) {
   }
   vm.runInNewContext(source,{document,FormData:MockFormData});
   return {
-    items,counter,empty,
+    items,counter,empty,more,
+    toggle(){onMore();},
     change(next){Object.assign(fields,next);onChange();},
     visible(){return items.map((item,index)=>!item.hidden?index:null).filter(x=>x!==null);}
   };
@@ -125,4 +127,22 @@ test('unverified duration or invalid age never pass filters',()=>{
 
 test('filter code never initiates affiliate clicks, tracking or remote fetches',()=>{
   assert.doesNotMatch(source,/fetch\s*\(|XMLHttpRequest|sendBeacon|gtag\s*\(|affiliate_click/);
+});
+
+
+test('expand shows only all matching results and new filters reset to three',()=>{
+  const app=build([{minutes:20,age:7,coop:false},{minutes:15,age:6,coop:false},{minutes:20,age:7,coop:false},{minutes:20,age:7,coop:false},{minutes:20,age:8,coop:false},{minutes:30,age:7,coop:false}]);
+  app.change({minutes:'20',age:'7'});
+  assert.deepEqual(app.visible(),[0,1,2]);
+  assert.equal(app.more.hidden,false);
+  app.toggle();
+  assert.deepEqual(app.visible(),[0,1,2,3]);
+  assert.equal(app.more.attrs['aria-expanded'],'true');
+  app.toggle();
+  assert.deepEqual(app.visible(),[0,1,2]);
+  app.toggle();
+  app.change({age:'6'});
+  assert.deepEqual(app.visible(),[1]);
+  assert.equal(app.more.hidden,true);
+  assert.equal(app.more.attrs['aria-expanded'],'false');
 });
