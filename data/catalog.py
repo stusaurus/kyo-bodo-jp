@@ -119,6 +119,9 @@ g("houseki-ippai","宝石がいっぱい！",2,6,5,5,4,"1113415555555","カー�
 g("animal-old-maid","どうぶつババ抜き",2,6,15,15,6,"1124514454555","動物の鳴き声を手がかりに、カードを引く相手や欲しいカードを考えるババ抜き。","カードを配る|相手からカードを引き動物の鳴き声をまねる|組を捨てながら最後にカラスを持たないようにする","家族|小学生|短時間","どうぶつババ抜き アークライト カードゲーム","family|children|beginner|short|party"),
 g("ding","ディング！",2,7,10,10,8,"1124514444555","周囲の状況を観察して割り込みの機会を探す手札消化ゲーム。","手札を配る|色か数字が合うカードを出し特殊条件なら宣言して割り込む|先に手札を使い切る","家族|友達|大人数|短時間","ディング アークライト カードゲーム","family|friends|large_group|party|short|beginner"),
 g("eggsposed","ばれたま",3,8,20,20,9,"2235513344554","鳥の陣営を隠しながら巣のタマゴと参加者の発言を手がかりに推理するゲーム。","役割を秘密に確認する|会話しながら巣のタマゴをめぐって行動する|自分の陣営の勝利条件を目指す","友達|大人数|心理戦","ばれたま オインクゲームズ ボードゲーム","friends|large_group|party|short"),
+g("dominion-2nd","ドミニオン：第二版",2,4,30,30,14,"4522313422112","財宝や王国カードを購入して自分の山札を育て、勝利点を競うデッキ構築ゲーム。","初期カードを各自の山札にする|カードの効果を使い財宝や王国カードを購入する|終了時に勝利点を比べる","友達|戦略|じっくり","ドミニオン 第二版 日本語版 ホビージャパン","friends|strategy"),
+g("deep-sea-adventure-boost","海底探険 深版",2,6,30,30,8,"2333514454543","全員が共有する空気の残量を考えながら、海底の財宝を持ち帰る競争。","ダイスを振り進む数を選ぶ|財宝を拾うか潜水艦へ戻るか考える|無事に持ち帰った財宝の得点を比べる","家族|友達|駆け引き","海底探険 深版 オインクゲームズ","family|friends|large_group|party"),
+g("telestrations-2nd","テレストレーション（二版）",4,8,30,30,12,"1125513354553","お題の絵と、その絵から推測した言葉を交互に伝えるお絵描き伝言ゲーム。","お題を確認して絵を描く|隣の人の絵や言葉を見て交互に伝える|最後に最初のお題と伝言の変化を見比べる","友達|大人数|会話","テレストレーション 二版 テンデイズゲームズ 日本語版","friends|large_group|party|beginner"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
@@ -126,6 +129,10 @@ g("eggsposed","ばれたま",3,8,20,20,9,"2235513344554","鳥の陣営を隠し�
 # game into a cooperative recommendation.
 COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    # Japanese editions checked 2026-11-27; Telestrations duration also checked against retail JAN listing.
+    "dominion-2nd": "https://hobbyjapan.games/dominion_2nd/",
+    "deep-sea-adventure-boost": "https://oinkgames.com/ja/games/analog/deep-sea-adventure-boost/",
+    "telestrations-2nd": "https://tendaysgames.shop/?pid=147417014",
     "nanjamonja": "https://sugorokuya.jp/p/nanjamonja/",
     # Japanese publisher facts verified 2026-11-25.
     "animal-old-maid": "https://arclightgames.jp/product/%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E3%83%90%E3%83%90%E6%8A%9C%E3%81%8D/",

@@ -24,6 +24,9 @@ GENERIC_BLOCK_TERMS=[
 
 # Short / generic titles need an extra product-context anchor.
 CONTEXT_RULES={
+    "dominion-2nd":["ホビージャパン","hobbyjapan"],
+    "deep-sea-adventure-boost":["オインク","oinkgames"],
+    "telestrations-2nd":["テンデイズ","tendays"],
     "animal-old-maid":["アークライト"],
     "ding":["アークライト"],
     "eggsposed":["オインク","oinkgames"],
@@ -72,6 +75,9 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
+    "dominion-2nd":["陰謀","海辺","錬金術","繁栄","異郷","暗黒時代","ギルド","収穫祭","冒険","帝国","夜想曲","ルネサンス","移動動物園","同盟","略奪","旭日","基本カード","デュアルセット","セット販売","まとめ買い","2個セット","第1版","初版"],
+    "deep-sea-adventure-boost":["拡張ダイス","ジッパーバッグ","ポーチ","ミラー","キーホルダー","アクリル","缶バッジ","セット販売","まとめ買い","2個セット","深版対応"],
+    "telestrations-2nd":["アフターダーク","after dark","6人用","6player","12人用","12player","ファミリーパック","family pack","セット販売","まとめ買い","2個セット","マーカーのみ","ペンのみ","イレーサーのみ","初版"],
     "animal-old-maid":["セット販売","まとめ買い","2個セット","ぬいぐるみ"],
     "ding":["リングディング","リング・ディング","セット販売","2個セット"],
     "eggsposed":["セット販売","まとめ買い","2個セット","ミラー","手鏡","鏡","mirror","キーホルダー","アクリルスタンド","缶バッジ"],
@@ -131,6 +137,9 @@ PER_GAME_BLOCK={
 
 # Accepted title aliases. Default is the catalog title itself.
 ALIASES={
+    "dominion-2nd":["ドミニオン第二版","ドミニオン第2版","ドミニオン二版","ドミニオン2版"],
+    "deep-sea-adventure-boost":["海底探険深版","海底探検深版"],
+    "telestrations-2nd":["テレストレーション第二版","テレストレーション第2版","テレストレーション二版","テレストレーション2版"],
     "6nimmt":["ニムト","6nimmt"],
     "the-mind":["ザマインド","themind"],
     "hanabi":["花火hanabi","hanabi"],
@@ -218,6 +227,8 @@ def match_item(g,item):
         if not exact_jp:
             return False,"missing_sagrada_japanese_identity",-450
 
+    if g["game_id"]=="dominion-2nd" and not has_term(name,"日本語版"):
+        return False,"missing_dominion_japanese_base_identity",-450
     required=CONTEXT_RULES.get(g["game_id"])
     if required and g["game_id"] not in ("sushi-go-party","take-it-easy","patchwork","the-game") and not any(has_term(name,t) for t in required):
         return False,"missing_product_context",-400
@@ -313,6 +324,9 @@ def query_variants(g):
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
+        "dominion-2nd":"4981932023069",
+        "deep-sea-adventure-boost":"4571394093757",
+        "telestrations-2nd":"4560450500865",
         # Manufacturer press release: https://prtimes.jp/main/html/rd/p/000000007.000041113.html
         "animal-old-maid":"4542325120453",
         "eggsposed":"4571394095485",
