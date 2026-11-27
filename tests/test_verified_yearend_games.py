@@ -17,3 +17,9 @@ def test_yearend_game_specs_and_exact_purchases():
         assert match_item(g, {"itemName": good})[0]
         for name in bad + [good + " 拡張", good + " 中古", good + " 英語版", good + " カードスリーブ"]:
             assert not match_item(g, {"itemName": name})[0], (gid, name)
+
+
+def test_dominion_alchemy_and_unqualified_titles_are_not_base_game():
+    game = next(g for g in GAMES if g["game_id"] == "dominion-2nd")
+    for name in ("ホビージャパン ドミニオン 錬金術 第二版 日本語版", "ドミニオン：第二版 ボードゲーム"):
+        assert not match_item(game, {"itemName": name})[0]
