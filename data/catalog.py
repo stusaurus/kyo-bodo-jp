@@ -125,13 +125,20 @@ g("telestrations-2nd","テレストレーション（二版）",4,8,30,30,12,"11
 g("pig-10","ぴっぐテン",2,8,15,15,6,"1122414454555","場の数字を足しながら、ぴったり10を作ってカードを集めるゲーム。","手札から数字カードを1枚出す|合計を10にするか特殊な数字の効果を使う|カードを最も多く集めた人が勝ち","家族|小学生|短時間","ぴっぐテン メビウスゲームズ 日本語版","family|children|friends|short|beginner|large_group"),
 g("zogen","ゾーゲン",2,6,20,20,6,"1124514454555","微生物が1体増減するカードを探して素早く出す反射神経ゲーム。","中央のカードに注目する|微生物が1体増減するカードを名前を呼びながら出す|最初に手札を3枚まで減らすと1位","家族|友達|短時間","ゾーゲン オインクゲームズ カードゲーム","family|children|friends|short|party|beginner"),
 g("king-of-tokyo-new","新・キング・オブ・トーキョー",2,6,30,30,8,"2342513444542","怪獣を操り、ダイスの結果で攻撃や回復、能力強化を行う対戦ゲーム。","ダイスを振り必要な目を残す|攻撃や回復、エネルギーなどを処理する|勝利点20点を得るか最後の1体になると勝ち","家族|友達|対戦","新 キング オブ トーキョー ホビージャパン 日本語版","family|friends|party|beginner"),
+g("geister","ガイスター",2,2,20,20,10,"2413311542115","正体を隠した2種類のおばけを動かし、相手の狙いを読み合う2人専用対戦ゲーム。","よいおばけと悪いおばけを秘密に配置する|自分の駒を1マス動かし相手の駒を取る|よいおばけの脱出など3つの勝利条件のいずれかを目指す","2人|友達|駆け引き","ガイスター メビウスゲームズ ボードゲーム","couple|friends|strategy|short|beginner"),
+g("penguin-party","ペンギンパーティ",2,6,15,15,6,"1322314454545","同じ色のカードがつながるようにペンギンのピラミッドを作り、手札を減らすカードゲーム。","各自にペンギンカードを配る|下段のカードと色が合う位置にカードを置く|カードを置けなくなったときの失点を抑える","家族|小学生|短時間","ペンギンパーティ ニューゲームズオーダー カードゲーム","family|children|friends|short|beginner"),
+g("magic-maze-pocket","マジックメイズ・ポケット",2,8,15,15,8,"2231453454545","担当する方向の動きだけを使い、限られた会話で仲間と協力するリアルタイムゲーム。","担当する操作を確認する|限られた会話で仲間と駒を動かす|制限時間内に全員の目標を達成する","家族|友達|協力|短時間","マジックメイズ ポケット 心火GAMES 日本語版","family|friends|cooperative|short|large_group"),
 ]
 
 # Shared-goal cooperation is a game mode, not a synonym for conversation.
 # Keep this explicit so subjective editorial ratings cannot turn a competitive
 # game into a cooperative recommendation.
-COOPERATIVE_IDS={"ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
+COOPERATIVE_IDS={"magic-maze-pocket","ito","ito-rainbow","codenames-duet","just-one","the-mind","hanabi","pandemic","the-crew-deep-sea","dorfromantik","sky-team","the-game","bandido","zombie-kidz","forbidden-island","mysterium-park","bomb-busters"}
 VERIFIED_SPECS_SOURCES = {
+    # Japanese distributor/publisher specifications checked 2026-11-27.
+    "geister": "https://mobiusgames.shop-pro.jp/?pid=144929015",
+    "penguin-party": "https://www.newgamesorder.jp/games/penguinparty",
+    "magic-maze-pocket": "https://gamemarket.jp/game/186831",
     # Japanese publisher specifications checked 2026-11-27.
     "pig-10": "https://mobiusgames.shop-pro.jp/?pid=145076352",
     "zogen": "https://oinkgames.com/ja/games/analog/zogen/",

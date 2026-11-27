@@ -1,3 +1,4 @@
+from data.catalog_qa_baseline import TWO_PLAYER_COOP_COUNT
 """A distinct indexable guide for 2-person cooperative board games, not a thin duplicate."""
 import json
 import re
@@ -14,7 +15,7 @@ def eligible():
 
 def test_guide_contains_all_factual_two_player_cooperative_games_once():
     games = eligible()
-    assert len(games) == 15  # Current real catalog, reviewed 2026-11-18.
+    assert len(games) == TWO_PLAYER_COOP_COUNT  # Reviewed catalog baseline.
     html = m.two_player_cooperative_guide()
     pattern = re.compile(r'<tr data-cooperative-game="([^"]+)">')
     expected = (

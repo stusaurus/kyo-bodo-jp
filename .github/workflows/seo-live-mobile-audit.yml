@@ -23,12 +23,12 @@ jobs:
       - name: Audit public desktop and mobile pages
         env:
           SEO_BASE: https://stusaurus.github.io/kyo-bodo-jp/
-          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/,games/animal-old-maid/,games/ding/,games/eggsposed/,games/dominion-2nd/,games/deep-sea-adventure-boost/,games/telestrations-2nd/,games/pig-10/,games/zogen/,games/king-of-tokyo-new/,scenes/family/,scenes/large-group/"
+          SEO_PATHS: "scenes/two-player/,scenes/couple/,scenes/children/,scenes/short/,scenes/solo/,guides/two-player-cooperative/,guides/gift-board-games/,games/ito/,games/mandala/,games/quarto/,games/nana-toridori/,games/incan-gold-rediscovered/,games/ciao-ciao/,games/nmbr9/,games/houseki-ippai/,games/animal-old-maid/,games/ding/,games/eggsposed/,games/dominion-2nd/,games/deep-sea-adventure-boost/,games/telestrations-2nd/,games/pig-10/,games/zogen/,games/king-of-tokyo-new/,games/geister/,games/penguin-party/,games/magic-maze-pocket/,scenes/family/,scenes/large-group/"
         run: |
           node <<'AUDIT_NODE'
             const {chromium}=require('/tmp/seo-audit/node_modules/playwright');
             const fs=require('fs');
-            const {short_count:SHORT_COUNT}=require('./data/catalog_qa_baseline.json');
+            const {short_count:SHORT_COUNT,two_player_coop_count:COOP_COUNT}=require('./data/catalog_qa_baseline.json');
             const base=process.env.SEO_BASE;
             const paths=['',...process.env.SEO_PATHS.split(',')];
             (async()=>{
@@ -77,7 +77,7 @@ jobs:
                     if(data.documentWidth>data.viewportWidth+2)warnings.push('horizontal overflow '+data.documentWidth+' > '+data.viewportWidth);
                     if(p==='scenes/short/'&&data.shortCount!==SHORT_COUNT)issues.push(`20-minute comparison count ${data.shortCount} differs from reviewed ${SHORT_COUNT}`);
                     if(p==='scenes/solo/'&&data.soloCards!==14)issues.push('solo comparison does not show 14 games');
-                    if(p==='guides/two-player-cooperative/'&&data.cooperativeRows!==15)issues.push('two-player cooperative guide does not show 15 games');
+                    if(p==='guides/two-player-cooperative/'&&data.cooperativeRows!==COOP_COUNT)issues.push(`two-player cooperative guide does not show ${COOP_COUNT} games`);
                     if(p==='scenes/children/'&&!data.childNine)issues.push('missing age-nine filter option');
                     if(p==='guides/gift-board-games/'){
                       const expected=['dobble','nine-tiles','bandido','zombie-kidz','kingdomino','the-game','harmonies','splendor-duel','the-crew-deep-sea'];

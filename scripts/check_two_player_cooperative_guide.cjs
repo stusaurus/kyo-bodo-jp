@@ -9,7 +9,7 @@ const base='/kyo-bodo-jp/';
 const games=JSON.parse(fs.readFileSync(path.join(root,'data/games.json'),'utf8'));
 const eligible=games.filter(g=>g.cooperative&&g.players_min<=2&&
   (g.players_max===null ? g.players_open_ended===true&&!!g.players_source : 2<=g.players_max));
-assert.equal(eligible.length,15);
+assert.equal(eligible.length,require("../data/catalog_qa_baseline.json").two_player_coop_count);
 const partitions=[
   eligible.filter(g=>g.play_time_max<=20),
   eligible.filter(g=>g.play_time_max>20&&g.play_time_max<=30),

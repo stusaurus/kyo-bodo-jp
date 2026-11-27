@@ -1,11 +1,12 @@
 """Verified primary-source facts for high-intent cooperative game buying decisions."""
-from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT
+from data.catalog_qa_baseline import CATALOG_COUNT, SHORT_COUNT, SOLO_COUNT, TWO_PLAYER_COOP_COUNT
 from html import unescape
 from scripts import build_site as m
 
 # Sources independently inspected on 2026-11-18. Original publisher or
 # recognized official Japanese distributor; these do not claim live inventory.
 FACTS = {
+    "magic-maze-pocket": (2, 8, 15, 15, 8, "https://gamemarket.jp/game/186831"),
     "sky-team": (2, 2, 20, 20, 12, "https://suppe.sugorokuya.jp/items/220360"),
     "codenames-duet": (2, None, 15, 15, 11, "https://hobbyjapan.games/codename_duet/"),
     "bandido": (1, 4, 15, 15, 6, "https://suppe.sugorokuya.jp/items/190126"),
@@ -55,7 +56,7 @@ def test_each_new_source_is_visible_in_game_detail_with_safe_outgoing_link():
 def test_two_person_cooperative_comparison_shows_sources_without_inventing_others():
     html = m.two_player_cooperative_guide()
     eligible = [g for g in m.GAMES if m.supports_players(g, 2) and g["cooperative"]]
-    assert len(eligible) == 15
+    assert len(eligible) == TWO_PLAYER_COOP_COUNT
     assert "情報の確認元" in html
     assert "未確認の作品について根拠を推測で補っていません" in html
     for g in eligible:
@@ -77,4 +78,4 @@ def test_no_recategorization_or_time_bucket_change_for_two_player_coops():
         lambda g:g["play_time_max"]<=20,
         lambda g:20<g["play_time_max"]<=30,
         lambda g:g["play_time_max"]>30
-    ]] == [7, 6, 2]
+    ]] == [8, 6, 2]
