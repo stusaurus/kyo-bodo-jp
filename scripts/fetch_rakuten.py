@@ -24,6 +24,9 @@ GENERIC_BLOCK_TERMS=[
 
 # Short / generic titles need an extra product-context anchor.
 CONTEXT_RULES={
+    "geister":["メビウス","drei magier"],
+    "penguin-party":["ニューゲームズオーダー","new games order"],
+    "magic-maze-pocket":["心火","synka"],
     "pig-10":["メビウス"],
     "zogen":["オインク","oinkgames"],
     "king-of-tokyo-new":["ホビージャパン","hobbyjapan"],
@@ -78,6 +81,9 @@ CONTEXT_RULES={
 
 # Prevent sibling/base variants from being used for another registered game.
 PER_GAME_BLOCK={
+    "geister":["マグネット","magnet","ミニ","mini","キーホルダー","ぬいぐるみ","コマのみ","まとめ買い","セット販売","2個セット"],
+    "penguin-party":["プールパーティ","pool party","スマートゲームズ","キーホルダー","ぬいぐるみ","まとめ買い","セット販売","2個セット"],
+    "magic-maze-pocket":["拡張","キッズ","kids","アクセサリー","まとめ買い","セット販売","2個セット"],
     "pig-10":["まとめ買い","セット販売","2個セット","ぬいぐるみ","キーホルダー"],
     "zogen":["セット販売","まとめ買い","2個セット","キーホルダー","アクリル","缶バッジ","ポーチ","ミラー","手鏡"],
     "king-of-tokyo-new":["パワーアップ","power up","邪悪覚醒","モンスターパック","monster pack","モンスターボックス","ダークエディション","オリジン","デュエル","マインドバグ","ハロウィン","サイバートゥース","アヌビス","キングコング","クトゥルフ","ニューヨーク","セット販売","まとめ買い","2個セット","ダイスのみ","フィギュアのみ"],
@@ -241,6 +247,8 @@ def match_item(g,item):
         return False,"missing_king_of_tokyo_japanese_edition",-450
     if g["game_id"]=="pig-10" and not (has_term(name,"日本語版") or has_term(name,"日本語説明書付き")):
         return False,"missing_pig10_japanese_edition",-450
+    if g["game_id"]=="magic-maze-pocket" and not has_term(name,"日本語版"):
+        return False,"missing_magic_maze_pocket_japanese_edition",-450
     if g["game_id"]=="machi-koro" and not (has_term(name,"街コロ") and has_term(name,"新装版") and (has_term(name,"グランディング") or has_term(name,"Grounding"))):
         return False,"missing_machi_koro_new_edition_identity",-450
     required=CONTEXT_RULES.get(g["game_id"])
@@ -339,6 +347,9 @@ def query_variants(g):
                   "NMBR9 メビウスゲームズ タイル"]+variants
     jan_queries={
         "machi-koro":"4560463140249",
+        "geister":"4580215110153",
+        "penguin-party":"4562365270864",
+        "magic-maze-pocket":"0790757739697",
         "pig-10":"4580215110122",
         "zogen":"4571394090701",
         "king-of-tokyo-new":"4981932022680",
