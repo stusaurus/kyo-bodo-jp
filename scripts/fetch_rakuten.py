@@ -132,7 +132,8 @@ PER_GAME_BLOCK={
     "bomb-busters":["プロキット","prokit"],
     "heat":["ヘヴィレイン","ヘビーレイン","heavy rain","トンネルヴィジョン","tunnel vision"],
     "the-game":["exit","脱出","エクストリーム","extreme","クワンチャイ"],
-    "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala","タロット","タペストリー","クロス","用シート"],
+    "mandala":["ぬりえ","塗り絵","お絵かき","マンカラ","mancala","タロット","タペストリー","クロス","用シート","キーホルダー","ポーチ","セット販売","まとめ買い"],
+    "ticket-ride-europe":["15周年","15th","1912","豪華版","anniversary","アルヴィン","デクスター","セット販売","まとめ買い","キーホルダー"],
     "forbidden-island":["パラサイト","小説","電子書籍"],
     "ice-cool":["アイスクール2","アイスクール 2","icecool2","ice cool2","ice cool 2",
                 "リング","ネッククーラー","冷感","クールリング"],
@@ -234,8 +235,13 @@ def match_item(g,item):
 
     if g["game_id"]=="mandala":
         exact_jp=has_term(name,"マンダラ") and has_term(name,"日本語版") and (has_term(name,"ボードゲーム") or has_term(name,"カードゲーム"))
-        if not exact_jp:
+        # Exact title from Rakuten Bic, confirmed against publisher and retail JAN.
+        exact_retail=norm(name)==norm("ホビージャパン｜Hobby JAPAN 【再販】マンダラ 日本語版")
+        if not (exact_jp or exact_retail):
             return False,"missing_mandala_japanese_game_identity",-450
+    if g["game_id"]=="ticket-ride-europe":
+        if not (has_term(name,"チケットトゥライドヨーロッパ") and has_term(name,"日本語版")):
+            return False,"missing_europe_japanese_base_identity",-450
     if g["game_id"]=="sagrada":
         exact_jp=has_term(name,"サグラダ") and (has_term(name,"日本語版") or has_term(name,"engames"))
         if not exact_jp:
@@ -345,7 +351,10 @@ def query_variants(g):
         # Avoid the unrelated fashion brand named NUMBER (N)INE.
         variants=["ナンバーナイン NMBR9 日本語版 ボードゲーム",
                   "NMBR9 メビウスゲームズ タイル"]+variants
+    if g["game_id"]=="ticket-ride-europe":
+        variants=["ホビージャパン チケット トゥ ライド ヨーロッパ 日本語版", "チケット トゥ ライド ヨーロッパ 日本語版"]+variants
     jan_queries={
+        "ticket-ride-europe":"0824968617137",
         "machi-koro":"4560463140249",
         "geister":"4580215110153",
         "penguin-party":"4562365270864",
