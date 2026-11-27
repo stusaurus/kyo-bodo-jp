@@ -18,6 +18,7 @@ EXPECTED_PATHS = {
     "games/animal-old-maid/", "games/ding/", "games/eggsposed/",
     "games/dominion-2nd/", "games/deep-sea-adventure-boost/", "games/telestrations-2nd/",
     "games/pig-10/", "games/zogen/", "games/king-of-tokyo-new/",
+    "games/geister/", "games/penguin-party/", "games/magic-maze-pocket/",
     "scenes/family/", "scenes/large-group/",
 }
 
@@ -90,7 +91,7 @@ def test_live_audit_fails_closed_on_wrong_catalog_or_advertising_classification(
     assert "new URL('games/'+expected[i]+'/',base).pathname" in script
     assert "'ito','codenames-duet','patchwork'" in script
     assert "data.soloCards!==14" in script
-    assert "data.cooperativeRows!==15" in script
+    assert "data.cooperativeRows!==COOP_COUNT" in script
     assert "!data.childNine" in script
     assert "data.offer.affiliate==='rakuten'" in script
     assert "data.offer.track==='rakuten_search_click'" in script

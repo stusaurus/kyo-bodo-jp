@@ -88,6 +88,12 @@ def test_every_catalog_title_can_match_a_safe_synthetic_listing():
             name += " オインクゲームズ"
         if g["game_id"] == "king-of-tokyo-new":
             name += " ホビージャパン 日本語版"
+        if g["game_id"] == "geister":
+            name += " メビウスゲームズ"
+        if g["game_id"] == "penguin-party":
+            name += " ニューゲームズオーダー"
+        if g["game_id"] == "magic-maze-pocket":
+            name += " 心火GAMES 日本語版"
         ok,reason,_=m.match_item(g,item(name))
         assert ok,(g["game_id"],name,reason)
 

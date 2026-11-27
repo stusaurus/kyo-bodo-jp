@@ -6,3 +6,5 @@ _BASELINE = json.loads(Path(__file__).with_suffix(".json").read_text(encoding="u
 CATALOG_COUNT = _BASELINE["catalog_count"]
 SHORT_COUNT = _BASELINE["short_count"]
 SOLO_COUNT = _BASELINE["solo_count"]
+
+TWO_PLAYER_COOP_COUNT = _BASELINE["two_player_coop_count"]
