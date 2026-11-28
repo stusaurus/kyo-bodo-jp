@@ -23,7 +23,7 @@
    - \`KYO_GCP_WIF_PROVIDER\`: \`projects/＜Google Cloud project number＞/locations/global/workloadIdentityPools/＜pool＞/providers/＜provider＞\`
    - \`KYO_GCP_SERVICE_ACCOUNT\`: \`＜read-only-account＞@＜project＞.iam.gserviceaccount.com\`
    どちらも公開設定用の識別子であり、個人のパスワードやサービスアカウント鍵ではない。
-6. Actions → **Kyo Bodo official GA4 and GSC read-only report (no paid connector)** → Run workflow → main から実行し、SummaryとArtifactを確認する。自動繰り返し起動は、公式データ取得が実証されるまで設定しない。
+6. Actions → **Kyo Bodo official GA4 and GSC read-only report (no paid connector)** → Run workflow → main から実行し、SummaryとArtifactを確認する。2026-11-24の公式API実行成功（Actions run 45384517625）を受け、毎日10:37 JST（01:37 UTC）に既存の読み取り専用レポートを定期実行する。実行時刻はGitHub Actionsの混雑等で遅れる場合がある。手動実行は引き続きmainから可能。PR・main以外では認証付きAPIジョブを実行しない。定期実行の初回成功はActionsの実績で別途確認する。
 
 **認証変数が未設定の場合**も手動起動できるが、\`NOT_CONFIGURED\` を出力するだけでAPIには接続しない。変数があってもGoogle側の権限・OIDC許可がない場合は認証エラーになるため、実測成功と誤認しない。
 
