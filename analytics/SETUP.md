@@ -7,7 +7,7 @@
 - 公式GA4 property **556462193**（Measurement IDではなくプロパティID）
 - Search Console URL-prefix property **https://stusaurus.github.io/kyo-bodo-jp/**
 - note第2記事 https://note.com/kyo_bodo_jp/n/n168b6eda559b
-- 許可済みキャンペーン **gift_guide_20261119**、UTM source / medium **note / referral**
+- 許可済みキャンペーン：**two_player_trial_20261118**、**gift_guide_20261119**、**preschool_gift_20261127**（UTM source / medium はすべて **note / referral**）。記事別に集計し合算しない。既存JSONの `ga4` はギフト第2記事の互換フィールド、`note_campaigns` に3記事の結果を格納する。
 - このPRは **APIの読み取り処理を安全に用意するだけ**。接続・認証、取得成功、noteからの訪問件数、楽天確定成果は証明していない。
 - Wix・Windsor.ai・Supermetrics等の有料サービスは不要。既存の無料APIとGitHub Actionsの利用枠内で実行する（利用枠・Google Cloudの請求設定は管理者が事前に確認）。
 
@@ -29,7 +29,7 @@
 
 ## レポートの判定
 
-- GA4：\`2026-11-20\`に公開したnote第2記事について、**2日以上前の完了済み日**から、\`note_campaign_landing\`, \`game_detail_click\`, \`affiliate_click\`, \`rakuten_search_click\` を集計。Googleの標準sessionManualCampaignName・sessionManualSourceMediumを使い、可能なら \`customEvent:operator_test\` で運営者テストを分離する。
+- GA4：許可済みnoteキャンペーンごとに公開日以降の**2日以上前の完了済み日（最大7日）**を対象とし、\`note_campaign_landing\`, \`game_detail_click\`, \`affiliate_click\`, \`rakuten_search_click\` を集計。Googleの標準sessionManualCampaignName・sessionManualSourceMediumを使い、可能なら \`customEvent:operator_test\` で運営者テストを分離する。
 - \`customEvent:operator_test\` が未登録なら **運営者以外の件数は不明**。運営者以外と仮分類できても「真の顧客」「購入確定」ではない。GA4イベント数とセッション数・ユーザー数・楽天確定報酬を混同しない。
 - GSC：米国太平洋時間基準の確定遅延を見込み、3日前までの28日を読む。サイト全体とトップ・2人用・カップル・小学生・ギフトページのGoogle自然検索クリック/表示を区別する。**note経由クリックは含まれない**。行がないページは\`null\`、0とみなさない。
 - Google APIのメタデータでしきい値処理・結果の切り捨てが示されると\`QUALITY_RESTRICTED\`。権限がなければ\`NOT_AUTHORIZED\`などの状態だけを出す。
