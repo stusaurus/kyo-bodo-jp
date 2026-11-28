@@ -15,6 +15,11 @@ SITE = "https://stusaurus.github.io/kyo-bodo-jp/"
 GA4_PROPERTY = "556462193"
 CAMPAIGN = "gift_guide_20261119"
 CAMPAIGN_LAUNCH = dt.date(2026, 11, 20)
+NOTE_CAMPAIGNS = {
+    "two_player_trial_20261118": dt.date(2026, 11, 18),
+    CAMPAIGN: CAMPAIGN_LAUNCH,
+    "preschool_gift_20261127": dt.date(2026, 11, 27),
+}
 EVENTS = ("note_campaign_landing", "game_detail_click",
           "affiliate_click", "rakuten_search_click")
 PAGES = ("", "scenes/two-player/", "scenes/couple/",
@@ -26,12 +31,12 @@ GSC_API = "https://www.googleapis.com/webmasters/v3"
 GA_API = "https://analyticsdata.googleapis.com/v1beta"
 
 
-def report_dates(today):
+def report_dates(today, campaign_launch=CAMPAIGN_LAUNCH):
     """Use only completed and lagged days; the publication day is never guessed."""
     gsc_end = today - dt.timedelta(days=3)
     gsc_start = gsc_end - dt.timedelta(days=27)
     ga_end = today - dt.timedelta(days=2)
-    ga_start = max(CAMPAIGN_LAUNCH, ga_end - dt.timedelta(days=6))
+    ga_start = max(campaign_launch, ga_end - dt.timedelta(days=6))
     return {"gsc": (gsc_start, gsc_end),
             "ga4": (ga_start, ga_end) if ga_start <= ga_end else None}
 
@@ -131,7 +136,9 @@ def ga4_quality(response):
     return None
 
 
-def parse_ga4(events_response, visits_response, operator_registered, window):
+def parse_ga4(events_response, visits_response, operator_registered, window, campaign=CAMPAIGN):
+    if campaign not in NOTE_CAMPAIGNS:
+        return unavailable("GA4", "UNKNOWN_CAMPAIGN", "DATA_LIMITED")
     for response in (events_response, visits_response):
         reason = ga4_quality(response)
         if reason:
@@ -151,7 +158,7 @@ def parse_ga4(events_response, visits_response, operator_registered, window):
             count = int(row["metricValues"][0]["value"])
             if (len(vals) != len(names) or count < 0 or
                 raw["eventName"] not in EVENTS or
-                raw["sessionManualCampaignName"] != CAMPAIGN or
+                raw["sessionManualCampaignName"] != campaign or
                 raw["sessionManualSourceMedium"].strip().lower() != "note / referral" or
                 not raw["pagePath"].startswith("/kyo-bodo-jp/")):
                 return unavailable("GA4 Data API", "UNEXPECTED_EVENT_SCOPE", "QUALITY_RESTRICTED")
@@ -172,7 +179,7 @@ def parse_ga4(events_response, visits_response, operator_registered, window):
             row = visits_response["rows"][0]
             dims = [x["value"] for x in row["dimensionValues"]]
             nums = [int(x["value"]) for x in row["metricValues"]]
-            if (dims != [CAMPAIGN, "note / referral"] or len(nums) != 2
+            if (dims != [campaign, "note / referral"] or len(nums) != 2
                     or min(nums) < 0):
                 raise ValueError("Invalid aggregate")
             visits = {"sessions_including_tests": nums[0],
@@ -182,7 +189,7 @@ def parse_ga4(events_response, visits_response, operator_registered, window):
     return {"source": "GA4 Data API", "status": (
                 "OBSERVED_ROWS" if events_response.get("rows") or visits
                 else "NO_OBSERVED_ROWS"),
-            "property_id": GA4_PROPERTY, "campaign": CAMPAIGN,
+            "property_id": GA4_PROPERTY, "campaign": campaign,
             "window": [d.isoformat() for d in window],
             "operator_dimension_registered": operator_registered,
             "event_counts": summary, "visits": visits,
@@ -222,8 +229,10 @@ def fetch_gsc(session, today):
     return result
 
 
-def fetch_ga4(session, today):
-    window = report_dates(today)["ga4"]
+def fetch_ga4(session, today, campaign=CAMPAIGN):
+    if campaign not in NOTE_CAMPAIGNS:
+        return unavailable("GA4", "UNKNOWN_CAMPAIGN", "DATA_LIMITED")
+    window = report_dates(today, NOTE_CAMPAIGNS[campaign])["ga4"]
     if window is None:
         return unavailable("GA4", "PUBLICATION_NOT_IN_COMPLETED_DATA", "NOT_YET_REPORTABLE")
     property_resource = "properties/" + GA4_PROPERTY
@@ -242,7 +251,7 @@ def fetch_ga4(session, today):
             "matchType": "EXACT", "value": value}}}
     def scoped_filters(only_target_events=False):
         expressions = [
-            exact("sessionManualCampaignName", CAMPAIGN),
+            exact("sessionManualCampaignName", campaign),
             exact("sessionManualSourceMedium", "note / referral"),
             exact("hostName", "stusaurus.github.io"),
         ]
@@ -271,7 +280,7 @@ def fetch_ga4(session, today):
                                    {"name": "sessionManualSourceMedium"}],
                     "metrics": [{"name": "sessions"}, {"name": "activeUsers"}],
                     "dimensionFilter": scoped_filters(), "limit": 1000})
-    return parse_ga4(raw, visits, has_operator, window)
+    return parse_ga4(raw, visits, has_operator, window, campaign)
 
 
 
@@ -422,8 +431,13 @@ def to_markdown(report):
                              "：表示 " + str(item["impressions"]) +
                              "、クリック " + str(item["clicks"]) +
                              "、平均順位 " + str(item["average_position"]))
-    if "event_counts" in a:
-        lines += ["", "### GA4（noteギフトキャンペーン）",
+    campaigns = report.get("note_campaigns", {CAMPAIGN: a})
+    for campaign, a in campaigns.items():
+        lines += ["", "### GA4（note：" + campaign + "）", "- 状態：" + a["status"]]
+        if "event_counts" not in a:
+            lines.append("- 計測値：不明（" + a.get("reason", "未取得") + "）")
+            continue
+        lines += [
                   "- 期間：" + " ～ ".join(a["window"]),
                   "- 実顧客数・購入確定：未検証", ""]
         for name, counts in a["event_counts"].items():
@@ -456,6 +470,8 @@ def run(today=None, session=None):
             return {"status": "NOT_CONFIGURED",
                     "ga4": unavailable("GA4", "MISSING_WORKLOAD_IDENTITY", "NOT_CONFIGURED"),
                     "gsc": unavailable("GSC", "MISSING_WORKLOAD_IDENTITY", "NOT_CONFIGURED"),
+                    "note_campaigns": {campaign: unavailable("GA4", "MISSING_WORKLOAD_IDENTITY", "NOT_CONFIGURED")
+                                       for campaign in NOTE_CAMPAIGNS},
                     "tested_at": today.isoformat()}
         import google.auth
         from google.auth.transport.requests import AuthorizedSession
@@ -475,6 +491,12 @@ def run(today=None, session=None):
               "tested_at": today.isoformat(),
               "revenue": "NOT_QUERIED",
               "contains_personal_information": False}
+    # Preserve the legacy ga4 field for existing consumers; no duplicate query.
+    result["note_campaigns"] = {
+        campaign: result["ga4"] if campaign == CAMPAIGN else
+        read(lambda sess, day: fetch_ga4(sess, day, campaign), "GA4")
+        for campaign in NOTE_CAMPAIGNS
+    }
     return result
 
 

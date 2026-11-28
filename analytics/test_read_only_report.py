@@ -219,6 +219,42 @@ class FreeOfficialMeasurementTests(TestCase):
         self.assertEqual(result["visits"]["sessions_including_tests"], 3)
         self.assertEqual(len(session.requests), 2)
 
+    def test_all_note_campaigns_are_separate_and_fail_closed(self):
+        self.assertEqual(set(m.NOTE_CAMPAIGNS), {
+            "two_player_trial_20261118", "gift_guide_20261119", "preschool_gift_20261127"})
+        for campaign, launch in m.NOTE_CAMPAIGNS.items():
+            window = (launch, launch + dt.timedelta(days=1))
+            event = row([launch.strftime("%Y%m%d"), "game_detail_click", campaign,
+                         "note / referral", "/kyo-bodo-jp/games/scout/"], [2])
+            visits = row([campaign, "note / referral"], [3, 2])
+            good = m.parse_ga4({"rows": [event]}, {"rows": [visits]}, False, window, campaign)
+            self.assertEqual(good["campaign"], campaign)
+            self.assertEqual(good["visits"]["sessions_including_tests"], 3)
+            self.assertEqual(good["event_counts"]["game_detail_click"]["raw_event_count"], 2)
+            for other in set(m.NOTE_CAMPAIGNS) - {campaign}:
+                self.assertEqual(m.parse_ga4({"rows": [event]}, {}, False, window, other)["status"],
+                                 "QUALITY_RESTRICTED")
+            self.assertEqual(m.report_dates(launch + dt.timedelta(days=1), launch)["ga4"], None)
+
+    def test_run_preserves_legacy_field_and_reads_each_campaign_once(self):
+        calls = []
+        def fake_ga4(session, today, campaign=m.CAMPAIGN):
+            calls.append(campaign)
+            return {"status": "NO_OBSERVED_ROWS", "campaign": campaign}
+        with mock.patch.object(m, "fetch_ga4", fake_ga4), \
+             mock.patch.object(m, "fetch_gsc", return_value={"status": "NO_OBSERVED_ROWS"}), \
+             mock.patch.object(m, "fetch_organic", return_value={"status": "NO_OBSERVED_ROWS"}):
+            result = m.run(today=dt.date(2026, 12, 1), session=object())
+        self.assertCountEqual(calls, list(m.NOTE_CAMPAIGNS))
+        self.assertEqual(result["ga4"], result["note_campaigns"][m.CAMPAIGN])
+        for campaign in m.NOTE_CAMPAIGNS:
+            self.assertIn(campaign, m.to_markdown(result))
+
+    def test_preschool_campaign_before_reportable_date_does_not_call_api(self):
+        result = m.fetch_ga4(object(), dt.date(2026, 11, 28), "preschool_gift_20261127")
+        self.assertEqual(result["status"], "NOT_YET_REPORTABLE")
+        self.assertIsNone(result["metrics"])
+
     def test_unknown_pageview_row_still_fails_closed_if_api_ignores_filter(self):
         pageview = row(["20261120", "page_view", m.CAMPAIGN,
                         "note / referral", "/kyo-bodo-jp/guides/gift-board-games/"], [8])
