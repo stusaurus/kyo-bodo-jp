@@ -6,6 +6,9 @@ on:
       - "analytics/**"
       - ".github/workflows/free-google-measurement.yml"
   workflow_dispatch:
+  schedule:
+    # 10:37 JST daily (01:37 UTC); GitHub may delay scheduled runs.
+    - cron: '37 1 * * *'
 
 permissions:
   contents: read
@@ -39,7 +42,7 @@ jobs:
           PY
 
   official-read-only-report:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
